@@ -1,96 +1,115 @@
-# Vegetable & Agriculture Frontend
+# 🌿 Smart Kitchen Garden - AI Detection System
 
-Frontend สำหรับระบบตรวจจับโรคและศัตรูพืชในผัก สำหรับสวนครัวด้วย CCTV และระบบพ่นน้ำอัตโนมัติ
+[![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Features
+> **"ดูแลสวนผักของคุณด้วยเทคโนโลยีที่ล้ำสมัย"**  
+> ระบบตรวจจับโรคและศัตรูพืชอัตโนมัติสำหรับสวนครัวอัจฉริยะ (Smart Kitchen Garden) พร้อมระบบแจ้งเตือนผ่าน Telegram และระบบควบคุมการพ่นน้ำอัตโนมัติ
 
-- 🔐 ระบบ Login/Register พร้อม JWT Authentication
-- 🌐 รองรับ 2 ภาษา (ไทย/อังกฤษ)
-- 📱 Responsive Design
-- 🔍 ตรวจจับโรคและศัตรูพืชด้วย AI
-- 🥬 ข้อมูลผัก โรคพืช และแมลงศัตรูพืช
-- 📊 Dashboard แสดงสถิติ
-- 🎨 ดีไซน์สวยงามด้วย Tailwind CSS
+---
 
-## Tech Stack
+## ✨ Key Features (จุดเด่นของระบบ)
 
-- React 18
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Axios
-- i18next (ภาษา)
-- Lucide React (Icons)
+- 🤖 **AI-Powered Detection**: ตรวจจับโรคพืชและแมลงศัตรูพืชแบบ Real-time ด้วยโมเดล Machine Learning
+- 📱 **Premium Dashboard**: แดชบอร์ดสรุปข้อมูลที่สวยงาม ใช้งานง่าย ปรับแต่งมาเพื่อเกษตรกรยุคใหม่
+- 🌐 **Internationalization (i18n)**: รองรับการใช้งานได้ทั้งภาษาไทย และภาษาอังกฤษ (TH/EN)
+- 🔔 **Telegram Integration**: เชื่อมต่อกับ Telegram Bot เพื่อรับการแจ้งเตือนเมื่อพบความผิดปกติในสวน
+- 📊 **Smart Statistics**: ดูสถิติการตรวจพบย้อนหลัง พร้อมเครื่องมือวิเคราะห์ระดับ Admin
+- 📸 **CCTV Monitoring**: รองรับการเชื่อมต่อกับกล้อง IP Camera เพื่อดูความเคลื่อนไหวในสวนแบบสดๆ
+- 🛡️ **Role-Based Access**: แบ่งระดับผู้ใช้งานชัดเจน (User / Admin) พร้อมระบบรักษาความปลอดภัย JWT
 
-## Installation
+---
 
+## 🛠️ Tech Stack (เทคโนโลยีที่ใช้)
+
+### Frontend Core
+- **Framework**: [React 18](https://reactjs.org/) (Functional Components + Hooks)
+- **Bundler**: [Vite](https://vitejs.dev/) (เพื่อความเร็วในการ Build และ Development)
+- **Routing**: [React Router 6](https://reactrouter.com/)
+
+### UI & Styling
+- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Charts**: [Recharts](https://recharts.org/) (สำหรับแสดงผลสถิติ)
+- **Editor**: [React Quill](https://github.com/zenoamaro/react-quill) (สำหรับระบบจัดการเนื้อหา)
+- **Modals & Alerts**: [SweetAlert2](https://sweetalert2.github.io/)
+
+### Utils & Services
+- **API Client**: [Axios](https://axios-http.com/)
+- **I18n**: [react-i18next](https://react.i18next.com/)
+- **PWA**: [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (รองรับการใช้งานแบบ Offline และติดตั้งบนมือถือ)
+
+---
+
+## 🚀 Getting Started (เริ่มต้นใช้งาน)
+
+### 1. Prerequisites
+- Node.js (แนะนำ v18 ขึ้นไป)
+- npm หรือ yarn
+
+### 2. Installation
 ```bash
+# Clone the repository
+git clone <repository-url>
+
 # Install dependencies
 npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
 ```
 
-## Environment Variables
-
-สร้างไฟล์ `.env` ใน root directory:
-
+### 3. Environment Setup
+สร้างไฟล์ `.env` ในโฟลเดอร์ root และกำหนดค่าดังนี้ (ห้ามนำไฟล์นี้ขึ้น Git):
 ```env
-VITE_API_URL=http://localhost:8888
+VITE_API_URL=http://your-api-url:8888
+VITE_TELEGRAM_BOT_TOKEN=your_bot_token_here
 ```
 
-## Pages
-
-| Route | Description |
-|-------|-------------|
-| `/` | หน้าแรก (Landing Page) |
-| `/login` | เข้าสู่ระบบ |
-| `/register` | ลงทะเบียน |
-| `/detect` | ตรวจโรคและศัตรูพืช |
-| `/vegetables` | ข้อมูลผัก |
-| `/diseases` | ข้อมูลโรคพืช |
-| `/pests` | ข้อมูลแมลงศัตรูพืช |
-| `/dashboard` | แดชบอร์ดผู้ใช้ |
-
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── components/     # Reusable components
-│   │   ├── Navbar.jsx
-│   │   ├── Footer.jsx
-│   │   └── LanguageSwitcher.jsx
-│   ├── pages/          # Page components
-│   │   ├── Home.jsx
-│   │   ├── Login.jsx
-│   │   ├── Register.jsx
-│   │   ├── Detect.jsx
-│   │   ├── Vegetables.jsx
-│   │   ├── Diseases.jsx
-│   │   ├── Pests.jsx
-│   │   └── Dashboard.jsx
-│   ├── context/        # React Context
-│   │   └── AuthContext.jsx
-│   ├── i18n/           # Translations
-│   │   ├── i18n.js
-│   │   └── locales/
-│   │       ├── th.json
-│   │       └── en.json
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── index.html
-├── package.json
-├── tailwind.config.js
-└── vite.config.js
+### 4. Running Development
+```bash
+npm run dev
 ```
 
-## License
+---
 
-MIT
-# Plant-Disease-and-Pest-Detection-System
+## 📂 Project Structure (โครงสร้างโปรเจกต์)
+
+```text
+src/
+├── components/         # คอมโพเนนต์ที่ใช้ซ้ำ (Navbar, Footer, Modals)
+├── context/            # ระบบจัดการ State (AuthContext)
+├── i18n/               # ระบบจัดการภาษา (Locales)
+├── pages/
+│   ├── admin/          # ส่วนจัดการหลังบ้าน (Reports, Users, Data Management)
+│   ├── auth/           # Login / Register
+│   ├── user/           # ส่วนผู้ใช้งาน (Detect, CCTV, Profile, Telegram)
+│   └── Home.jsx        # หน้าแรกของเว็บไซต์
+├── service/            # ส่วนเชื่อมต่อ API (Services)
+├── static/             # ไฟล์ Static (Images, Logos)
+└── index.css           # Global Styles & Tailwind Config
+```
+
+---
+
+## 👥 Roles & Pages
+
+### 👨‍🌾 User Pages
+- **Detect**: อัปโหลดรูปภาพเพื่อตรวจจับโรคพืชด้วย AI
+- **Dashboard**: สรุปข้อมูลการใช้งานและเมนูหลัก
+- **CCTV**: ดูภาพสดจากกล้องที่ตั้งไว้ในสวน
+- **Library**: ค้นหาข้อมูลเกี่ยวกับผัก โรค และแมลง
+- **Telegram**: เชื่อมต่อ Chat ID เพื่อรับแจ้งเตือน
+
+### 👨‍💻 Admin Pages
+- **Statistics**: ดูภาพรวมระบบ สถิติการใช้งาน และการแจ้งเตือน
+- **Reports**: ส่งออกข้อมูลสถิติเป็นรายงาน
+- **Management**: จัดการข้อมูลผัก โรค และแมลงศัตรูพืช
+- **User Management**: จัดการสิทธิ์และข้อมูลของผู้ใช้งาน
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+*Created with ❤️ for Smart Farmers by [Your Name/Team Name]*

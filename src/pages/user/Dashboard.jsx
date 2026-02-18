@@ -15,7 +15,9 @@ import {
   LogOut,
   ChevronRight,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Activity
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -39,7 +41,7 @@ const Dashboard = () => {
       confirmButtonColor: '#16a34a',
       cancelButtonColor: '#6b7280',
       confirmButtonText: t('nav.logout'),
-      cancelButtonText: t('admin.cancel'),
+      cancelButtonText: t('common.cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
         logout();
@@ -55,7 +57,8 @@ const Dashboard = () => {
       icon: Camera,
       path: "/detect",
       color: "from-green-600 to-emerald-500",
-      shadow: "shadow-emerald-200"
+      shadow: "shadow-emerald-200/50",
+      badge: t('user.dashboard.aiBadge')
     },
     {
       title: t('home.features.vegetables.title'),
@@ -63,7 +66,7 @@ const Dashboard = () => {
       icon: Leaf,
       path: "/vegetables",
       color: "from-green-500 to-green-400",
-      shadow: "shadow-green-100"
+      shadow: "shadow-green-100/50"
     },
     {
       title: t('home.features.diseases.title'),
@@ -71,7 +74,7 @@ const Dashboard = () => {
       icon: ShieldAlert,
       path: "/diseases",
       color: "from-red-500 to-orange-400",
-      shadow: "shadow-red-100"
+      shadow: "shadow-red-100/50"
     },
     {
       title: t('home.features.pests.title'),
@@ -79,7 +82,7 @@ const Dashboard = () => {
       icon: Bug,
       path: "/pests",
       color: "from-orange-500 to-yellow-400",
-      shadow: "shadow-orange-100"
+      shadow: "shadow-orange-100/50"
     }
   ];
 
@@ -103,137 +106,160 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      {/* Premium Header with Wave/Gradient */}
-      <div className="relative bg-gradient-to-br from-green-700 via-green-600 to-emerald-600 pt-8 pb-24 px-4 overflow-hidden">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+      {/* Premium Header - Ultra Modern */}
+      <div className="relative bg-gray-900 pt-12 pb-32 px-4 overflow-hidden">
+        {/* Dynamic Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/40 via-gray-900 to-gray-900" />
+        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-green-500/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px]" />
         
-        <div className="max-w-5xl mx-auto relative z-10 flex flex-col sm:flex-row items-center justify-between text-white gap-6">
-          <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
-            <div className="relative">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-4 border-white/20 overflow-hidden bg-white/10 backdrop-blur-md shadow-2xl shrink-0 transform hover:rotate-3 transition-transform duration-300">
-                {user?.image_path ? (
-                  <img src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-white" />
-                  </div>
-                )}
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-6 group">
+              <div className="relative">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[2.5rem] border-4 border-white/10 overflow-hidden bg-white/5 backdrop-blur-xl shadow-2xl flex-shrink-0 transform hover:rotate-6 transition-transform duration-500">
+                  {user?.image_path ? (
+                    <img src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="w-10 h-10 text-white/30" />
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-gray-900 rounded-full flex items-center justify-center shadow-lg">
+                  <Activity className="w-4 h-4 text-white animate-pulse" />
+                </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-2 border-green-600 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles className="w-4 h-4 text-yellow-400" />
+                  <span className="text-[10px] font-black text-green-400 uppercase tracking-[0.3em]">
+                    {user?.role === 'admin' ? t('user.dashboard.roleAdmin') : t('user.dashboard.roleUser')}
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                  {t('user.dashboard.welcome', { fullname: user?.fullname || t('user.dashboard.welcomeDefault') })}
+                </h1>
+                <p className="text-white/50 text-base sm:text-lg font-medium mt-1 max-w-sm">
+                  {t('user.dashboard.subtitle')}
+                </p>
               </div>
             </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight">
-                {t('user.dashboard.welcome', { fullname: user?.fullname || t('admin.roles.user') })}
-              </h1>
-              <p className="text-green-50/80 text-sm sm:text-base font-medium opacity-90 leading-tight mt-1">
-                {t('user.dashboard.subtitle')}
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
-             <button 
-                onClick={() => navigate('/profile')}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl border border-white/10 transition-all font-bold text-sm"
-             >
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('nav.profile')}</span>
-             </button>
-             <button 
-                onClick={() => navigate('/telegram')}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl border border-white/10 transition-all font-bold text-sm"
-             >
-                <Send className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('nav.telegram')}</span>
-             </button>
-             <button 
-                onClick={handleLogout}
-                className="p-2.5 bg-red-500/80 hover:bg-red-500 rounded-xl transition-all shadow-lg hover:shadow-red-200"
-             >
-                <LogOut className="w-5 h-5 text-white" />
-             </button>
+            <div className="flex items-center gap-3">
+               <button 
+                  onClick={() => navigate('/profile')}
+                  className="px-6 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 transition-all font-black text-xs text-white uppercase tracking-widest active:scale-95"
+               >
+                  {t('nav.profile')}
+               </button>
+               <button 
+                  onClick={() => navigate('/telegram')}
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-2xl transition-all font-black text-xs uppercase tracking-widest hover:bg-green-400 active:scale-95 shadow-xl shadow-black/20"
+               >
+                  <Send className="w-4 h-4" />
+                  {t('nav.telegram')}
+               </button>
+               <button 
+                  onClick={handleLogout}
+                  className="p-3 bg-red-500/10 hover:bg-red-500 rounded-2xl group transition-all"
+               >
+                  <LogOut className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+               </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 -mt-12">
-        {/* Main Grid Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-10">
+      <div className="max-w-6xl mx-auto px-4 -mt-16 relative z-20">
+        {/* Main Category Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {menuActions.map((item, index) => (
             <div
               key={index}
               onClick={() => navigate(item.path)}
-              className="bg-white p-6 sm:p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 flex flex-col gap-6 hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] transition-all group cursor-pointer relative overflow-hidden active:scale-[0.98]"
+              className="bg-white p-8 rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-transparent hover:border-green-100 flex flex-col gap-6 hover:-translate-y-2 transition-all duration-500 group cursor-pointer relative overflow-hidden active:scale-95"
             >
-              <div className="flex items-start justify-between relative z-10">
-                <div className={`w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center text-white ${item.shadow} shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                  <item.icon className="w-7 h-7 sm:w-8 sm:h-8" />
-                </div>
-                <div className="p-2 bg-gray-50 rounded-full group-hover:bg-green-50 transition-colors">
-                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-green-500 transition-all group-hover:translate-x-1" />
+              <div className="relative z-10">
+                <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center text-white ${item.shadow} shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                  <item.icon className="w-8 h-8 drop-shadow-lg" />
                 </div>
               </div>
-              <div className="relative z-10">
-                <h3 className="text-lg sm:text-xl font-black text-gray-800 mb-2">
+
+              <div className="relative z-10 mt-2">
+                {item.badge && (
+                  <span className="inline-block px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-3">
+                    {item.badge}
+                  </span>
+                )}
+                <h3 className="text-xl font-black text-gray-900 mb-2 tracking-tight group-hover:text-green-600 transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed font-medium">
+                <p className="text-sm text-gray-400 leading-relaxed font-bold">
                   {item.desc}
                 </p>
               </div>
-              
-              {/* Subtle background text or icon */}
-              <item.icon className="absolute -bottom-4 -right-4 w-32 h-32 text-gray-50 opacity-[0.03] group-hover:scale-110 transition-transform duration-700" />
+
+              <div className="mt-4 flex items-center justify-between relative z-10">
+                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-green-50 transition-colors">
+                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-green-600 transition-all" />
+                </div>
+                <item.icon className="absolute -bottom-8 -right-8 w-32 h-32 text-gray-50 opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none" />
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Secondary Nav + Support Header */}
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-              {secondaryActions.map((item, index) => (
-                  <button
-                      key={index}
-                      onClick={() => navigate(item.path)}
-                      className="flex items-center justify-between p-5 bg-white rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all group"
-                  >
-                      <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
-                              <item.icon className="w-6 h-6" />
-                          </div>
-                          <div className="text-left">
-                              <h4 className="font-extrabold text-gray-800 text-base">{item.title}</h4>
-                              <p className="text-xs text-gray-400 font-medium">{item.desc}</p>
-                          </div>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-green-500 transition-all group-hover:translate-x-1" />
-                  </button>
-              ))}
+        {/* Bottom Section: Secondary Tools and Support Card */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {secondaryActions.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => navigate(item.path)}
+                className="flex items-center justify-between p-6 bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-500 group"
+              >
+                <div className="flex items-center gap-5 text-left">
+                  <div className={`w-14 h-14 rounded-2xl ${item.bg} flex items-center justify-center ${item.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-inner`}>
+                    <item.icon className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-gray-900 text-lg tracking-tight">{item.title}</h4>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{item.desc}</p>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:translate-x-1 transition-all">
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-green-600" />
+                </div>
+              </button>
+            ))}
           </div>
 
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-6 lg:w-2/5 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+          <div className="bg-gray-900 rounded-[3rem] p-10 text-white flex flex-col justify-between gap-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-green-400 opacity-[0.03] rounded-full -mr-32 -mt-32 blur-3xl group-hover:opacity-10 transition-opacity duration-1000" />
             
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10">
-                <MessageCircle className="w-6 h-6 text-white" />
+            <div className="relative z-10 flex items-start gap-6">
+              <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10 shadow-2xl">
+                <MessageCircle className="w-7 h-7 text-green-400" />
               </div>
-              <div className="text-left">
-                <h2 className="text-lg font-black">{t('user.dashboard.support.title')}</h2>
-                <p className="text-gray-400 text-[11px] leading-tight max-w-[140px]">{t('user.dashboard.support.desc')}</p>
+              <div>
+                <h2 className="text-2xl font-black mb-2 tracking-tight">{t('user.dashboard.support.title')}</h2>
+                <p className="text-gray-400 text-sm font-medium leading-relaxed opacity-80">
+                  {t('user.dashboard.support.desc')}
+                </p>
               </div>
             </div>
             
             <button 
               onClick={() => navigate('/contact')}
-              className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-2xl shadow-xl shadow-green-900/20 transition-all font-bold text-sm whitespace-nowrap active:scale-95 relative z-10 border border-green-500/50"
+              className="w-full py-5 bg-green-600 hover:bg-green-500 text-white rounded-[2rem] shadow-2xl shadow-green-900/40 transition-all font-black text-sm uppercase tracking-[0.2em] active:scale-95 relative z-10 group/btn"
             >
-              {t('user.dashboard.support.button')}
+              <span className="flex items-center justify-center gap-3">
+                {t('user.dashboard.support.button')}
+                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+              </span>
             </button>
           </div>
         </div>

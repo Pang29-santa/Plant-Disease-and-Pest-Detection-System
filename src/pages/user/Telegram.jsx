@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, AlertCircle, CheckCircle, Loader2, MessageSquare, Unlink, RefreshCw } from 'lucide-react';
+import { Send, AlertCircle, CheckCircle, Loader2, MessageSquare, Unlink, RefreshCw, ChevronLeft, ShieldCheck, ArrowRight, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
@@ -109,13 +109,13 @@ const TelegramPage = () => {
         icon: 'success',
         title: t('telegramPage.alerts.sendTestSuccessTitle'),
         text: t('telegramPage.alerts.sendTestSuccessText'),
-        confirmButtonColor: '#3B82F6',
+        confirmButtonColor: '#3085d6',
       });
     } catch (error) {
       Swal.fire({
         icon: 'error',
         title: t('telegramPage.alerts.sendTestErrorTitle'),
-        confirmButtonColor: '#3B82F6',
+        confirmButtonColor: '#3085d6',
       });
     } finally {
       setIsLoading(false);
@@ -144,7 +144,7 @@ const TelegramPage = () => {
       Swal.fire({
         icon: 'success',
         title: t('telegramPage.alerts.disconnectSuccessTitle'),
-        confirmButtonColor: '#3B82F6',
+        confirmButtonColor: '#3085d6',
       });
       setIsConnected(false);
       setConnection(null);
@@ -153,7 +153,7 @@ const TelegramPage = () => {
       Swal.fire({
         icon: 'error',
         title: t('telegramPage.alerts.disconnectErrorTitle'),
-        confirmButtonColor: '#3B82F6',
+        confirmButtonColor: '#3085d6',
       });
     } finally {
       setIsLoading(false);
@@ -199,134 +199,148 @@ const TelegramPage = () => {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
-
-  // แสดงหน้าการเชื่อมต่อสำเร็จแล้ว
-  if (isConnected) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center justify-center">
-        <div className="bg-white p-12 rounded-3xl shadow-xl text-center max-w-lg w-full">
-          <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center text-green-600 mx-auto mb-6">
-            <CheckCircle className="w-10 h-10" />
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">{t('telegramPage.connectedTitle')}</h1>
-          <p className="text-gray-500 mb-6">
-            {t('telegramPage.connectedSubtitle')}
-          </p>
-          
-          {/* Chat ID hidden as requested */}
-
-          <div className="flex flex-col gap-3">
-            <button 
-              onClick={handleSendTest}
-              disabled={isLoading}
-              className="w-full py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <MessageSquare className="w-5 h-5" />
-              )}
-              {t('telegramPage.sendTestBtn')}
-            </button>
-            
-            <button 
-              onClick={handleDisconnect}
-              disabled={isLoading}
-              className="w-full py-3 bg-red-100 text-red-600 rounded-xl font-bold hover:bg-red-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Unlink className="w-5 h-5" />
-              {t('telegramPage.disconnectBtn')}
-            </button>
-            
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
-            >
-              {t('telegramPage.backDashboardBtn')}
-            </button>
-          </div>
+          <p className="text-sm font-black text-gray-400 uppercase tracking-widest">{t('common.loading')}</p>
         </div>
       </div>
     );
   }
 
-  // แสดงหน้ากรอกรหัสยืนยัน
   return (
-    <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center justify-center">
-      <div className="bg-white p-12 rounded-3xl shadow-xl text-center max-w-lg w-full">
-        <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6">
-          <Send className="w-10 h-10" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">{t('telegramPage.title')}</h1>
-        <p className="text-gray-500 mb-6">
-          {t('telegramPage.subtitle')}
-        </p>
-        
-        <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100 flex items-start gap-3 text-left mb-8">
-          <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-bold text-orange-900 mb-1">{t('telegramPage.stepsTitle')}</p>
-            <ol className="text-xs text-orange-800 list-decimal ml-4 space-y-1">
-              <li>
-                <Trans i18nKey="telegramPage.step1">
-                  ค้นหาบอท <a href="https://t.me/vegetableproject_chatbot" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-semibold">@vegetableproject_chatbot</a> ใน Telegram
-                </Trans>
-              </li>
-              <li>{t('telegramPage.step2')}</li>
-              <li>{t('telegramPage.step3')}</li>
-            </ol>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] p-4 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50" />
+      <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 bg-sky-50 rounded-full blur-3xl opacity-50" />
 
-        {/* ช่องกรอกรหัสยืนยัน */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
-            {t('telegramPage.inputLabel')}
-          </label>
-          <input
-            type="text"
-            value={connectionCode}
-            onChange={(e) => setConnectionCode(e.target.value)}
-            placeholder={t('telegramPage.inputPlaceholder')}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-center text-lg tracking-widest"
-            maxLength={10}
-          />
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <button 
-            onClick={handleVerifyCode}
-            disabled={isLoading || !connectionCode.trim()}
-            className="w-full py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <CheckCircle className="w-5 h-5" />
-            )}
-            {t('telegramPage.connectBtn')}
-          </button>
-
-          <button 
-            onClick={handleRequestNewCode}
-            disabled={isLoading}
-            className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <RefreshCw className="w-5 h-5" />
-            {t('telegramPage.requestCodeBtn')}
-          </button>
-          
-          <button 
+      <div className="max-w-xl w-full relative z-10">
+        <button 
             onClick={() => navigate('/dashboard')}
-            className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
-          >
-            {t('telegramPage.cancelBtn')}
-          </button>
+            className="flex items-center gap-2 text-gray-400 hover:text-blue-600 transition-colors font-bold text-sm mb-8 group"
+        >
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            {t('detailPage.back')}
+        </button>
+
+        <div className="bg-white p-10 md:p-12 rounded-[3.5rem] shadow-2xl shadow-gray-200/50 border border-gray-100 relative overflow-hidden flex flex-col items-center">
+          {/* Status Indicator */}
+          <div className={`absolute top-0 right-0 px-6 py-2 rounded-bl-3xl font-black text-[10px] uppercase tracking-widest ${isConnected ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+            {isConnected ? t('telegramPage.status.connected') : t('telegramPage.status.not_connected')}
+          </div>
+
+          <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner group ${isConnected ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
+            {isConnected ? <CheckCircle className="w-12 h-12" /> : <Send className="w-12 h-12 group-hover:rotate-12 transition-transform duration-500" />}
+          </div>
+
+          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight text-center">
+            {isConnected ? t('telegramPage.connectedTitle') : t('telegramPage.title')}
+          </h1>
+          <p className="text-gray-500 mb-10 font-medium leading-relaxed max-w-sm text-center">
+            {isConnected ? t('telegramPage.connectedSubtitle') : t('telegramPage.subtitle')}
+          </p>
+
+          {isConnected ? (
+            /* Connected View Actions */
+            <div className="w-full flex flex-col gap-4">
+              <button 
+                onClick={handleSendTest}
+                disabled={isLoading}
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <MessageSquare className="w-5 h-5" />}
+                {t('telegramPage.sendTestBtn')}
+              </button>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={handleDisconnect}
+                  disabled={isLoading}
+                  className="py-4 bg-white border-2 border-red-50 text-red-600 rounded-2xl font-black hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                >
+                  <Unlink className="w-5 h-5" />
+                  {t('telegramPage.disconnectBtn')}
+                </button>
+                
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="py-4 bg-gray-50 text-gray-600 rounded-2xl font-black hover:bg-gray-100 transition-all flex items-center justify-center gap-2 active:scale-95"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  Dashboard
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Disconnected View Form */
+            <div className="w-full space-y-8">
+              <div className="bg-orange-50/50 p-6 rounded-[2.5rem] border border-orange-100 relative group overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-4 -mt-4 w-16 h-16 bg-orange-100/50 rounded-full blur-xl group-hover:scale-150 transition-transform" />
+                <div className="flex items-start gap-4 relative z-10">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-orange-600 shadow-sm shrink-0">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-orange-900 mb-2 uppercase tracking-tight">{t('telegramPage.stepsTitle')}</p>
+                    <ol className="text-xs text-orange-800/80 list-decimal ml-4 space-y-2 font-medium">
+                      <li>
+                        <Trans i18nKey="telegramPage.step1">
+                          Find bot <a href="https://t.me/vegetableproject_chatbot" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:scale-105 inline-flex items-center gap-0.5 font-black">@vegetableproject_chatbot <ExternalLink className="w-3 h-3" /></a>
+                        </Trans>
+                      </li>
+                      <li>{t('telegramPage.step2')}</li>
+                      <li>{t('telegramPage.step3')}</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                  {t('telegramPage.inputLabel')}
+                </label>
+                <input
+                  type="text"
+                  value={connectionCode}
+                  onChange={(e) => setConnectionCode(e.target.value)}
+                  placeholder={t('telegramPage.inputPlaceholder')}
+                  className="w-full px-8 py-5 bg-gray-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-[2rem] outline-none transition-all text-center text-2xl font-black tracking-[0.2em] text-gray-800 shadow-inner"
+                  maxLength={10}
+                />
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <button 
+                  onClick={handleVerifyCode}
+                  disabled={isLoading || !connectionCode.trim()}
+                  className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <CheckCircle className="w-6 h-6" />}
+                  {t('telegramPage.connectBtn')}
+                </button>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button 
+                    onClick={handleRequestNewCode}
+                    disabled={isLoading}
+                    className="py-4 px-6 bg-white border-2 border-gray-100 text-gray-600 rounded-2xl font-black hover:border-blue-200 hover:text-blue-600 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                    {t('telegramPage.requestCodeBtn')}
+                  </button>
+                  
+                  <button 
+                    onClick={() => navigate('/dashboard')}
+                    className="py-4 px-6 bg-white border-2 border-gray-100 text-gray-600 rounded-2xl font-black hover:bg-gray-50 transition-all active:scale-95"
+                  >
+                    {t('telegramPage.cancelBtn')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

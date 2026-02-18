@@ -91,9 +91,11 @@ const Navbar = () => {
               <img src={logo} alt="Logo" className="w-7 h-7 object-contain" />
             </div>
             <div className="leading-tight">
-              <h1 className="text-[10px] font-bold text-green-700 uppercase tracking-tighter">ระบบตรวจ</h1>
+              <h1 className="text-[10px] font-bold text-green-700 uppercase tracking-tighter">
+                {t('nav.branding.top')}
+              </h1>
               <h1 className="text-sm font-black text-gray-800 uppercase tracking-tight group-hover:text-primary-600 transition-colors">
-                โรคพืชในผักสวนครัว
+                {t('nav.branding.bottom')}
               </h1>
             </div>
           </Link>
@@ -168,7 +170,7 @@ const Navbar = () => {
                 {isProfileOpen && (
                   <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl py-3 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                     <div className="px-4 py-2 border-b border-gray-50 mb-2">
-                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">จัดการบัญชี</p>
+                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{t('nav.menu.manageAccount')}</p>
                        <p className="text-sm font-black text-gray-800 truncate">{user?.fullname}</p>
                     </div>
                     
@@ -236,8 +238,8 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <img src={logo} alt="Logo" className="w-8 h-8 object-contain" />
               <div className="leading-tight">
-                <p className="text-[10px] font-bold text-green-700 uppercase tracking-tighter">ระบบตรวจ</p>
-                <p className="text-xs font-black text-gray-800 uppercase tracking-tight">โรคพืชในผักสวนครัว</p>
+                <p className="text-[10px] font-bold text-green-700 uppercase tracking-tighter">{t('nav.branding.top')}</p>
+                <p className="text-xs font-black text-gray-800 uppercase tracking-tight">{t('nav.branding.bottom')}</p>
               </div>
             </div>
             <button 
@@ -271,7 +273,7 @@ const Navbar = () => {
             <div className="p-4 space-y-6">
               {/* Main Links */}
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">เมนูหลัก</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.menu.main')}</p>
                 <div className="space-y-1">
                   {mainLinks.map((link) => {
                     const Icon = link.icon;
@@ -299,7 +301,7 @@ const Navbar = () => {
               {/* User Private Links */}
               {isAuthenticated && (
                 <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">ส่วนของคุณ</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.menu.userSection')}</p>
                   <div className="space-y-1">
                     {userLinks.map((link) => {
                       const Icon = link.icon;
@@ -327,7 +329,7 @@ const Navbar = () => {
 
               {/* Settings & Account */}
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">การตั้งค่า</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.menu.settings')}</p>
                 <div className="space-y-1">
                   <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">
                     <div className="p-1.5 rounded-lg bg-gray-100 text-gray-400">
@@ -336,7 +338,7 @@ const Navbar = () => {
                     {t('nav.profile')}
                   </Link>
                   <div className="px-4 py-3 flex items-center justify-between bg-gray-50 rounded-xl">
-                    <span className="text-sm font-bold text-gray-600">ภาษา (Language)</span>
+                    <span className="text-sm font-bold text-gray-600">{t('nav.menu.language')} (Language)</span>
                     <LanguageSwitcher />
                   </div>
                 </div>

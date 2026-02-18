@@ -1,23 +1,55 @@
 import React from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, ChevronLeft, ArrowRight, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CCTVPage = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
+    
     return (
-        <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center justify-center">
-            <div className="bg-white p-12 rounded-3xl shadow-xl text-center max-w-md w-full">
-                <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6">
-                    <Camera className="w-10 h-10" />
-                </div>
-                <h1 className="text-2xl font-bold text-gray-800 mb-4">จัดการกล้องวงจรปิด</h1>
-                <p className="text-gray-500 mb-8">หน้านี้กำลังอยู่ระหว่างการพัฒนา ระบบจะแสดงภาพสดจาก CCTV ของคุณเร็วๆ นี้</p>
+        <div className="min-h-screen bg-[#F8FAFC] p-4 flex flex-col items-center justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50" />
+            <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 bg-sky-50 rounded-full blur-3xl opacity-50" />
+
+            <div className="max-w-xl w-full relative z-10">
                 <button 
                     onClick={() => navigate('/dashboard')}
-                    className="w-full py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-colors"
+                    className="flex items-center gap-2 text-gray-400 hover:text-blue-600 transition-colors font-bold text-sm mb-8 group"
                 >
-                    ย้อนกลับไปหน้าหลัก
+                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    {t('detailPage.back')}
                 </button>
+
+                <div className="bg-white p-12 rounded-[3rem] shadow-2xl shadow-gray-200/50 text-center border border-gray-100 flex flex-col items-center">
+                    <div className="w-24 h-24 bg-blue-50 rounded-[2rem] flex items-center justify-center text-blue-600 mb-8 shadow-inner relative group overflow-hidden">
+                        <Camera className="w-10 h-10 group-hover:scale-110 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Video className="w-6 h-6 text-blue-600 animate-pulse" />
+                        </div>
+                    </div>
+                    
+                    <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">
+                        {t('cctvPage.title')}
+                    </h1>
+                    <p className="text-gray-500 mb-10 font-medium leading-relaxed max-w-xs">
+                        {t('cctvPage.subtitle')}
+                    </p>
+
+                    <button 
+                        onClick={() => navigate('/dashboard')}
+                        className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-xl shadow-gray-200 flex items-center justify-center gap-2 group active:scale-95"
+                    >
+                        {t('profile.backHome')}
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                </div>
+
+                <div className="mt-8 text-center">
+                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
+                    Feature Coming Soon
+                  </p>
+                </div>
             </div>
         </div>
     );

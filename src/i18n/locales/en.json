@@ -2,9 +2,58 @@
   "app": {
     "title": "Plant Disease and Pest Detection System",
     "subtitle": "For Kitchen Garden with CCTV and Automatic Water Spraying",
-    "category": "Smart Agriculture"
+    "disease": "Plant Disease"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "viewAll": "View All",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "noResults": "No results found",
+    "pagination": "Pagination",
+    "searchDots": "Search...",
+    "contactUs": "Contact Us",
+    "confirm": "Confirm",
+    "switch": "Thai",
+    "success": "Success"
+  },
+  "cctvPage": {
+    "title": "Manage CCTV",
+    "subtitle": "This page is under development. Live CCTV streams will be available soon."
+  },
+  "plotsPage": {
+    "title": "Vegetable Plots",
+    "subtitle": "Manage layout and data in your vegetable plots. This feature will be available soon."
+  },
+  "historyPage": {
+    "title": "Detection History",
+    "subtitle": "Collect your detection history of diseases and pests."
+  },
+  "contactPage": {
+    "title": "Contact Admin",
+    "subtitle": "If you encounter any issues or need further advice, you can contact us via the channels below."
   },
   "nav": {
+    "branding": {
+      "top": "Scan System",
+      "bottom": "Plant Diseases in Home Gardens"
+    },
+    "menu": {
+      "manageAccount": "Manage Account",
+      "main": "Main Menu",
+      "userSection": "Your Section",
+      "settings": "Settings",
+      "language": "Language"
+    },
     "home": "Home",
     "detect": "Detect Disease & Pests",
     "vegetables": "Vegetables",
@@ -129,25 +178,6 @@
     "11": "November",
     "12": "December"
   },
-  "common": {
-    "loading": "Loading...",
-    "error": "Error occurred",
-    "retry": "Retry",
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "search": "Search",
-    "filter": "Filter",
-    "viewAll": "View All",
-    "back": "Back",
-    "next": "Next",
-    "close": "Close",
-    "noResults": "No results found",
-    "pagination": "Pagination",
-    "searchDots": "Search...",
-    "contactUs": "Contact Us"
-  },
   "vegetablesPage": {
     "searchPlaceholder": "Search vegetables (Thai/English)...",
     "searchButton": "Search",
@@ -172,9 +202,12 @@
     "uploadHeader": "Upload Image",
     "dropzoneText": "Click or drag image file here",
     "fileLimitText": "Supports JPG, PNG (Max 10MB)",
-    "selectImageBtn": "Select from Camera/Gallery",
-    "saveHistory": "Save detection history to your account",
-    "processing": "Processing...",
+    "selectImageBtn": "Select Image Or Take Photo",
+    "saveHistory": "Save Detection History",
+    "sendToTelegram": "Send detection results to Telegram",
+    "telegramNotConnected": "Telegram not connected",
+    "connectNow": "Connect now",
+    "processing": "Processing Analysis...",
     "analyzeNow": "Analyze Now",
     "resultHeader": "AI Analysis Result",
     "noDataTitle": "No Data Yet",
@@ -551,5 +584,30 @@
     "userRole": "User Role",
     "backHome": "Back to Home",
     "manage": "Manage"
+  },
+  "user": {
+    "dashboard": {
+      "welcome": "Welcome, {{fullname}}",
+      "subtitle": "Manage your kitchen garden with smart technology",
+      "welcomeDefault": "Smart Farmer",
+      "roleAdmin": "Administrator",
+      "roleUser": "Smart Farmer",
+      "aiBadge": "AI Powered",
+      "logout": {
+        "confirm": "Logout?",
+        "text": "Are you sure you want to logout?"
+      },
+      "secondary": {
+        "cctv": "Live CCTV",
+        "cctvDesc": "Monitor your garden in real-time",
+        "history": "History Log",
+        "historyDesc": "View past detection results"
+      },
+      "support": {
+        "title": "Need Help?",
+        "desc": "Contact our team for any technical issues or advice.",
+        "button": "Contact Support"
+      }
+    }
   }
 }

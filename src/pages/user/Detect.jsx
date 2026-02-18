@@ -217,7 +217,7 @@ const Detect = () => {
                     />
                     <label htmlFor="send-telegram" className="text-sm font-medium text-gray-700 cursor-pointer flex items-center gap-2">
                       <MessageSquare className="w-4 h-4 text-blue-500" />
-                      {t('detectPage.sendToTelegram', 'ส่งผลการตรวจจับไปยัง Telegram')}
+                      {t('detectPage.sendToTelegram')}
                     </label>
                   </div>
                 )}
@@ -227,9 +227,9 @@ const Detect = () => {
                   <div className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-xl">
                     <MessageSquare className="w-5 h-5 text-yellow-500 flex-shrink-0" />
                     <p className="text-sm text-yellow-700">
-                      {t('detectPage.telegramNotConnected', 'ยังไม่ได้เชื่อมต่อ Telegram')} 
+                      {t('detectPage.telegramNotConnected')} 
                       <a href="/telegram" className="ml-1 text-blue-600 hover:underline font-medium">
-                        {t('detectPage.connectNow', 'เชื่อมต่อเลย')}
+                        {t('detectPage.connectNow')}
                       </a>
                     </p>
                   </div>
@@ -302,7 +302,7 @@ const Detect = () => {
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
                           result.category === 'disease' ? 'bg-orange-100 text-orange-700' : 
-                          result.category === 'pest' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
+                          result.category === 'pest' ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700'
                         }`}>
                           {result.category === 'disease' 
                             ? t('detectPage.categories.disease') 

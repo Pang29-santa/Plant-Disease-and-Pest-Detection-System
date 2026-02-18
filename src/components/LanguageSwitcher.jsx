@@ -13,12 +13,15 @@ const LanguageSwitcher = () => {
   return (
     <button
       onClick={toggleLanguage}
-      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 
-                 hover:text-primary-600 transition-colors duration-200"
-      title={t('language.switch')}
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-all duration-300 group active:scale-95"
+      title={t('common.switch')}
     >
-      <Globe className="w-5 h-5" />
-      <span className="uppercase">{i18n.language === 'th' ? 'TH' : 'EN'}</span>
+      <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-primary-600 shadow-sm group-hover:rotate-12 transition-transform">
+        <Globe className="w-3.5 h-3.5" />
+      </div>
+      <span className="text-xs font-black text-gray-600 uppercase tracking-tighter group-hover:text-primary-600 transition-colors">
+        {i18n.language === 'th' ? 'TH' : 'EN'}
+      </span>
     </button>
   );
 };
