@@ -1,0 +1,561 @@
+{
+  "app": {
+    "title": "ระบบตรวจจับโรคและศัตรูพืชในผัก",
+    "subtitle": "สำหรับสวนครัวด้วย CCTV และระบบพ่นน้ำอัตโนมัติ",
+    "category": "เกษตรอัจฉริยะ"
+  },
+  "nav": {
+    "home": "หน้าแรก",
+    "detect": "ตรวจโรคและศัตรูพืช",
+    "vegetables": "ข้อมูลผัก",
+    "diseases": "โรคพืช",
+    "pests": "แมลงศัตรูพืช",
+    "login": "เข้าสู่ระบบ",
+    "register": "ลงทะเบียน",
+    "logout": "ออกจากระบบ",
+    "dashboard": "แดชบอร์ด",
+    "cctv": "กล้องวงจรปิด",
+    "plots": "ข้อมูลแปลงผัก",
+    "history": "ประวัติการตรวจพบ",
+    "knowledge": "ความรู้",
+    "contact": "ติดต่อผู้ดูแล",
+    "profile": "โปรไฟล์",
+    "telegram": "เชื่อมต่อ Telegram"
+  },
+  "home": {
+    "welcome": "ยินดีต้อนรับ",
+    "heroBadge": "เทคโนโลยีสวนครัวอัจฉริยะ",
+    "description": "ระบบตรวจจับโรคและศัตรูพืชในผักสำหรับสวนครัว โดยใช้ CCTV และ AI ในการตรวจจับ พร้อมระบบพ่นน้ำอัตโนมัติ",
+    "featureTitle": "ฟีเจอร์หลัก",
+    "featuresSubtitle": "ระบบของเราช่วยคุณดูแลสวนครัวได้อย่างมีประสิทธิภาพ ครบจบในที่เดียว",
+    "learnMore": "เรียนรู้เพิ่มเติม",
+    "tech": {
+      "title": "เทคโนโลยี AI ที่ทันสมัย",
+      "description": "ระบบใช้ Machine Learning และ Computer Vision ในการตรวจจับโรคและศัตรูพืช แบบ Real-time พร้อมแจ้งเตือนผ่าน Telegram",
+      "badge": "AI สวนอัจฉริยะ",
+      "camera": {
+        "title": "กล้องวงจรปิด",
+        "desc": "ตรวจสอบพืชแบบ Real-time ตลอด 24 ชั่วโมง"
+      },
+      "ai": {
+        "title": "การตรวจจับด้วย AI",
+        "desc": "AI ตรวจจับโรคและศัตรูพืชอัตโนมัติ"
+      },
+      "water": {
+        "title": "ระบบพ่นน้ำอัตโนมัติ",
+        "desc": "ระบบพ่นน้ำอัตโนมัติเมื่อตรวจพบโรค"
+      }
+    },
+    "features": {
+      "detect": {
+        "title": "ตรวจโรคและศัตรูพืช",
+        "desc": "ตรวจจับโรคและศัตรูพืชในผักด้วย AI แบบ Real-time"
+      },
+      "vegetables": {
+        "title": "ข้อมูลผัก",
+        "desc": "ข้อมูลผักหลากหลายชนิด พร้อมวิธีการปลูกและดูแล"
+      },
+      "diseases": {
+        "title": "ข้อมูลโรคพืช",
+        "desc": "รายการโรคพืชที่พบบ่อย พร้อมวิธีป้องกันและรักษา"
+      },
+      "pests": {
+        "title": "ข้อมูลแมลงศัตรูพืช",
+        "desc": "รายการแมลงศัตรูพืช พร้อมวิธีกำจัดอย่างมีประสิทธิภาพ"
+      }
+    },
+    "cta": {
+      "login": "เข้าสู่ระบบ",
+      "register": "ลงทะเบียน",
+      "getStarted": "เริ่มต้นใช้งาน"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "เข้าสู่ระบบ",
+      "subtitle": "เข้าสู่ระบบเพื่อใช้งานฟีเจอร์ทั้งหมด",
+      "username": "ชื่อผู้ใช้ หรือ อีเมล",
+      "password": "รหัสผ่าน",
+      "submit": "เข้าสู่ระบบ",
+      "noAccount": "ยังไม่มีบัญชี?",
+      "register": "ลงทะเบียน",
+      "forgotPassword": "ลืมรหัสผ่าน?",
+      "login_failed": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+      "usernamePlaceholder": "email@example.com",
+      "passwordPlaceholder": "••••••••",
+      "rememberMe": "จดจำฉัน",
+      "loggingIn": "กำลังเข้าสู่ระบบ...",
+      "copyright": "© 2025 โปรเจกต์ผัก"
+    },
+    "register": {
+      "title": "ลงทะเบียน",
+      "subtitle": "สร้างบัญชีใหม่เพื่อเริ่มใช้งาน",
+      "fullname": "ชื่อ-นามสกุล",
+      "email": "อีเมล",
+      "phone": "เบอร์โทรศัพท์",
+      "province": "จังหวัด",
+      "district": "อำเภอ",
+      "subdistrict": "ตำบล",
+      "select": "เลือก",
+      "uploadPhoto": "เพิ่มรูปโปรไฟล์",
+      "password": "รหัสผ่าน",
+      "confirmPassword": "ยืนยันรหัสผ่าน",
+      "submit": "บันทึกข้อมูล",
+      "haveAccount": "มีบัญชีอยู่แล้ว?",
+      "login": "ไปยังหน้าเข้าสู่ระบบ",
+      "terms": "เงื่อนไขการใช้งาน",
+      "privacy": "นโยบายความเป็นส่วนตัว",
+      "logoutConfirmTitle": "ยืนยันการออกจากระบบ?",
+      "logoutConfirmText": "คุณต้องการออกจากระบบหรือไม่?",
+      "logoutConfirmButton": "ออกจากระบบ"
+    }
+  },
+  "language": {
+    "th": "ไทย",
+    "en": "English",
+    "switch": "เปลี่ยนภาษา"
+  },
+  "months": {
+    "1": "มกราคม",
+    "2": "กุมภาพันธ์",
+    "3": "มีนาคม",
+    "4": "เมษายน",
+    "5": "พฤษภาคม",
+    "6": "มิถุนายน",
+    "7": "กรกฎาคม",
+    "8": "สิงหาคม",
+    "9": "กันยายน",
+    "10": "ตุลาคม",
+    "11": "พฤศจิกายน",
+    "12": "ธันวาคม"
+  },
+  "common": {
+    "loading": "กำลังโหลด...",
+    "error": "เกิดข้อผิดพลาด",
+    "retry": "ลองใหม่",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "search": "ค้นหา",
+    "filter": "กรอง",
+    "viewAll": "ดูทั้งหมด",
+    "back": "ย้อนกลับ",
+    "next": "ถัดไป",
+    "close": "ปิด",
+    "noResults": "ไม่พบข้อมูล",
+    "pagination": "การแบ่งหน้า",
+    "searchDots": "ค้นหา...",
+    "contactUs": "ติดต่อเรา"
+  },
+  "vegetablesPage": {
+    "searchPlaceholder": "ค้นหาชื่อผัก (ไทย/อังกฤษ)...",
+    "searchButton": "ค้นหา",
+    "searchResults": "ผลการค้นหา:",
+    "noData": "ไม่พบข้อมูล",
+    "tryAgain": "ลองใช้คำค้นหาอื่นดูนะครับ",
+    "readMore": "อ่านเพิ่มเติม",
+    "page": "หน้าที่ {{page}} จาก {{totalPages}}",
+    "sunLoving": "ชอบแดด",
+    "moreImages": "รูปภาพเพิ่มเติม",
+    "details": "รายละเอียด",
+    "planting": "วิธีปลูก",
+    "care": "การดูแลรักษา",
+    "nutrition": "ข้อมูลโภชนาการ",
+    "noNutrition": "ไม่มีข้อมูลโภชนาการ",
+    "growth": "{{days}} วัน",
+    "noDataDetails": "ไม่มีข้อมูล",
+    "smartAgricultureDatabase": "ฐานข้อมูลเกษตรอัจฉริยะ"
+  },
+  "detectPage": {
+    "subtitle": "ใช้พลังของระบบ AI วิเคราะห์โรคพืชและแมลงศัตรูพืชในสวนของคุณอย่างแม่นยำ",
+    "uploadHeader": "อัปโหลดรูปภาพ",
+    "dropzoneText": "คลิกหรือลากไฟล์รูปภาพมาวางที่นี่",
+    "fileLimitText": "รองรับ JPG, PNG (สูงสุด 10MB)",
+    "selectImageBtn": "เลือกจากกล้อง/คลังภาพ",
+    "saveHistory": "บันทึกประวัติการตรวจจับในบัญชีของคุณ",
+    "processing": "กำลังประมวลผล...",
+    "analyzeNow": "วิเคราะห์เดี๋ยวนี้",
+    "resultHeader": "ผลการวิเคราะห์จากระบบ AI",
+    "noDataTitle": "ยังไม่มีข้อมูล",
+    "noDataText": "กรุณาอัปโหลดรูปภาพพืชที่คุณต้องการตรวจสอบ เพื่อให้ AI เริ่มการวิเคราะห์",
+    "workingTitle": "กำลังทำงาน...",
+    "workingText": "ระบบกำลังเปรียบเทียบรูปภาพกับฐานข้อมูลโรคและแมลง",
+    "confidence": "ความมั่นใจ",
+    "severityLevel": "ระดับความรุนแรง",
+    "symptoms": "อาการที่พบ",
+    "treatment": "แนวทางการแก้ไขและรักษา",
+    "prevention": "วิธีการป้องกันในอนาคต",
+    "alerts": {
+      "fileTooLargeTitle": "ไฟล์ใหญ่เกินไป",
+      "fileTooLargeText": "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 10MB",
+      "loginNoticeTitle": "แจ้งเตือน",
+      "loginNoticeText": "วิเคราะห์สำเร็จแล้ว แต่ข้อมูลไม่ได้ถูกบันทึกเนื่องจากคุณไม่ได้เข้าสู่ระบบ",
+      "acknowledge": "รับทราบ",
+      "analysisFailedTitle": "การวิเคราะห์ล้มเหลว",
+      "analysisFailedDefault": "เกิดข้อผิดพลาดในการวิเคราะห์ภาพ กรุณาลองใหม่อีกครั้ง"
+    },
+    "categories": {
+      "disease": "โรคพืช",
+      "pest": "แมลงศัตรูพืช",
+      "healthy": "สุขภาพดี"
+    },
+    "severity": {
+      "high": "สูง",
+      "medium": "ปานกลาง",
+      "low": "ต่ำ",
+      "normal": "ปกติ"
+    }
+  },
+  "diseasesPage": {
+    "subtitle": "รวมโรคพืชที่พบบ่อย พร้อมวิธีป้องกันรักษา",
+    "searchPlaceholder": "ค้นหาโรคพืช...",
+    "symptoms": "อาการ",
+    "cause": "สาเหตุ",
+    "treatment": "การรักษา",
+    "viewDetail": "ดูรายละเอียด",
+    "noResults": "ไม่พบโรคที่ค้นหา"
+  },
+  "pestsPage": {
+    "subtitle": "รายการแมลงศัตรูพืช พร้อมวิธีกำจัดอย่างมีประสิทธิภาพ",
+    "searchPlaceholder": "ค้นหาแมลงศัตรูพืช...",
+    "description": "คำอธิบาย",
+    "damage": "ความเสียหาย",
+    "control": "วิธีกำจัด",
+    "severity": "ความรุนแรง",
+    "noResults": "ไม่พบแมลงที่ค้นหา"
+  },
+  "detailPage": {
+    "back": "ย้อนกลับ",
+    "noData": "ไม่พบข้อมูล",
+    "noDataDesc": "ขออภัย ไม่พบรายละเอียดของโรคหรือศัตรูพืชที่คุณต้องการ",
+    "symptoms": "ลักษณะอาการและสิ่งที่พบ",
+    "cause": "สาเหตุการเกิด",
+    "treatment": "วิธีการรักษาและจัดการ",
+    "prevention": "การป้องกัน",
+    "gallery": "รูปภาพเพิ่มเติม",
+    "pest": "ศัตรูพืช",
+    "disease": "โรคพืช"
+  },
+  "telegramPage": {
+    "title": "เชื่อมต่อ Telegram",
+    "subtitle": "รับการแจ้งเตือนแบบ Real-time เมื่อระบบตรวจพบโรคหรือศัตรูพืชผ่านแอปพลิเคชัน Telegram",
+    "stepsTitle": "ขั้นตอนการเชื่อมต่อ",
+    "step1": "ค้นหาบอท <1>@vegetableproject_chatbot</1> ใน Telegram",
+    "step2": "พิมพ์คำสั่ง /start",
+    "step3": "พิมพ์รหัสยืนยันที่ได้รับจากบอทลงในช่องด้านล่าง",
+    "inputLabel": "รหัสยืนยัน",
+    "inputPlaceholder": "กรอกรหัสยืนยัน 6 หลัก",
+    "connectBtn": "ยืนยันการเชื่อมต่อ",
+    "requestCodeBtn": "ขอรหัสยืนยันใหม่",
+    "cancelBtn": "ยกเลิก",
+    "connectedTitle": "เชื่อมต่อ Telegram แล้ว",
+    "connectedSubtitle": "คุณได้เชื่อมต่อ Telegram สำเร็จแล้ว คุณจะได้รับการแจ้งเตือนเมื่อระบบตรวจพบโรคหรือศัตรูพืช",
+    "chatId": "Chat ID:",
+    "sendTestBtn": "ส่งข้อความทดสอบ",
+    "disconnectBtn": "ยกเลิกการเชื่อมต่อ",
+    "backDashboardBtn": "กลับไปหน้า Dashboard",
+    "status": {
+      "connected": "เชื่อมต่อแล้ว",
+      "not_connected": "ยังไม่ได้เชื่อมต่อ"
+    },
+    "alerts": {
+      "enterCodeTitle": "กรุณากรอกรหัสยืนยัน",
+      "loginRequiredTitle": "กรุณาเข้าสู่ระบบก่อน",
+      "connectSuccessTitle": "เชื่อมต่อ Telegram สำเร็จ!",
+      "connectErrorTitle": "รหัสยืนยันไม่ถูกต้อง",
+      "genericErrorTitle": "เกิดข้อผิดพลาดในการเชื่อมต่อ",
+      "sendTestSuccessTitle": "ส่งข้อความทดสอบสำเร็จ!",
+      "sendTestSuccessText": "กรุณาตรวจสอบ Telegram",
+      "sendTestErrorTitle": "ไม่สามารถส่งข้อความทดสอบได้",
+      "disconnectConfirmTitle": "ยืนยันการยกเลิก?",
+      "disconnectConfirmText": "คุณต้องการยกเลิกการเชื่อมต่อ Telegram ใช่หรือไม่?",
+      "confirmBtn": "ยืนยัน",
+      "cancelBtn": "ยกเลิก",
+      "disconnectSuccessTitle": "ยกเลิกการเชื่อมต่อสำเร็จ",
+      "disconnectErrorTitle": "ไม่สามารถยกเลิกการเชื่อมต่อได้",
+      "requestCodeSuccessTitle": "ส่งรหัสยืนยันใหม่ไปยัง Telegram แล้ว",
+      "requestCodeErrorTitle": "ไม่สามารถส่งรหัสได้",
+      "requestCodeGenericErrorTitle": "ไม่สามารถขอรหัสใหม่ได้"
+    }
+  },
+  "admin": {
+    "userDetail": "รายละเอียดผู้ใช้งาน",
+    "editInfo": "แก้ไขข้อมูล",
+    "contactInfo": "ข้อมูลการติดต่อ",
+    "addressInfo": "ข้อมูลที่อยู่อาศัย",
+    "telegramInfo": "ข้อมูล Telegram",
+    "role": "บทบาท",
+    "status": "สถานะ",
+    "email": "อีเมล",
+    "phone": "เบอร์โทรศัพท์",
+    "province": "จังหวัด",
+    "district": "อำเภอ",
+    "subdistrict": "ตำบล",
+    "noAddress": "ยังไม่ได้ระบุข้อมูลที่อยู่",
+    "telegramChatId": "Telegram Chat ID",
+    "connectedAt": "วันที่เชื่อมต่อ",
+    "roles": {
+      "admin": "ผู้ดูแลระบบ",
+      "user": "ผู้ใช้งานทั่วไป"
+    },
+    "statuses": {
+      "active": "กำลังใช้งาน",
+      "suspended": "ระงับการใช้งาน",
+      "inactive": "ไม่ใช้งาน"
+    },
+    "alerts": {
+      "noUserId": "ไม่พบรหัสผู้ใช้งาน",
+      "noUserData": "ไม่พบข้อมูลผู้ใช้งาน"
+    },
+    "sidebar": {
+      "brand": "ระบบตรวจสอบ\nพืชสวนครัว",
+      "dashboard": "หน้าหลัก",
+      "vegetables": "ข้อมูลผัก",
+      "diseases": "ข้อมูลโรคพืช",
+      "pests": "ข้อมูลศัตรูพืช",
+      "reports": "รายงานสรุป",
+      "users": "ข้อมูลผู้ใช้งาน",
+      "logout": "ออกจากระบบ"
+    },
+    "logout": {
+      "title": "ยืนยันการออกจากระบบ?",
+      "text": "คุณต้องการออกจากระบบหรือไม่?",
+      "confirm": "ออกจากระบบ",
+      "cancel": "ยกเลิก"
+    },
+    "dashboard": {
+      "title": "หน้าหลัก Admin",
+      "breadcrumb": "หน้าหลัก",
+      "stats": {
+        "vegetables": "จำนวนผัก",
+        "diseases": "จำนวนโรคพืช",
+        "pests": "จำนวนศัตรูพืช",
+        "users": "จำนวนผู้ใช้งาน"
+      },
+      "daily": {
+        "title": "สถิติการตรวจพบประจำวัน",
+        "selectDate": "เลือกวันที่",
+        "load": "โหลดข้อมูล",
+        "topDiseases": "3 โรคพืชที่พบมากที่สุด",
+        "topPests": "3 ศัตรูพืชที่พบมากที่สุด",
+        "noData": "ไม่พบข้อมูล"
+      }
+    },
+    "users": {
+      "title": "ข้อมูลผู้ใช้งาน",
+      "searchPlaceholder": "ค้นหาชื่อ, เบอร์โทร, อีเมล...",
+      "addNew": "เพิ่มผู้ใช้งานใหม่",
+      "table": {
+        "user": "ผู้ใช้งาน",
+        "phone": "เบอร์โทร",
+        "email": "อีเมล",
+        "role": "บทบาท",
+        "status": "สถานะ",
+        "manage": "จัดการ"
+      },
+      "actions": {
+        "view": "ดูรายละเอียด",
+        "activate": "เปิดใช้งาน",
+        "suspend": "ระงับการใช้งาน"
+      },
+      "confirm": {
+        "title": "ยืนยัน{{action}}?",
+        "text": "คุณต้องการ{{action}}ผู้ใช้นี้หรือไม่?",
+        "success": "{{action}}ผู้ใช้เรียบร้อยแล้ว",
+        "error": "ไม่สามารถอัปเดตสถานะได้"
+      },
+      "form": {
+        "titleNew": "เพิ่มผู้ใช้งานใหม่",
+        "titleEdit": "แก้ไขข้อมูลผู้ใช้งาน",
+        "back": "กลับไปยังหน้าข้อมูลผู้ใช้งาน",
+        "fullname": "ชื่อ - นามสกุล",
+        "fullnamePlaceholder": "ชื่อ - นามสกุล",
+        "phone": "เบอร์โทรศัพท์",
+        "phonePlaceholder": "08XXXXXXXX",
+        "email": "อีเมลผู้ใช้งานใหม่",
+        "emailPlaceholder": "example@mail.com",
+        "password": "รหัสผ่าน",
+        "passwordPlaceholder": "••••••••",
+        "passwordHint": "(เว้นว่างหากไม่ต้องการเปลี่ยน)",
+        "location": "ข้อมูลพื้นที่",
+        "selectProvince": "เลือกจังหวัด",
+        "selectDistrict": "เลือกอำเภอ",
+        "selectSubdistrict": "เลือกตำบล",
+        "role": "บทบาทผู้ใช้งาน",
+        "status": "สถานะ",
+        "image": "รูปโปรไฟล์",
+        "uploadImage": "อัปโหลดรูปโปรไฟล์",
+        "imageHint": "แนะนำขนาด 400x400 px",
+        "buttons": {
+          "save": "บันทึกข้อมูลผู้ใช้งาน",
+          "clear": "ล้างข้อมูล"
+        },
+        "confirm": {
+          "title": "ยืนยันการ{{action}}?",
+          "text": "คุณต้องการที่จะ{{action}}ผู้ใช้งานนี้ใช่หรือไม่?",
+          "success": "{{action}}สำเร็จเรียบร้อยแล้ว",
+          "error": "ไม่สามารถเปลี่ยนสถานะได้ในขณะนี้"
+        },
+        "no_data": "ไม่พบข้อมูลผู้ใช้งาน",
+        "validation": {
+          "required": "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน",
+          "passwordRequired": "กรุณากรอกรหัสผ่านสำหรับผู้ใช้งานใหม่"
+        }
+      },
+      "detail": {
+        "title": "รายละเอียดผู้ใช้งาน"
+      }
+    },
+      "reports": {
+        "title": "รายงานสรุป",
+        "filters": {
+          "year": "ปี",
+          "month": "เดือน",
+          "type": "ประเภท",
+          "all": "ทั้งหมด",
+          "search": "ค้นหา",
+          "searching": "กำลังค้นหา..."
+        },
+        "stats": {
+          "total": "ตรวจพบทั้งหมด",
+          "disease": "โรคพืช",
+          "pest": "ศัตรูพืช"
+        },
+        "chart": {
+          "title": "สถิติรายเดือน {{month}} {{year}}",
+          "noData": "ไม่มีข้อมูล"
+        },
+        "topRank": {
+          "title": "5 อันดับ ที่บ่อย ที่สุด",
+          "rank": "ลำดับ",
+          "name": "ชื่อ",
+          "count": "จำนวนครั้ง",
+          "export": "ส่งออก"
+        },
+        "empty": {
+          "title": "เลือกช่วงเวลาและประเภทเพื่อดูรายงาน",
+          "text": "กรุณาเลือกปี เดือน และประเภทที่ต้องการดูรายงาน จากนั้นกดปุ่ม \"ค้นหา\""
+        },
+        "csv": {
+          "header": "รายงานสรุปการตรวจจับ - {{month}} {{year}} ({{type}})",
+          "total": "จำนวนการตรวจจับทั้งหมด",
+          "disease": "จำนวนการตรวจจับโรคพืช",
+          "pest": "จำนวนการตรวจจับศัตรูพืช",
+          "table": {
+            "rank": "ลำดับ",
+            "thaiName": "ชื่อไทย",
+            "engName": "ชื่ออังกฤษ",
+            "type": "ประเภท",
+            "count": "จำนวนครั้ง"
+          }
+        }
+      },
+    "diseases": {
+      "title": "จัดการข้อมูลโรคและศัตรูพืช",
+      "diseaseListTitle": "ข้อมูลโรคพืช",
+      "pestListTitle": "ข้อมูลศัตรูพืช",
+      "addNew": "เพิ่มข้อมูล",
+      "searchPlaceholder": "ค้นหา (ไทย/อังกฤษ)...",
+      "table": {
+        "id": "ID",
+        "image": "รูปภาพ",
+        "thaiName": "ชื่อไทย",
+        "engName": "ชื่ออังกฤษ",
+        "type": "ประเภท",
+        "manage": "จัดการ"
+      },
+      "types": {
+        "disease": "โรคพืช",
+        "pest": "ศัตรูพืช"
+      },
+      "confirm": {
+        "deleteTitle": "คุณแน่ใจหรือไม่?",
+        "deleteText": "คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้",
+        "deleteSuccess": "ลบข้อมูลเรียบร้อยแล้ว",
+        "deleteError": "ไม่สามารถลบข้อมูลได้"
+      },
+      "form": {
+        "editTitle": "แก้ไขข้อมูล",
+        "addTitle": "เพิ่มข้อมูลใหม่",
+        "back": "ย้อนกลับ",
+        "thaiName": "ชื่อไทย",
+        "engName": "ชื่ออังกฤษ",
+        "type": "ประเภท",
+        "coverImage": "รูปปก (Cover Image)",
+        "uploadCover": "อัปโหลดรูปปก",
+        "galleryImages": "รูปภาพเพิ่มเติม (Gallery)",
+        "addImage": "เพิ่มรูป",
+        "maxImagesWarning": "สามารถอัปโหลดได้สูงสุด 5 รูป (รวมรูปปก)",
+        "causeTh": "สาเหตุ (ไทย)",
+        "causeEn": "สาเหตุ (อังกฤษ)",
+        "symptomsTh": "ลักษณะอาการ (ไทย)",
+        "symptomsEn": "ลักษณะอาการ (อังกฤษ)",
+        "preventionTh": "การป้องกัน (ไทย)",
+        "preventionEn": "การป้องกัน (อังกฤษ)",
+        "treatmentTh": "การรักษา (ไทย)",
+        "treatmentEn": "การรักษา (อังกฤษ)",
+        "save": "บันทึกข้อมูล",
+        "saving": "กำลังบันทึก...",
+        "cancel": "ยกเลิก",
+        "successSave": "บันทึกข้อมูลเรียบร้อย",
+        "successAdd": "เพิ่มข้อมูลเรียบร้อย",
+        "errorSave": "เกิดข้อผิดพลาดในการบันทึก",
+        "errorFetch": "ไม่สามารถโหลดข้อมูลได้",
+        "warnThaiName": "กรุณากรอกชื่อภาษาไทย"
+      },
+      "detail": {
+        "title": "รายละเอียดข้อมูล",
+        "edit": "แก้ไขข้อมูล",
+        "gallery": "รูปภาพเพิ่มเติม (Gallery)"
+      }
+    },
+    "vegetables": {
+      "title": "จัดการข้อมูลผัก",
+      "add": "เพิ่มข้อมูลผัก",
+      "edit": "แก้ไขข้อมูลผัก",
+      "form": {
+        "title": "ข้อมูลผัก",
+        "thaiName": "ชื่อผัก (ภาษาไทย)",
+        "engName": "ชื่อผัก (ภาษาอังกฤษ)",
+        "sciName": "ชื่อวิทยาศาสตร์",
+        "growth": "ระยะเวลาการเติบโต (วัน)",
+        "plantingTh": "วิธีการปลูก (TH)",
+        "plantingEn": "วิธีการปลูก (EN)",
+        "careTh": "วิธีการดูแล (TH)",
+        "careEn": "วิธีการดูแล (EN)",
+        "detailsTh": "รายละเอียดเพิ่มเติม (TH)",
+        "detailsEn": "รายละเอียดเพิ่มเติม (EN)",
+        "nutrition": {
+          "title": "คุณค่าทางโภชนาการ",
+          "add": "เพิ่ม",
+          "select": "เลือกสารอาหาร",
+          "amount": "ปริมาณ",
+          "unit": "หน่วย",
+          "name": "สารอาหาร",
+          "placeholder": "ตัวอย่าง: มะเขือเทศ"
+        }
+      },
+      "detail": {
+        "title": "รายละเอียดผัก",
+        "growthUnit": "วัน"
+      },
+      "listTitle": "ข้อมูลผัก",
+      "addNew": "เพิ่มข้อมูล",
+      "searchPlaceholder": "ค้นหาผัก (ไทย/อังกฤษ)...",
+      "confirm": {
+        "deleteTitle": "คุณแน่ใจหรือไม่?",
+        "deleteText": "คุณต้องการลบข้อมูลผักนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้",
+        "deleteSuccess": "ลบข้อมูลผักเรียบร้อยแล้ว",
+        "deleteError": "ไม่สามารถลบข้อมูลได้"
+      }
+    }
+  },
+  "profile": {
+    "title": "โปรไฟล์ของฉัน",
+    "telegramConnection": "การเชื่อมต่อ Telegram",
+    "userRole": "บทบาทผู้ใช้งาน",
+    "backHome": "ย้อนกลับไปหน้าหลัก",
+    "manage": "จัดการ"
+  }
+}

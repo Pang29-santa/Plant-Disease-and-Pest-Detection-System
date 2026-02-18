@@ -1,0 +1,555 @@
+{
+  "app": {
+    "title": "Plant Disease and Pest Detection System",
+    "subtitle": "For Kitchen Garden with CCTV and Automatic Water Spraying",
+    "category": "Smart Agriculture"
+  },
+  "nav": {
+    "home": "Home",
+    "detect": "Detect Disease & Pests",
+    "vegetables": "Vegetables",
+    "diseases": "Diseases",
+    "pests": "Pests",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "cctv": "CCTV",
+    "plots": "Plots",
+    "history": "History",
+    "knowledge": "Knowledge",
+    "contact": "Contact Admin",
+    "profile": "Profile",
+    "telegram": "Telegram Connect"
+  },
+  "home": {
+    "welcome": "Welcome",
+    "heroBadge": "Smart Kitchen Garden Technology",
+    "description": "A plant disease and pest detection system for kitchen gardens using CCTV and AI for real-time detection with automatic water spraying system",
+    "featureTitle": "Core Features",
+    "featuresSubtitle": "Our system helps you manage your garden efficiently in one place",
+    "learnMore": "Learn More",
+    "tech": {
+      "title": "Advanced AI Technology",
+      "description": "System uses Machine Learning and Computer Vision to detect diseases and pests in real-time with Telegram notifications.",
+      "badge": "AI Smart Garden",
+      "camera": {
+        "title": "CCTV Monitoring",
+        "desc": "Real-time plant monitoring 24/7"
+      },
+      "ai": {
+        "title": "AI Detection",
+        "desc": "Automatic disease and pest detection"
+      },
+      "water": {
+        "title": "Auto Watering",
+        "desc": "Automatic water spraying when disease detected"
+      }
+    },
+    "features": {
+      "detect": {
+        "title": "Detect Disease & Pests",
+        "desc": "Detect plant diseases and pests in real-time using AI technology"
+      },
+      "vegetables": {
+        "title": "Vegetable Information",
+        "desc": "Various vegetable information with growing and care instructions"
+      },
+      "diseases": {
+        "title": "Plant Diseases",
+        "desc": "Common plant diseases with prevention and treatment methods"
+      },
+      "pests": {
+        "title": "Pest Information",
+        "desc": "List of plant pests with effective elimination methods"
+      }
+    },
+    "cta": {
+      "login": "Login",
+      "register": "Register",
+      "getStarted": "Get Started"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Login to access all features",
+      "username": "Username or Email",
+      "password": "Password",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Register",
+      "forgotPassword": "Forgot password?",
+      "login_failed": "Invalid username or password",
+      "usernamePlaceholder": "email@example.com",
+      "passwordPlaceholder": "••••••••",
+      "rememberMe": "Remember me",
+      "loggingIn": "Logging in...",
+      "copyright": "© 2025 Vegetable Project"
+    },
+    "register": {
+      "title": "Register",
+      "subtitle": "Create a new account to get started",
+      "fullname": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "province": "Province",
+      "district": "District",
+      "subdistrict": "Subdistrict",
+      "select": "Select",
+      "uploadPhoto": "Upload Photo",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Submit",
+      "haveAccount": "Already have an account?",
+      "login": "Go to Login",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "logoutConfirmTitle": "Confirm logout?",
+      "logoutConfirmText": "Are you sure you want to logout?",
+      "logoutConfirmButton": "Logout"
+    }
+  },
+  "language": {
+    "th": "ไทย",
+    "en": "English",
+    "switch": "Switch Language"
+  },
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "viewAll": "View All",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "noResults": "No results found",
+    "pagination": "Pagination",
+    "searchDots": "Search...",
+    "contactUs": "Contact Us"
+  },
+  "vegetablesPage": {
+    "searchPlaceholder": "Search vegetables (Thai/English)...",
+    "searchButton": "Search",
+    "searchResults": "Search results:",
+    "noData": "No data found",
+    "tryAgain": "Please try different keywords",
+    "readMore": "Read more",
+    "page": "Page {{page}} of {{totalPages}}",
+    "sunLoving": "Sun loving",
+    "moreImages": "More images",
+    "details": "Details",
+    "planting": "Planting Method",
+    "care": "Care Instructions",
+    "nutrition": "Nutrition Facts",
+    "noNutrition": "No nutrition data available",
+    "growth": "{{days}} days",
+    "noDataDetails": "No data available",
+    "smartAgricultureDatabase": "Smart Agriculture Database"
+  },
+  "detectPage": {
+    "subtitle": "Accurately analyze plant diseases and pests in your garden with AI power",
+    "uploadHeader": "Upload Image",
+    "dropzoneText": "Click or drag image file here",
+    "fileLimitText": "Supports JPG, PNG (Max 10MB)",
+    "selectImageBtn": "Select from Camera/Gallery",
+    "saveHistory": "Save detection history to your account",
+    "processing": "Processing...",
+    "analyzeNow": "Analyze Now",
+    "resultHeader": "AI Analysis Result",
+    "noDataTitle": "No Data Yet",
+    "noDataText": "Please upload a plant image to start AI analysis",
+    "workingTitle": "Working...",
+    "workingText": "System is comparing the image with disease and pest database",
+    "confidence": "Confidence",
+    "severityLevel": "Severity Level",
+    "symptoms": "Symptoms",
+    "treatment": "Treatment Guidelines",
+    "prevention": "Prevention Methods",
+    "alerts": {
+      "fileTooLargeTitle": "File Too Large",
+      "fileTooLargeText": "Please select a file smaller than 10MB",
+      "loginNoticeTitle": "Notice",
+      "loginNoticeText": "Analysis complete, but data was not saved because you are not logged in",
+      "acknowledge": "Acknowledge",
+      "analysisFailedTitle": "Analysis Failed",
+      "analysisFailedDefault": "An error occurred during image analysis. Please try again."
+    },
+    "categories": {
+      "disease": "Plant Disease",
+      "pest": "Pest",
+      "healthy": "Healthy"
+    },
+    "severity": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "normal": "Normal"
+    }
+  },
+  "diseasesPage": {
+    "subtitle": "Common plant diseases with prevention and treatment methods",
+    "searchPlaceholder": "Search diseases...",
+    "symptoms": "Symptoms",
+    "cause": "Cause",
+    "treatment": "Treatment",
+    "viewDetail": "View Details",
+    "noResults": "No diseases found"
+  },
+  "pestsPage": {
+    "subtitle": "Common garden pests with effective control methods",
+    "searchPlaceholder": "Search pests...",
+    "description": "Description",
+    "damage": "Damage",
+    "control": "Control",
+    "severity": "Severity",
+    "noResults": "No pests found"
+  },
+  "detailPage": {
+    "back": "Back",
+    "noData": "Data not found",
+    "noDataDesc": "Sorry, the details of the disease or pest you are looking for could not be found.",
+    "symptoms": "Symptoms & Appearance",
+    "cause": "Cause",
+    "treatment": "Treatment & Management",
+    "prevention": "Prevention",
+    "gallery": "Additional Gallery",
+    "pest": "Pest",
+    "disease": "Plant Disease"
+  },
+  "telegramPage": {
+    "title": "Connect Telegram",
+    "subtitle": "Receive real-time notifications when diseases or pests are detected via Telegram",
+    "stepsTitle": "Connection Steps",
+    "step1": "Search for bot <1>@vegetableproject_chatbot</1> in Telegram",
+    "step2": "Type /start command",
+    "step3": "Enter the verification code received from the bot below",
+    "inputLabel": "Verification Code",
+    "inputPlaceholder": "Enter 6-digit code",
+    "connectBtn": "Confirm Connection",
+    "requestCodeBtn": "Request New Code",
+    "cancelBtn": "Cancel",
+    "connectedTitle": "Telegram Connected",
+    "connectedSubtitle": "You have successfully connected Telegram. You will receive notifications when diseases or pests are detected.",
+    "chatId": "Chat ID:",
+    "sendTestBtn": "Send Test Message",
+    "disconnectBtn": "Disconnect",
+    "backDashboardBtn": "Back to Dashboard",
+    "status": {
+      "connected": "Connected",
+      "not_connected": "Not Connected"
+    },
+    "alerts": {
+      "enterCodeTitle": "Please enter verification code",
+      "loginRequiredTitle": "Please login first",
+      "connectSuccessTitle": "Telegram Connected Successfully!",
+      "connectErrorTitle": "Invalid verification code",
+      "genericErrorTitle": "Connection error occurred",
+      "sendTestSuccessTitle": "Test message sent!",
+      "sendTestSuccessText": "Please check your Telegram",
+      "sendTestErrorTitle": "Could not send test message",
+      "disconnectConfirmTitle": "Confirm Disconnect?",
+      "disconnectConfirmText": "Are you sure you want to disconnect Telegram?",
+      "confirmBtn": "Confirm",
+      "cancelBtn": "Cancel",
+      "disconnectSuccessTitle": "Disconnected Successfully",
+      "disconnectErrorTitle": "Could not disconnect",
+      "requestCodeSuccessTitle": "New code sent to Telegram",
+      "requestCodeErrorTitle": "Could not send code",
+      "requestCodeGenericErrorTitle": "Could not request new code"
+    }
+  },
+  "admin": {
+    "userDetail": "User Details",
+    "editInfo": "Edit Information",
+    "contactInfo": "Contact Information",
+    "addressInfo": "Address Information",
+    "telegramInfo": "Telegram Information",
+    "role": "Role",
+    "status": "Status",
+    "email": "Email",
+    "phone": "Phone Number",
+    "province": "Province",
+    "district": "District",
+    "subdistrict": "Subdistrict",
+    "noAddress": "No address data specified",
+    "telegramChatId": "Telegram Chat ID",
+    "connectedAt": "Connected At",
+    "roles": {
+      "admin": "Administrator",
+      "user": "General User"
+    },
+    "statuses": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "inactive": "Inactive"
+    },
+    "alerts": {
+      "noUserId": "User ID not found",
+      "noUserData": "User data not found"
+    },
+    "sidebar": {
+      "brand": "Home Garden System",
+      "dashboard": "Dashboard",
+      "vegetables": "Vegetable Info",
+      "diseases": "Disease Info",
+      "pests": "Pest Info",
+      "reports": "Summary Reports",
+      "users": "User Info",
+      "logout": "Logout"
+    },
+    "logout": {
+      "title": "Confirm Logout?",
+      "text": "Are you sure you want to logout?",
+      "confirm": "Logout",
+      "cancel": "Cancel"
+    },
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "breadcrumb": "Home",
+      "stats": {
+        "vegetables": "Total Vegetables",
+        "diseases": "Total Diseases",
+        "pests": "Total Pests",
+        "users": "Total Users"
+      },
+      "daily": {
+        "title": "Daily Detection Statistics",
+        "selectDate": "Select Date",
+        "load": "Load Data",
+        "topDiseases": "Top 3 Diseases Found",
+        "topPests": "Top 3 Pests Found",
+        "noData": "No data found"
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "searchPlaceholder": "Search name, phone, email...",
+      "addNew": "Add New User",
+      "table": {
+        "user": "User",
+        "phone": "Phone",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "manage": "Manage"
+      },
+      "actions": {
+        "view": "View Details",
+        "activate": "Activate User",
+        "suspend": "Suspend User"
+      },
+      "form": {
+        "titleNew": "Add New User",
+        "titleEdit": "Edit User",
+        "back": "Back to Users",
+        "fullname": "Full Name",
+        "fullnamePlaceholder": "Full Name",
+        "phone": "Phone Number",
+        "phonePlaceholder": "08XXXXXXXX",
+        "email": "Email Address",
+        "emailPlaceholder": "example@mail.com",
+        "password": "Password",
+        "passwordPlaceholder": "••••••••",
+        "passwordHint": "(leave blank if no change)",
+        "location": "Location Information",
+        "selectProvince": "Select Province",
+        "selectDistrict": "Select District",
+        "selectSubdistrict": "Select Subdistrict",
+        "role": "User Role",
+        "status": "Status",
+        "image": "Profile Image",
+        "uploadImage": "Upload Profile",
+        "imageHint": "Recommended size 400x400 px",
+        "buttons": {
+          "save": "Save User",
+          "clear": "Clear Form"
+        },
+        "confirm": {
+          "title": "Confirm {{action}}?",
+          "text": "Are you sure you want to {{action}} this user?",
+          "success": "{{action}} successfully",
+          "error": "Failed to change status"
+        },
+        "no_data": "No user data found",
+        "validation": {
+          "required": "Please fill in all required fields",
+          "passwordRequired": "Please enter a password for new user"
+        }
+      },
+      "detail": {
+        "title": "User Details"
+      }
+    },
+      "reports": {
+        "title": "Summary Reports",
+        "filters": {
+          "year": "Year",
+          "month": "Month",
+          "type": "Type",
+          "all": "All",
+          "search": "Search",
+          "searching": "Searching..."
+        },
+        "stats": {
+          "total": "Total Found",
+          "disease": "Diseases",
+          "pest": "Pests"
+        },
+        "chart": {
+          "title": "Monthly Statistics for {{month}} {{year}}",
+          "noData": "No data available"
+        },
+        "topRank": {
+          "title": "Top 5 Frequent Findings",
+          "rank": "Rank",
+          "name": "Name",
+          "count": "Count",
+          "export": "Export"
+        },
+        "empty": {
+          "title": "Select time period and type to view report",
+          "text": "Please select a year, month, and type to view the report, then click 'Search'."
+        },
+        "csv": {
+          "header": "Detection Summary Report - {{month}} {{year}} ({{type}})",
+          "total": "Total Detections",
+          "disease": "Disease Detections",
+          "pest": "Pest Detections",
+          "table": {
+            "rank": "Rank",
+            "thaiName": "Thai Name",
+            "engName": "English Name",
+            "type": "Type",
+            "count": "Count"
+          }
+        }
+      },
+    "diseases": {
+      "title": "Diseases & Pests Management",
+      "diseaseListTitle": "Plant Disease Information",
+      "pestListTitle": "Pest Information",
+      "addNew": "Add Information",
+      "searchPlaceholder": "Search (Thai/English)...",
+      "table": {
+        "id": "ID",
+        "image": "Image",
+        "thaiName": "Thai Name",
+        "engName": "English Name",
+        "type": "Type",
+        "manage": "Manage"
+      },
+      "types": {
+        "disease": "Disease",
+        "pest": "Pest"
+      },
+      "confirm": {
+        "deleteTitle": "Are you sure?",
+        "deleteText": "Do you want to delete this information? This cannot be undone.",
+        "deleteSuccess": "Information deleted successfully",
+        "deleteError": "Failed to delete information"
+      },
+      "form": {
+        "editTitle": "Edit Information",
+        "addTitle": "Add Information",
+        "back": "Back",
+        "thaiName": "Thai Name",
+        "engName": "English Name",
+        "type": "Type",
+        "coverImage": "Cover Image",
+        "uploadCover": "Upload Cover",
+        "galleryImages": "Gallery Images",
+        "addImage": "Add Image",
+        "maxImagesWarning": "Maximum 5 images allowed (including cover)",
+        "causeTh": "Cause (Thai)",
+        "causeEn": "Cause (English)",
+        "symptomsTh": "Symptoms (Thai)",
+        "symptomsEn": "Symptoms (English)",
+        "preventionTh": "Prevention (Thai)",
+        "preventionEn": "Prevention (English)",
+        "treatmentTh": "Treatment (Thai)",
+        "treatmentEn": "Treatment (English)",
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "successSave": "Information saved successfully",
+        "successAdd": "Information added successfully",
+        "errorSave": "Failed to save information",
+        "errorFetch": "Failed to load information",
+        "warnThaiName": "Please enter Thai name"
+      },
+      "detail": {
+        "title": "Information Details",
+        "edit": "Edit Information",
+        "gallery": "Gallery Images"
+      }
+    },
+    "vegetables": {
+      "title": "Vegetable Management",
+      "listTitle": "Vegetable Information",
+      "add": "Add Vegetable",
+      "edit": "Edit Vegetable",
+      "form": {
+        "title": "Vegetable Information",
+        "thaiName": "Vegetable Name (Thai)",
+        "engName": "Vegetable Name (English)",
+        "sciName": "Scientific Name",
+        "growth": "Growth Duration (Days)",
+        "plantingTh": "Planting Method (Thai)",
+        "plantingEn": "Planting Method (English)",
+        "careTh": "Care Method (Thai)",
+        "careEn": "Care Method (English)",
+        "detailsTh": "Additional Details (Thai)",
+        "detailsEn": "Additional Details (English)",
+        "nutrition": {
+          "title": "Nutritional Information",
+          "add": "Add",
+          "select": "Select Nutrient",
+          "amount": "Amount",
+          "unit": "Unit",
+          "name": "Nutrient",
+          "placeholder": "Example: Tomato"
+        }
+      },
+      "detail": {
+        "title": "Vegetable Details",
+        "growthUnit": "days"
+      },
+      "addNew": "Add Information",
+      "searchPlaceholder": "Search vegetables (Thai/English)...",
+      "confirm": {
+        "deleteTitle": "Are you sure?",
+        "deleteText": "Do you want to delete this vegetable? This cannot be undone.",
+        "deleteSuccess": "Vegetable deleted successfully",
+        "deleteError": "Failed to delete vegetable"
+      }
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "telegramConnection": "Telegram Connection",
+    "userRole": "User Role",
+    "backHome": "Back to Home",
+    "manage": "Manage"
+  }
+}
