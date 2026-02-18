@@ -33,7 +33,7 @@ const Login = () => {
       } else if (result.user?.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        navigate('/');
       }
     } else {
       const msg = result.message || '';
@@ -199,10 +199,10 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-primary-600 text-white font-semibold rounded-xl
+              className={`w-full py-3.5 px-4 bg-primary-600 text-white font-semibold rounded-xl
                        hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500/20 
                        active:scale-[0.98] transition-all duration-200 disabled:opacity-50 
-                       disabled:cursor-not-allowed shadow-lg shadow-primary-600/20"
+                       disabled:cursor-not-allowed shadow-lg shadow-primary-600/20 ${loading ? 'cursor-wait' : ''}`}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -212,7 +212,11 @@ const Login = () => {
                   </svg>
                   {t('auth.login.loggingIn')}
                 </span>
-              ) : t('auth.login.submit')}
+              ) : (
+                <span className="text-base">
+                  {t('auth.login.submit')}
+                </span>
+              )}
             </button>
 
             <p className="text-center text-sm text-gray-600">

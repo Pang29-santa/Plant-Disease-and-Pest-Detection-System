@@ -113,7 +113,7 @@ const AdminUsers = () => {
                                     placeholder={t('admin.users.searchPlaceholder')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 />
                                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             </div>
@@ -121,7 +121,7 @@ const AdminUsers = () => {
 
                         <Link
                             to="/admin/users/new"
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 justify-center transition-colors"
+                            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 justify-center transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             {t('admin.users.addNew')}
@@ -132,7 +132,7 @@ const AdminUsers = () => {
                 {/* Main Content */}
                 {loading ? (
                     <div className="p-12 text-center">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                         <p className="mt-2 text-gray-600">{t('common.loading')}</p>
                     </div>
                 ) : users.length === 0 ? (
@@ -227,7 +227,7 @@ const AdminUsers = () => {
                                         onClick={() => setPage(idx + 1)}
                                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${
                                             page === idx + 1
-                                                ? 'z-10 bg-green-600 border-green-600 text-white'
+                                                ? 'z-10 bg-primary-600 border-primary-600 text-white'
                                                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                                         }`}
                                     >

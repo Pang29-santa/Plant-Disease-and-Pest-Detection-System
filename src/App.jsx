@@ -68,11 +68,7 @@ function App() {
             } />
             
             {/* Protected Routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
+
             <Route path="/cctv" element={
               <ProtectedRoute>
                 <CCTV />

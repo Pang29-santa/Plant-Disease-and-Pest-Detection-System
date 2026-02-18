@@ -35,7 +35,7 @@ const AdminPestDetail = () => {
     return (
         <AdminLayout title={t('admin.diseases.detail.title')}>
             <div className="mb-6 flex justify-between items-center">
-                <Link to="/admin/pests" className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
+                <Link to="/admin/pests" className="inline-flex items-center text-gray-600 hover:text-primary-600 transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1" />
                     {t('admin.diseases.form.back')}
                 </Link>
@@ -49,7 +49,7 @@ const AdminPestDetail = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100">
-                <div className="bg-green-50/50 p-6 border-b border-green-100">
+                <div className="bg-primary-50/50 p-6 border-b border-primary-100">
                     <div className="flex flex-col md:flex-row gap-8">
                         <div className="w-full md:w-64 h-64 flex-shrink-0 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                             <img
@@ -83,13 +83,13 @@ const AdminPestDetail = () => {
                     ].map((section, idx) => (
                         <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
-                                <h3 className="text-lg font-bold text-green-800 flex items-center border-l-4 border-green-500 pl-3">{section.label}</h3>
+                                <h3 className="text-lg font-bold text-primary-800 flex items-center border-l-4 border-primary-500 pl-3">{section.label}</h3>
                                 <div className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 min-h-[100px]" 
                                     dangerouslySetInnerHTML={{ __html: section.content || '-' }} 
                                 />
                             </div>
                             <div className="space-y-4">
-                                <h3 className="text-lg font-bold text-green-800 flex items-center border-l-4 border-green-500 pl-3">{section.labelEn}</h3>
+                                <h3 className="text-lg font-bold text-primary-800 flex items-center border-l-4 border-primary-500 pl-3">{section.labelEn}</h3>
                                 <div className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 min-h-[100px]" 
                                     dangerouslySetInnerHTML={{ __html: section.contentEn || '-' }} 
                                 />

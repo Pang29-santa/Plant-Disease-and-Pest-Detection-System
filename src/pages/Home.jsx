@@ -237,9 +237,7 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-secondary-400 rounded-full flex items-center justify-center shadow-2xl animate-float">
-                <span className="text-white font-black text-2xl tracking-tighter">AI</span>
-              </div>
+
             </div>
 
             <div className="space-y-10">

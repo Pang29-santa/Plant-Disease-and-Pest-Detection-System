@@ -2,7 +2,8 @@
   "app": {
     "title": "Plant Disease and Pest Detection System",
     "subtitle": "For Kitchen Garden with CCTV and Automatic Water Spraying",
-    "disease": "Plant Disease"
+    "disease": "Plant Disease",
+    "category": "Smart Farming"
   },
   "common": {
     "loading": "Loading...",
@@ -40,7 +41,21 @@
   },
   "contactPage": {
     "title": "Contact Admin",
-    "subtitle": "If you encounter any issues or need further advice, you can contact us via the channels below."
+    "sendTitle": "Send Message to Admin",
+    "requestType": "Request Type",
+    "selectType": "-- Select Request Type --",
+    "message": "Message",
+    "subtitle": "Or contact directly via email:",
+    "placeholder": "Please enter the message details you want to send to the admin...",
+    "sendMessage": "Send Message",
+    "types": {
+      "addVegetable": "Add Vegetable Info",
+      "addDisease": "Add Disease Info",
+      "addPest": "Add Pest Info",
+      "other": "Others"
+    },
+    "success": "Message sent successfully. The admin team will review and take action soon.",
+    "error": "Error sending message. Please try again."
   },
   "nav": {
     "branding": {

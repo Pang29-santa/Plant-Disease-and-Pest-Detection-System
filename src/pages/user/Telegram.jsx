@@ -215,16 +215,6 @@ const TelegramPage = () => {
       {/* Background Decorative Elements */}
       <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50" />
       <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 bg-sky-50 rounded-full blur-3xl opacity-50" />
-
-      <div className="max-w-xl w-full relative z-10">
-        <button 
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-gray-400 hover:text-blue-600 transition-colors font-bold text-sm mb-8 group"
-        >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            {t('detailPage.back')}
-        </button>
-
         <div className="bg-white p-10 md:p-12 rounded-[3.5rem] shadow-2xl shadow-gray-200/50 border border-gray-100 relative overflow-hidden flex flex-col items-center">
           {/* Status Indicator */}
           <div className={`absolute top-0 right-0 px-6 py-2 rounded-bl-3xl font-black text-[10px] uppercase tracking-widest ${isConnected ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
@@ -254,24 +244,14 @@ const TelegramPage = () => {
                 {t('telegramPage.sendTestBtn')}
               </button>
               
-              <div className="grid grid-cols-2 gap-4">
-                <button 
-                  onClick={handleDisconnect}
-                  disabled={isLoading}
-                  className="py-4 bg-white border-2 border-red-50 text-red-600 rounded-2xl font-black hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
-                >
-                  <Unlink className="w-5 h-5" />
-                  {t('telegramPage.disconnectBtn')}
-                </button>
-                
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="py-4 bg-gray-50 text-gray-600 rounded-2xl font-black hover:bg-gray-100 transition-all flex items-center justify-center gap-2 active:scale-95"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                  Dashboard
-                </button>
-              </div>
+              <button 
+                onClick={handleDisconnect}
+                disabled={isLoading}
+                className="w-full py-4 bg-white border-2 border-red-50 text-red-600 rounded-2xl font-black hover:bg-red-50 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <Unlink className="w-5 h-5" />
+                {t('telegramPage.disconnectBtn')}
+              </button>
             </div>
           ) : (
             /* Disconnected View Form */
@@ -342,7 +322,33 @@ const TelegramPage = () => {
             </div>
           )}
         </div>
-      </div>
+
+        {/* Features / Benefits Section */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl w-full px-4">
+          <div className="bg-white/60 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-lg flex flex-col items-center text-center group hover:bg-white hover:scale-105 transition-all duration-300">
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <h3 className="font-black text-gray-800 mb-2">{t('telegramPage.features.chat.title', 'Real-time Chat')}</h3>
+            <p className="text-sm text-gray-500 font-medium">{t('telegramPage.features.chat.desc', 'Get instant updates and chat with our AI assistant directly.')}</p>
+          </div>
+
+          <div className="bg-white/60 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-lg flex flex-col items-center text-center group hover:bg-white hover:scale-105 transition-all duration-300">
+            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="font-black text-gray-800 mb-2">{t('telegramPage.features.alerts.title', 'Instant Alerts')}</h3>
+            <p className="text-sm text-gray-500 font-medium">{t('telegramPage.features.alerts.desc', 'Receive immediate notifications about your farm status.')}</p>
+          </div>
+
+          <div className="bg-white/60 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-lg flex flex-col items-center text-center group hover:bg-white hover:scale-105 transition-all duration-300">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h3 className="font-black text-gray-800 mb-2">{t('telegramPage.features.secure.title', 'Secure & Private')}</h3>
+            <p className="text-sm text-gray-500 font-medium">{t('telegramPage.features.secure.desc', 'Your data is encrypted and securely connected to your account.')}</p>
+          </div>
+        </div>
     </div>
   );
 };
