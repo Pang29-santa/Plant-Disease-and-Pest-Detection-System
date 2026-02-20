@@ -76,10 +76,16 @@ export const chatWithAI = async (message, context = null) => {
  * @returns {Promise} รายการประวัติ
  */
 export const getDetectionHistory = async (params = {}) => {
-  const { limit = 20, skip = 0 } = params;
-  const response = await axios.get(`${API_URL}/detection-history`, {
-    params: { limit, skip },
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || !user.user_id) {
+      console.warn('No user ID found for fetching history');
+      return [];
+  }
+  console.log(`[API] Fetching detection history for user ${user.user_id}`, params);
+  const response = await axios.get(`/api/detection/by-user/${user.user_id}`, {
+    params: params,
   });
+  console.log(`[API] Received ${response.data?.length || 0} records`);
   return response.data;
 };
 

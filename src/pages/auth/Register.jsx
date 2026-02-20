@@ -143,7 +143,7 @@ const Register = () => {
       const result = await register(data);
       
       if (result.success) {
-        navigate('/dashboard');
+        navigate('/');
       } else {
         setError(result.message);
       }
