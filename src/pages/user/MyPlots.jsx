@@ -1099,7 +1099,7 @@ const MyPlotsStyles = () => (
       display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
     }
     .myplots-history-date-row .myplots-filter-group { flex: 1; min-width: 160px; }
-    .myplots-filter-actions { display: flex; gap: 8px; align-items: flex-end; padding-bottom: 2px; }
+    .myplots-filter-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding-bottom: 2px; }
     .myplots-search-btn {
       display: flex; align-items: center; gap: 6px;
       padding: 9px 18px; background: #2E7D32; color: #fff;
@@ -1154,7 +1154,19 @@ const MyPlotsStyles = () => (
       .myplots-page-title, .myplots-history-title { font-size: 22px; }
       .myplots-grid { grid-template-columns: 1fr; }
       .myplots-history-date-row { flex-direction: column; align-items: stretch; }
-      .myplots-filter-actions { justify-content: flex-end; margin-top: 8px; }
+      .myplots-filter-actions { 
+        justify-content: space-between; 
+        margin-top: 8px; 
+        flex-wrap: nowrap; 
+        width: 100%;
+      }
+      .myplots-filter-actions button {
+        flex: 1;
+        justify-content: center;
+        padding: 9px 4px;
+        font-size: 13px;
+        gap: 4px;
+      }
       
       /* Mobile Table as Cards */
       .myplots-table thead { display: none; }
