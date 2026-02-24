@@ -228,7 +228,13 @@
     "noDataTitle": "No Data Yet",
     "noDataText": "Please upload a plant image to start AI analysis",
     "workingTitle": "Working...",
-    "workingText": "System is comparing the image with disease and pest database",
+    "workingText": "AI is analyzing image with TensorFlow Model...",
+    "modelInfo": "Model Used",
+    "confidenceHigh": "High Confidence",
+    "confidenceMedium": "Medium Confidence",
+    "confidenceLow": "Needs Review",
+    "uncertainResult": "Result May Be Uncertain",
+    "uncertainAdvice": "Recommend consulting an expert for verification",
     "confidence": "Confidence",
     "severityLevel": "Severity Level",
     "symptoms": "Symptoms",
@@ -354,7 +360,12 @@
     },
     "alerts": {
       "noUserId": "User ID not found",
-      "noUserData": "User data not found"
+      "noUserData": "User data not found",
+      "success": "Success",
+      "successSave": "Data saved successfully",
+      "error": "Error",
+      "errorSave": "Failed to save data",
+      "duplicateName": "This name already exists"
     },
     "sidebar": {
       "brand": "Home Garden System",

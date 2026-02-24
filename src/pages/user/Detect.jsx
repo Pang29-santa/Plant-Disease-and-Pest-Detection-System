@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, Upload, Scan, AlertCircle, CheckCircle, Send, MessageSquare } from 'lucide-react';
+import { Camera, Upload, Scan, AlertCircle, CheckCircle, Send, MessageSquare, Cpu, TrendingUp, AlertTriangle, Info } from 'lucide-react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../context/AuthContext';
+import { useDetection } from '../../context/DetectionContext';
 import { getTelegramConnection } from '../../services/telegramApi';
 
 const Detect = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState(null);
-  const [saveResult, setSaveResult] = useState(true);
-  const [sendToTelegram, setSendToTelegram] = useState(true);
+  
+  const {
+    selectedImage, setSelectedImage,
+    selectedFile, setSelectedFile,
+    isAnalyzing, setIsAnalyzing,
+    result, setResult,
+    saveResult, setSaveResult,
+    sendToTelegram, setSendToTelegram,
+  } = useDetection();
+
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [isCheckingTelegram, setIsCheckingTelegram] = useState(true);
 
@@ -81,10 +86,14 @@ const Detect = () => {
     formData.append('file', selectedFile);
     formData.append('save_result', saveResult ? 'true' : 'false');
     formData.append('send_telegram', sendToTelegram ? 'true' : 'false');
+    // TensorFlow model parameters
+    formData.append('use_tta', 'true');
+    formData.append('enhance', 'true');
+    formData.append('confidence_threshold', '0.5');
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/ai/detect', formData, {
+      const response = await axios.post('/api/ai/detect/tf', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           ...(token && { 'Authorization': `Bearer ${token}` })
@@ -250,8 +259,8 @@ const Detect = () => {
                   </>
                 ) : (
                   <>
-                    <Scan className="w-6 h-6" />
-                    {t('detectPage.analyzeNow')}
+                    <Cpu className="w-6 h-6" />
+                    {t('detectPage.analyzeNow')} (AI)
                   </>
                 )}
               </button>
@@ -290,17 +299,17 @@ const Detect = () => {
               {result && (
                 <div className="animate-fade-in space-y-8">
                   {/* Status Banner */}
-                  <div className={`p-6 rounded-2xl flex items-center gap-6 ${
+                  <div className={`p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 ${
                     result.is_detected ? 'bg-red-50 border border-red-100' : 'bg-green-50 border border-green-100'
                   }`}>
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 ${
                       result.is_detected ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
                     }`}>
-                      {result.is_detected ? <AlertCircle className="w-10 h-10" /> : <CheckCircle className="w-10 h-10" />}
+                      {result.is_detected ? <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10" /> : <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10" />}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
+                    <div className="flex-1 min-w-0 w-full">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase whitespace-nowrap ${
                           result.category === 'disease' ? 'bg-orange-100 text-orange-700' : 
                           result.category === 'pest' ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700'
                         }`}>
@@ -310,20 +319,28 @@ const Detect = () => {
                               ? t('detectPage.categories.pest') 
                               : t('detectPage.categories.healthy')}
                         </span>
-                        <span className="text-sm font-bold text-gray-500">{t('detectPage.confidence')} {result.confidence}%</span>
                       </div>
-                      <h3 className="text-2xl font-black text-gray-900 leading-tight">
+                      <h3 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight truncate whitespace-normal break-words">
                         {i18n.language === 'en' ? result.target_name_en : result.target_name_th}
                       </h3>
-                      <p className="text-gray-500 italic font-medium">
+                      <p className="text-sm sm:text-base text-gray-500 italic font-medium break-words">
                         {i18n.language === 'en' ? result.target_name_th : result.target_name_en}
                       </p>
+                      {result.model && (
+                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-[10px] sm:text-xs font-medium rounded-lg whitespace-nowrap">
+                            <Cpu className="w-3 h-3" />
+                            {result.model}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Details Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gray-50 rounded-2xl p-6">
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Severity Level */}
+                    <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 w-full">
                       <p className="text-sm font-black text-gray-400 uppercase mb-2">{t('detectPage.severityLevel')}</p>
                       <p className={`text-2xl font-black ${
                         result.severity_level === 'สูง' ? 'text-red-600' : 
@@ -335,14 +352,69 @@ const Detect = () => {
                          t('detectPage.severity.normal')}
                       </p>
                     </div>
-                    <div className="bg-gray-50 rounded-2xl p-6">
-                      <p className="text-sm font-black text-gray-400 uppercase mb-2">{t('detectPage.symptoms')}</p>
-                      <p className="text-gray-700 font-medium leading-relaxed">{result.symptoms}</p>
+
+                    {/* Confidence */}
+                    <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 w-full flex flex-col justify-center">
+                      <p className="text-sm font-black text-gray-400 uppercase mb-2">{t('detectPage.confidence')}</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                        <span className="text-2xl font-black text-gray-900">{result.confidence}%</span>
+                        {result.confidence_level && (
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-medium rounded-lg whitespace-nowrap ${
+                            result.confidence_level === 'high' ? 'bg-green-100 text-green-700' :
+                            result.confidence_level === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-orange-100 text-orange-700'
+                          }`}>
+                            <TrendingUp className="w-3 h-3" />
+                            {result.confidence_level === 'high' ? t('detectPage.confidenceHigh') :
+                             result.confidence_level === 'medium' ? t('detectPage.confidenceMedium') : t('detectPage.confidenceLow')}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Steps */}
+                  {/* Uncertainty Warning */}
+                  {result.uncertainty && (result.uncertainty.is_uncertain || result.validation?.has_conflict) && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex items-start gap-4">
+                      <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-orange-800 mb-1">{t('detectPage.uncertainResult')}</h4>
+                        <p className="text-orange-700 text-sm">
+                          {result.validation?.has_conflict 
+                            ? `${result.validation.suggested_category} / ${result.validation.detected_category}`
+                            : `${result.uncertainty.top_1_confidence}% / ${result.uncertainty.top_2_confidence}%`
+                          }
+                        </p>
+                        <p className="text-orange-600 text-xs mt-1">{t('detectPage.uncertainAdvice')}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Steps & Additional Info */}
                   <div className="space-y-6">
+                    {result.symptoms && (
+                      <div>
+                        <h4 className="flex items-center gap-2 text-lg font-black text-gray-900 mb-4">
+                          <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+                            <Info className="w-5 h-5" />
+                          </div>
+                          {t('detectPage.symptoms')}
+                        </h4>
+                        <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 w-full overflow-hidden">
+                          {result.symptoms.includes('<') ? (
+                            <div 
+                              className="html-content text-gray-700 font-medium leading-relaxed break-words flex-1 min-w-0"
+                              dangerouslySetInnerHTML={{ __html: result.symptoms }} 
+                            />
+                          ) : (
+                            <p className="text-gray-700 font-medium leading-relaxed break-words">{result.symptoms}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {result.treatment && result.treatment.length > 0 && (
                       <div>
                         <h4 className="flex items-center gap-2 text-lg font-black text-gray-900 mb-4">
@@ -353,17 +425,17 @@ const Detect = () => {
                         </h4>
                         <div className="space-y-3">
                           {result.treatment.map((step, i) => (
-                            <div key={i} className="flex gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+                            <div key={i} className="flex gap-3 sm:gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 w-full overflow-hidden">
                               {/* ตรวจสอบว่ามี HTML หรือไม่ */}
                               {step.includes('<') ? (
                                 <div 
-                                  className="html-content text-gray-700 font-medium"
+                                  className="html-content text-gray-700 font-medium flex-1 min-w-0 break-words"
                                   dangerouslySetInnerHTML={{ __html: step }} 
                                 />
                               ) : (
                                 <>
-                                  <span className="font-black text-blue-600">{i + 1}.</span>
-                                  <p className="text-gray-700 font-medium">{step}</p>
+                                  <span className="font-black text-blue-600 flex-shrink-0">{i + 1}.</span>
+                                  <p className="text-gray-700 font-medium flex-1 min-w-0 break-words">{step}</p>
                                 </>
                               )}
                             </div>
@@ -382,16 +454,16 @@ const Detect = () => {
                         </h4>
                         <div className="space-y-3">
                           {result.prevention.map((step, i) => (
-                            <div key={i} className="flex gap-4 p-4 bg-green-50/50 rounded-2xl border border-green-100">
+                            <div key={i} className="flex gap-3 sm:gap-4 p-4 bg-green-50/50 rounded-2xl border border-green-100 w-full overflow-hidden">
                               {step.includes('<') ? (
                                 <div 
-                                  className="html-content text-gray-700 font-medium"
+                                  className="html-content text-gray-700 font-medium flex-1 min-w-0 break-words"
                                   dangerouslySetInnerHTML={{ __html: step }} 
                                 />
                               ) : (
                                 <>
-                                  <span className="font-black text-green-600">•</span>
-                                  <p className="text-gray-700 font-medium">{step}</p>
+                                  <span className="font-black text-green-600 flex-shrink-0">•</span>
+                                  <p className="text-gray-700 font-medium flex-1 min-w-0 break-words">{step}</p>
                                 </>
                               )}
                             </div>

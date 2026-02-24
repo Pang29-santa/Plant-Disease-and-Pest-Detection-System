@@ -1,13 +1,23 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
+import { setLanguage } from '../services/languageApi';
 
 const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
 
-  const toggleLanguage = () => {
+  const toggleLanguage = async () => {
     const newLang = i18n.language === 'th' ? 'en' : 'th';
+    
+    // เปลี่ยนภาษาทันทีฝั่ง client
     i18n.changeLanguage(newLang);
+    
+    // บันทึกลง backend (async, ไม่ต้องรอ)
+    try {
+      await setLanguage(newLang);
+    } catch (error) {
+      console.error('Failed to sync language with backend:', error);
+    }
   };
 
   return (

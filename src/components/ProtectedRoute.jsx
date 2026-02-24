@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
             timer: 2000,
             showConfirmButton: false
         });
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/" replace />;
     }
     return <Navigate to="/" replace />;
   }

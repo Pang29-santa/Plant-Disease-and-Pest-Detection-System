@@ -90,26 +90,26 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 w-full bg-white shadow-sm z-50 border-b border-gray-100">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 gap-4">
           
           {/* 1. System Branding (Far Left) - Responsive width */}
-          <Link to="/" className="flex items-center gap-3 group shrink-0 w-auto lg:w-64">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary-100 transition-all duration-300">
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary-100 transition-all duration-300 shrink-0">
               <img src={logo} alt="Logo" className="w-7 h-7 object-contain group-hover:scale-110 transition-transform" />
             </div>
             <div className="leading-tight block">
-              <h1 className="text-[10px] font-black text-primary-700 uppercase tracking-[0.2em]">
+              <h1 className="text-[10px] font-black text-primary-700 uppercase tracking-[0.2em] whitespace-nowrap">
                 {t('nav.branding.top')}
               </h1>
-              <h1 className="text-sm sm:text-base font-black text-gray-800 uppercase tracking-tight group-hover:text-primary-600 transition-colors">
+              <h1 className="text-xs sm:text-sm xl:text-base font-black text-gray-800 uppercase tracking-tight group-hover:text-primary-600 transition-colors whitespace-nowrap">
                 {t('nav.branding.bottom')}
               </h1>
             </div>
           </Link>
 
           {/* 2. Navigation Links (Centered) */}
-          <div className="hidden lg:flex items-center justify-center gap-1 flex-1">
-            <div className="flex items-center p-1.5 bg-gray-50/50 rounded-2xl border border-gray-100 backdrop-blur-sm">
+          <div className="hidden xl:flex items-center justify-center">
+            <div className="flex items-center p-1 bg-gray-50/50 rounded-2xl border border-gray-100 backdrop-blur-sm">
               {mainLinks.map((link) => {
                 if (link.authRequired && !isAuthenticated) return null;
                 
@@ -119,7 +119,7 @@ const Navbar = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
                       active
                         ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5' 
                         : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
@@ -136,7 +136,7 @@ const Navbar = () => {
                 <button
                   onMouseEnter={() => setIsKnowledgeOpen(true)}
                   onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
                     isKnowledgeOpen || isKnowledgeActive
                       ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5'
                       : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
@@ -183,7 +183,7 @@ const Navbar = () => {
               {/* Contact Admin Link (Desktop) */}
               <Link
                 to="/contact"
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
+                className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
                   isActive('/contact') 
                     ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5' 
                     : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
@@ -196,7 +196,7 @@ const Navbar = () => {
           </div>
 
           {/* 3. Right Side (Fixed width for balance, but allow expansion) */}
-          <div className="flex items-center justify-end gap-3 sm:gap-4 w-auto lg:min-w-[16rem]">
+          <div className="flex items-center justify-end gap-3 sm:gap-4 shrink-0">
             
             {/* TH/EN Switch - Move to menu on ultra small screens */}
             <div className="hidden sm:block">
@@ -275,7 +275,7 @@ const Navbar = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+              className="xl:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -285,12 +285,12 @@ const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`xl:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsMenuOpen(false)}
       />
 
       {/* Mobile Menu Panel */}
-      <div className={`lg:hidden fixed top-0 right-0 h-full w-[280px] bg-white z-50 shadow-2xl transition-transform duration-300 transform ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`xl:hidden fixed top-0 right-0 h-full w-[280px] bg-white z-50 shadow-2xl transition-transform duration-300 transform ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Mobile Menu Header */}
           <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">

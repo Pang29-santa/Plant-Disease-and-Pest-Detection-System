@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { ChevronLeft, Save, Plus, Trash2, Upload, X } from 'lucide-react';
+import { ChevronLeft, Save, Plus, Trash2, Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { checkVegetableName } from '../../services/validationApi';
+
+// Debounce utility - must be defined before use
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+};
 
 const AdminVegetableForm = () => {
     const { t } = useTranslation();
@@ -38,11 +48,45 @@ const AdminVegetableForm = () => {
     const [nutAmount, setNutAmount] = useState('');
     const [nutUnit, setNutUnit] = useState('g');
     const [loading, setLoading] = useState(false);
+    const [nameValidation, setNameValidation] = useState({ checking: false, exists: null, message: '' });
+    const [originalName, setOriginalName] = useState('');
 
     useEffect(() => {
         if (isEditMode) fetchVegetableData();
         fetchNutritionOptions();
     }, [id]);
+
+    // Debounced name validation
+    const debouncedCheckName = useCallback(
+        debounce(async (name) => {
+            if (!name || name.trim() === '') {
+                setNameValidation({ checking: false, exists: null, message: '' });
+                return;
+            }
+            // Skip validation if editing and name hasn't changed
+            if (isEditMode && name === originalName) {
+                setNameValidation({ checking: false, exists: false, message: '' });
+                return;
+            }
+            setNameValidation(prev => ({ ...prev, checking: true }));
+            try {
+                const result = await checkVegetableName(name);
+                setNameValidation({
+                    checking: false,
+                    exists: result.exists,
+                    message: result.exists ? t('admin.alerts.duplicateName') : ''
+                });
+            } catch (error) {
+                setNameValidation({ checking: false, exists: null, message: '' });
+            }
+        }, 500),
+        [isEditMode, originalName, t]
+    );
+
+    // Validate name when thai_name changes
+    useEffect(() => {
+        debouncedCheckName(formData.thai_name);
+    }, [formData.thai_name]);
 
     useEffect(() => {
         return () => {
@@ -78,6 +122,7 @@ const AdminVegetableForm = () => {
                     details_en: res.data.details_en || '',
                     vegetable_id: res.data.vegetable_id || res.data.id || ''
                 });
+                setOriginalName(res.data.thai_name || '');
 
                 const images = Array.isArray(res.data.image_paths) ? res.data.image_paths : (res.data.image_path ? [res.data.image_path] : []);
                 if (images.length > 0) {
@@ -166,6 +211,14 @@ const AdminVegetableForm = () => {
     };
 
     const handleSubmit = async () => {
+        // Check for duplicate name before submitting (skip if editing and name unchanged)
+        if (!isEditMode || formData.thai_name !== originalName) {
+            if (nameValidation.exists) {
+                Swal.fire(t('admin.alerts.error'), t('admin.alerts.duplicateName'), 'error');
+                return;
+            }
+        }
+        
         try {
             setLoading(true);
             const data = new FormData();
@@ -219,18 +272,63 @@ const AdminVegetableForm = () => {
 
     return (
         <AdminLayout title={isEditMode ? t('admin.vegetables.edit') : t('admin.vegetables.add')}>
+            <div className="mb-6">
+                <Link to="/admin/vegetables" className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
+                    <ChevronLeft className="w-5 h-5 mr-1" />
+                    {t('admin.diseases.form.back')}
+                </Link>
+            </div>
+
             <div className="w-full mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center gap-4 mb-6 border-b pb-4">
-                    <button onClick={() => navigate('/admin/vegetables')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <ChevronLeft className="w-6 h-6 text-gray-600" />
-                    </button>
-                    <h2 className="text-xl font-bold text-gray-800">{isEditMode ? t('admin.vegetables.edit') : t('admin.vegetables.add')}</h2>
-                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b">
+                    {isEditMode ? t('admin.vegetables.edit') : t('admin.vegetables.add')}
+                </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
+                        {/* Thai Name with validation */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {t('admin.vegetables.form.thaiName')}
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="thai_name"
+                                    value={formData.thai_name}
+                                    onChange={handleChange}
+                                    disabled={isEditMode}
+                                    className={`w-full border rounded px-3 py-2 focus:ring-2 outline-none transition-all pr-10 ${
+                                        nameValidation.exists 
+                                            ? 'border-red-500 focus:ring-red-200' 
+                                            : nameValidation.exists === false && formData.thai_name
+                                                ? 'border-green-500 focus:ring-green-200'
+                                                : 'border-gray-300 focus:ring-green-500'
+                                    } ${isEditMode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                    placeholder={t('admin.vegetables.form.nutrition.placeholder')}
+                                />
+                                {/* Validation Icon */}
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    {nameValidation.checking ? (
+                                        <div className="w-5 h-5 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin" />
+                                    ) : nameValidation.exists ? (
+                                        <AlertCircle className="w-5 h-5 text-red-500" />
+                                    ) : nameValidation.exists === false && formData.thai_name && !isEditMode ? (
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    ) : null}
+                                </div>
+                            </div>
+                            {/* Validation Message */}
+                            {nameValidation.message && (
+                                <p className="text-sm text-red-500 mt-1">{nameValidation.message}</p>
+                            )}
+                            {isEditMode && (
+                                <p className="text-sm text-gray-400 mt-1">ชื่อผักไม่สามารถแก้ไขได้</p>
+                            )}
+                        </div>
+
+                        {/* Other fields */}
                         {[
-                            { label: t('admin.vegetables.form.thaiName'), name: 'thai_name', placeholder: t('admin.vegetables.form.nutrition.placeholder') },
                             { label: t('admin.vegetables.form.engName'), name: 'eng_name', placeholder: 'Example: Tomato' },
                             { label: t('admin.vegetables.form.sciName'), name: 'sci_name' },
                             { label: t('admin.vegetables.form.growth'), name: 'growth', type: 'number' }

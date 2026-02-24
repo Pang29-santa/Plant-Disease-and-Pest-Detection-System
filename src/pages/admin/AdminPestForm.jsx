@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { ChevronLeft, Save, Upload, X } from 'lucide-react';
+import { ChevronLeft, Save, Upload, X, Plus, CheckCircle, AlertCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { checkDiseasePestName } from '../../services/validationApi';
+
+// Debounce utility
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+};
 
 const AdminPestForm = () => {
     const { t } = useTranslation();
@@ -28,12 +38,15 @@ const AdminPestForm = () => {
         prevention_en: '',
         treatment: '',
         treatment_en: '',
-        image_path: ''
     });
 
+    const [existingCover, setExistingCover] = useState(null);
+    const [newCover, setNewCover] = useState(null);
+    const [existingGallery, setExistingGallery] = useState([]);
+    const [newGallery, setNewGallery] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [nameValidation, setNameValidation] = useState({ checking: false, exists: null, message: '' });
+    const [originalName, setOriginalName] = useState('');
 
     const modules = {
         toolbar: [
@@ -45,21 +58,76 @@ const AdminPestForm = () => {
     };
 
     useEffect(() => {
-        if (isEdit) fetchPest();
+        if (isEdit) fetchDisease();
     }, [id]);
 
-    const fetchPest = async () => {
+    // Debounced name validation
+    const debouncedCheckName = useCallback(
+        debounce(async (name) => {
+            if (!name || name.trim() === '') {
+                setNameValidation({ checking: false, exists: null, message: '' });
+                return;
+            }
+            // Skip validation if editing and name hasn't changed
+            if (isEdit && name === originalName) {
+                setNameValidation({ checking: false, exists: false, message: '' });
+                return;
+            }
+            setNameValidation(prev => ({ ...prev, checking: true }));
+            try {
+                const result = await checkDiseasePestName(name, formData.type);
+                setNameValidation({
+                    checking: false,
+                    exists: result.exists,
+                    message: result.exists ? t('admin.alerts.duplicateName') : ''
+                });
+            } catch (error) {
+                setNameValidation({ checking: false, exists: null, message: '' });
+            }
+        }, 500),
+        [isEdit, originalName, formData.type, t]
+    );
+
+    // Validate name when thai_name changes
+    useEffect(() => {
+        debouncedCheckName(formData.thai_name);
+    }, [formData.thai_name]);
+
+    useEffect(() => {
+        return () => {
+            if (newCover?.preview) URL.revokeObjectURL(newCover.preview);
+            newGallery.forEach(item => URL.revokeObjectURL(item.preview));
+        };
+    }, [newCover, newGallery]);
+
+    const fetchDisease = async () => {
         try {
             setLoading(true);
             const res = await axios.get(`/api/diseases-pest/${id}`);
             if (res.data) {
-                setFormData(res.data);
-                if (res.data.image_path) {
-                    setImagePreview(`${import.meta.env.VITE_API_URL}/${res.data.image_path.split('/').map(p => encodeURIComponent(p)).join('/')}`);
+                setFormData({
+                    type: res.data.type || defaultType,
+                    thai_name: res.data.thai_name || '',
+                    eng_name: res.data.eng_name || '',
+                    cause: res.data.cause || '',
+                    cause_en: res.data.cause_en || '',
+                    description: res.data.description || '',
+                    description_en: res.data.description_en || '',
+                    prevention: res.data.prevention || '',
+                    prevention_en: res.data.prevention_en || '',
+                    treatment: res.data.treatment || '',
+                    treatment_en: res.data.treatment_en || '',
+                });
+                setOriginalName(res.data.thai_name || '');
+
+                const images = res.data.image_paths || (res.data.image_path ? [res.data.image_path] : []);
+                if (images.length > 0) {
+                    setExistingCover(images[0]);
+                    setExistingGallery(images.slice(1));
                 }
             }
         } catch (err) {
-            console.error('Failed to fetch pest:', err);
+            console.error('Failed to fetch disease:', err);
             Swal.fire(t('admin.alerts.error'), t('admin.diseases.form.errorFetch'), 'error');
             navigate('/admin/pests');
         } finally {
@@ -76,15 +144,41 @@ const AdminPestForm = () => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleImageChange = (e) => {
+    const handleCoverChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            if (imagePreview && !imagePreview.includes(import.meta.env.VITE_API_URL)) {
-                URL.revokeObjectURL(imagePreview);
-            }
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+        if (!file) return;
+        if (newCover?.preview) URL.revokeObjectURL(newCover.preview);
+        setNewCover({ file, preview: URL.createObjectURL(file) });
+        e.target.value = '';
+    };
+
+    const removeCover = () => {
+        if (newCover) {
+            URL.revokeObjectURL(newCover.preview);
+            setNewCover(null);
         }
+        setExistingCover(null);
+    };
+
+    const handleGalleryChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const totalImages = (newCover || existingCover ? 1 : 0) + existingGallery.length + newGallery.length + files.length;
+        if (totalImages > 5) {
+             Swal.fire(t('admin.alerts.warning'), t('admin.diseases.form.maxImagesWarning'), 'warning');
+             return;
+        }
+
+        const newItems = files.map(file => ({ file, preview: URL.createObjectURL(file) }));
+        setNewGallery(prev => [...prev, ...newItems]);
+        e.target.value = '';
+    };
+
+    const removeExistingGallery = (index) => setExistingGallery(prev => prev.filter((_, i) => i !== index));
+    const removeNewGallery = (index) => {
+        URL.revokeObjectURL(newGallery[index].preview);
+        setNewGallery(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e) => {
@@ -93,39 +187,42 @@ const AdminPestForm = () => {
             return Swal.fire(t('admin.alerts.warning'), t('admin.diseases.form.warnThaiName'), 'warning');
         }
 
+        // Check for duplicate name before submitting (skip if editing and name unchanged)
+        if (!isEdit || formData.thai_name !== originalName) {
+            if (nameValidation.exists) {
+                return Swal.fire(t('admin.alerts.error'), t('admin.alerts.duplicateName'), 'error');
+            }
+        }
+
         try {
             setLoading(true);
-            let imagePath = formData.image_path;
-
-            if (imageFile) {
-                const uploadData = new FormData();
-                uploadData.append('file', imageFile);
-                const uploadRes = await axios.post('/api/diseases-pest/upload', uploadData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                if (uploadRes.data.success) {
-                    imagePath = uploadRes.data.image_path;
-                }
-            }
-
-            const dataToSubmit = { ...formData, image_path: imagePath };
-            delete dataToSubmit._id; 
+            const data = new FormData();
+            Object.keys(formData).forEach(key => data.append(key, formData[key]));
 
             if (isEdit) {
-                await axios.put(`/api/diseases-pest/${id}`, dataToSubmit);
+                if (newCover) data.append('cover_image', newCover.file);
+                if (existingCover) data.append('existing_cover_path', existingCover);
+                newGallery.forEach(item => data.append('gallery_images', item.file));
+                data.append('existing_gallery_paths', JSON.stringify(existingGallery));
+                
+                await axios.put(`/api/diseases-pest/${id}/with-images`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
                 await Swal.fire(t('admin.alerts.success'), t('admin.diseases.form.successSave'), 'success');
             } else {
-                await axios.post('/api/diseases-pest', dataToSubmit);
+                if (newCover) data.append('cover_image', newCover.file);
+                newGallery.forEach(item => data.append('gallery_images', item.file));
+                await axios.post('/api/diseases-pest/with-images', data, { headers: { 'Content-Type': 'multipart/form-data' } });
                 await Swal.fire(t('admin.alerts.success'), t('admin.diseases.form.successAdd'), 'success');
             }
             navigate('/admin/pests');
         } catch (err) {
             console.error('Error saving:', err);
-            Swal.fire(t('admin.alerts.error'), t('admin.diseases.form.errorSave'), 'error');
+            Swal.fire(t('admin.alerts.error'), `${t('admin.diseases.form.errorSave')}: ${err.response?.data?.detail || err.message}`, 'error');
         } finally {
             setLoading(false);
         }
     };
+
+    const getImageUrl = (path) => `${import.meta.env.VITE_API_URL}/${path.split('/').map(p => encodeURIComponent(p)).join('/')}`;
 
     return (
         <AdminLayout title={isEdit ? t('admin.diseases.form.editTitle') : t('admin.diseases.form.addTitle')}>
@@ -147,7 +244,7 @@ const AdminPestForm = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.diseases.form.type')}</label>
                             <input
                                 type="text"
-                                value={`${t('admin.diseases.types.pest')} (Pest)`}
+                                value={formData.type === '1' ? `${t('admin.diseases.types.disease')} (Disease)` : `${t('admin.diseases.types.pest')} (Pest)`}
                                 disabled
                                 className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                             />
@@ -157,21 +254,47 @@ const AdminPestForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.diseases.form.thaiName')} <span className="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                name="thai_name"
-                                value={formData.thai_name || ''}
-                                onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition-shadow"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="thai_name"
+                                    value={formData.thai_name}
+                                    onChange={handleChange}
+                                    disabled={isEdit}
+                                    className={`w-full p-2 border rounded-lg focus:ring-2 transition-shadow pr-10 ${
+                                        nameValidation.exists 
+                                            ? 'border-red-500 focus:ring-red-200' 
+                                            : nameValidation.exists === false && formData.thai_name
+                                                ? 'border-green-500 focus:ring-green-200'
+                                                : 'border-gray-300 focus:ring-green-500'
+                                    } ${isEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                    required
+                                />
+                                {/* Validation Icon */}
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    {nameValidation.checking ? (
+                                        <div className="w-5 h-5 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin" />
+                                    ) : nameValidation.exists ? (
+                                        <AlertCircle className="w-5 h-5 text-red-500" />
+                                    ) : nameValidation.exists === false && formData.thai_name && !isEdit ? (
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    ) : null}
+                                </div>
+                            </div>
+                            {/* Validation Message */}
+                            {nameValidation.message && (
+                                <p className="text-sm text-red-500 mt-1">{nameValidation.message}</p>
+                            )}
+                            {isEdit && (
+                                <p className="text-sm text-gray-400 mt-1">ชื่อไม่สามารถแก้ไขได้</p>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.diseases.form.engName')}</label>
                             <input
                                 type="text"
                                 name="eng_name"
-                                value={formData.eng_name || ''}
+                                value={formData.eng_name}
                                 onChange={handleChange}
                                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition-shadow"
                             />
@@ -179,29 +302,44 @@ const AdminPestForm = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.diseases.form.coverImage')}</label>
-                        <div className="flex items-start space-x-4">
-                            <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 relative group">
-                                {imagePreview ? (
-                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                    <Upload className="w-8 h-8 text-gray-400" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="block w-full text-sm text-gray-500
-                                    file:mr-4 file:py-2 file:px-4
-                                    file:rounded-full file:border-0
-                                    file:text-sm file:font-semibold
-                                    file:bg-green-50 file:text-green-700
-                                    hover:file:bg-green-100 transition-all"
-                                />
-                                <p className="mt-2 text-xs text-gray-500">JPG, PNG, WEBP (Max 5MB)</p>
-                            </div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t('admin.diseases.form.coverImage')} <span className="text-red-500">*</span>
+                        </label>
+                        
+                        <div className={`relative w-full h-64 rounded-lg flex flex-col items-center justify-center overflow-hidden group border-2 border-dashed transition-all ${
+                            (newCover || existingCover) ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-300 hover:bg-gray-100'
+                        }`}>
+                            {(newCover || existingCover) ? (
+                                <>
+                                    <img 
+                                        src={newCover ? newCover.preview : getImageUrl(existingCover)} 
+                                        alt="Cover" 
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => e.target.src = 'https://placehold.co/400?text=No+Image'}
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={removeCover}
+                                            className="bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-all transform hover:scale-110"
+                                        >
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                                    <Upload className="w-10 h-10 text-gray-400 mb-3" />
+                                    <span className="text-sm text-gray-600 font-medium">{t('admin.diseases.form.uploadCover')}</span>
+                                    <span className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP</span>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleCoverChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            )}
                         </div>
                     </div>
 
@@ -229,6 +367,46 @@ const AdminPestForm = () => {
                                 </div>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="pt-8 border-t">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                             <Upload className="w-5 h-5 text-green-600" /> {t('admin.diseases.form.galleryImages')}
+                        </h3>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            {existingGallery.map((path, index) => (
+                                <div key={`exist-${index}`} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                                    <img src={getImageUrl(path)} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeExistingGallery(index)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            ))}
+                            {newGallery.map((item, index) => (
+                                <div key={`new-${index}`} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                                    <img src={item.preview} alt={`New Gallery ${index}`} className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeNewGallery(index)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            ))}
+                            {((existingCover || newCover ? 1 : 0) + existingGallery.length + newGallery.length < 5) && (
+                                <label className="flex flex-col items-center justify-center aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                    <Plus className="w-6 h-6 text-gray-400 mb-1" />
+                                    <span className="text-xs text-gray-500">{t('admin.diseases.form.addImage')}</span>
+                                    <input type="file" accept="image/*" multiple onChange={handleGalleryChange} className="hidden" />
+                                </label>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex justify-end gap-4 pt-6 border-t">

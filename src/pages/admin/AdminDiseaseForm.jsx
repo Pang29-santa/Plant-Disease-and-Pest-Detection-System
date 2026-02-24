@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { ChevronLeft, Save, Upload, X, Plus } from 'lucide-react';
+import { ChevronLeft, Save, Upload, X, Plus, CheckCircle, AlertCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { checkDiseasePestName } from '../../services/validationApi';
+
+// Debounce utility
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+};
 
 const AdminDiseaseForm = () => {
     const { t } = useTranslation();
@@ -35,6 +45,8 @@ const AdminDiseaseForm = () => {
     const [existingGallery, setExistingGallery] = useState([]);
     const [newGallery, setNewGallery] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [nameValidation, setNameValidation] = useState({ checking: false, exists: null, message: '' });
+    const [originalName, setOriginalName] = useState('');
 
     const modules = {
         toolbar: [
@@ -48,6 +60,38 @@ const AdminDiseaseForm = () => {
     useEffect(() => {
         if (isEdit) fetchDisease();
     }, [id]);
+
+    // Debounced name validation
+    const debouncedCheckName = useCallback(
+        debounce(async (name) => {
+            if (!name || name.trim() === '') {
+                setNameValidation({ checking: false, exists: null, message: '' });
+                return;
+            }
+            // Skip validation if editing and name hasn't changed
+            if (isEdit && name === originalName) {
+                setNameValidation({ checking: false, exists: false, message: '' });
+                return;
+            }
+            setNameValidation(prev => ({ ...prev, checking: true }));
+            try {
+                const result = await checkDiseasePestName(name, formData.type);
+                setNameValidation({
+                    checking: false,
+                    exists: result.exists,
+                    message: result.exists ? t('admin.alerts.duplicateName') : ''
+                });
+            } catch (error) {
+                setNameValidation({ checking: false, exists: null, message: '' });
+            }
+        }, 500),
+        [isEdit, originalName, formData.type, t]
+    );
+
+    // Validate name when thai_name changes
+    useEffect(() => {
+        debouncedCheckName(formData.thai_name);
+    }, [formData.thai_name]);
 
     useEffect(() => {
         return () => {
@@ -74,6 +118,7 @@ const AdminDiseaseForm = () => {
                     treatment: res.data.treatment || '',
                     treatment_en: res.data.treatment_en || '',
                 });
+                setOriginalName(res.data.thai_name || '');
 
                 const images = res.data.image_paths || (res.data.image_path ? [res.data.image_path] : []);
                 if (images.length > 0) {
@@ -142,6 +187,13 @@ const AdminDiseaseForm = () => {
             return Swal.fire(t('admin.alerts.warning'), t('admin.diseases.form.warnThaiName'), 'warning');
         }
 
+        // Check for duplicate name before submitting (skip if editing and name unchanged)
+        if (!isEdit || formData.thai_name !== originalName) {
+            if (nameValidation.exists) {
+                return Swal.fire(t('admin.alerts.error'), t('admin.alerts.duplicateName'), 'error');
+            }
+        }
+
         try {
             setLoading(true);
             const data = new FormData();
@@ -202,14 +254,40 @@ const AdminDiseaseForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.diseases.form.thaiName')} <span className="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                name="thai_name"
-                                value={formData.thai_name}
-                                onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition-shadow"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="thai_name"
+                                    value={formData.thai_name}
+                                    onChange={handleChange}
+                                    disabled={isEdit}
+                                    className={`w-full p-2 border rounded-lg focus:ring-2 transition-shadow pr-10 ${
+                                        nameValidation.exists 
+                                            ? 'border-red-500 focus:ring-red-200' 
+                                            : nameValidation.exists === false && formData.thai_name
+                                                ? 'border-green-500 focus:ring-green-200'
+                                                : 'border-gray-300 focus:ring-green-500'
+                                    } ${isEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                    required
+                                />
+                                {/* Validation Icon */}
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    {nameValidation.checking ? (
+                                        <div className="w-5 h-5 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin" />
+                                    ) : nameValidation.exists ? (
+                                        <AlertCircle className="w-5 h-5 text-red-500" />
+                                    ) : nameValidation.exists === false && formData.thai_name && !isEdit ? (
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    ) : null}
+                                </div>
+                            </div>
+                            {/* Validation Message */}
+                            {nameValidation.message && (
+                                <p className="text-sm text-red-500 mt-1">{nameValidation.message}</p>
+                            )}
+                            {isEdit && (
+                                <p className="text-sm text-gray-400 mt-1">ชื่อไม่สามารถแก้ไขได้</p>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.diseases.form.engName')}</label>
