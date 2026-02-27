@@ -26,8 +26,12 @@ const LanguageSwitcher = () => {
       className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-all duration-300 group active:scale-95"
       title={t('common.switch')}
     >
-      <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-primary-600 shadow-sm group-hover:rotate-12 transition-transform">
-        <Globe className="w-3.5 h-3.5" />
+      <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+        <img 
+          src={i18n.language === 'th' ? "https://flagcdn.com/w40/th.png" : "https://flagcdn.com/w40/gb.png"} 
+          alt={i18n.language === 'th' ? "TH" : "EN"}
+          className="w-full h-full object-cover"
+        />
       </div>
       <span className="text-xs font-black text-gray-600 uppercase tracking-tighter group-hover:text-primary-600 transition-colors">
         {i18n.language === 'th' ? 'TH' : 'EN'}

@@ -10,7 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
-const Detect = lazy(() => import('./pages/user/Detect'));
+const DetectPublic = lazy(() => import('./pages/DetectPublic'));
+const DetectWithPlot = lazy(() => import('./pages/user/DetectWithPlot'));
 const Vegetables = lazy(() => import('./pages/user/Vegetables'));
 const Diseases = lazy(() => import('./pages/user/Diseases'));
 const Pests = lazy(() => import('./pages/user/Pests'));
@@ -59,7 +60,12 @@ function App() {
               <Route path="/register" element={<Register />} />
               
               {/* Feature Routes */}
-              <Route path="/detect" element={<Detect />} />
+              <Route path="/detect" element={<DetectPublic />} />
+              <Route path="/detect/plots" element={
+                <ProtectedRoute>
+                  <DetectWithPlot />
+                </ProtectedRoute>
+              } />
               <Route path="/vegetables" element={<Vegetables />} />
               <Route path="/diseases" element={<Diseases />} />
               <Route path="/pests" element={<Pests />} />

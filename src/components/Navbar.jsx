@@ -27,7 +27,8 @@ import {
 import logo from '../static/img/logo.png';
 
 const Navbar = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isThai = i18n.language === 'th';
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,6 +75,7 @@ const Navbar = () => {
   const mainLinks = [
     { to: '/cctv', label: t('nav.cctv'), icon: BookOpen, authRequired: true },
     { to: '/detect', label: t('nav.detect'), icon: Camera },
+    { to: '/detect/plots', label: isThai ? 'วิเคราะห์ตามแปลง' : 'Plot Analysis', icon: Sprout, authRequired: true },
     { to: '/plots', label: t('nav.plots'), icon: Map, authRequired: true },
     { to: '/history', label: t('nav.history'), icon: History, authRequired: true },
   ];
@@ -110,88 +112,120 @@ const Navbar = () => {
           {/* 2. Navigation Links (Centered) */}
           <div className="hidden xl:flex items-center justify-center">
             <div className="flex items-center p-1 bg-gray-50/50 rounded-2xl border border-gray-100 backdrop-blur-sm">
-              {mainLinks.map((link) => {
-                if (link.authRequired && !isAuthenticated) return null;
-                
-                const Icon = link.icon;
-                const active = isActive(link.to);
-                return (
+              {!isAuthenticated ? (
+                /* Public User Navigation - Simplified */
+                <>
+                  {[
+                    { to: '/detect', label: t('nav.detect'), icon: Camera },
+                    { to: '/vegetables', label: t('nav.vegetables'), icon: Sprout },
+                    { to: '/diseases', label: t('nav.diseases'), icon: Activity },
+                    { to: '/pests', label: t('nav.pests'), icon: Bug },
+                  ].map((link) => {
+                    const Icon = link.icon;
+                    const active = isActive(link.to);
+                    return (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className={`flex items-center gap-2 px-3 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
+                          active
+                            ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5' 
+                            : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 transition-colors ${active ? 'text-primary-600' : 'opacity-40'}`} />
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </>
+              ) : (
+                /* Authenticated User Navigation - Full Menu */
+                <>
+                  {mainLinks.map((link) => {
+                    if (link.authRequired && !isAuthenticated) return null;
+                    
+                    const Icon = link.icon;
+                    const active = isActive(link.to);
+                    return (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
+                          active
+                            ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5' 
+                            : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 transition-colors ${active ? 'text-primary-600' : 'opacity-40'}`} />
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+
+                  {/* Knowledge Dropdown (Desktop) */}
+                  <div className="relative" ref={knowledgeRef}>
+                    <button
+                      onMouseEnter={() => setIsKnowledgeOpen(true)}
+                      onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
+                      className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
+                        isKnowledgeOpen || isKnowledgeActive
+                          ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5'
+                          : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
+                      }`}
+                    >
+                      <Library className={`w-4 h-4 transition-colors ${isKnowledgeOpen || isKnowledgeActive ? 'text-primary-600' : 'opacity-40'}`} />
+                      {t('nav.knowledge')}
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isKnowledgeOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isKnowledgeOpen && (
+                      <div 
+                        className="absolute top-full left-0 mt-3 w-56 bg-white border border-gray-100 rounded-[1.5rem] shadow-2xl py-2.5 animate-in fade-in slide-in-from-top-2 duration-300 z-50"
+                        onMouseLeave={() => setIsKnowledgeOpen(false)}
+                      >
+                        <div className="px-4 py-2 mb-1 border-b border-gray-50">
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('nav.knowledge')}</p>
+                        </div>
+                        {knowledgeLinks.map((link) => {
+                          const Icon = link.icon;
+                          const active = isActive(link.to);
+                          return (
+                            <Link
+                              key={link.to}
+                              to={link.to}
+                              onClick={() => setIsKnowledgeOpen(false)}
+                              className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold transition-all ${
+                                active
+                                  ? 'text-primary-700 bg-primary-50 mx-2 rounded-xl'
+                                  : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600 mx-2 rounded-xl'
+                              }`}
+                            >
+                              <div className={`p-1.5 rounded-lg ${active ? 'bg-white text-primary-600 shadow-sm' : 'bg-gray-50 text-gray-400'}`}>
+                                 <Icon className="w-4 h-4" />
+                              </div>
+                              {link.label}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Contact Admin Link (Desktop) */}
                   <Link
-                    key={link.to}
-                    to={link.to}
+                    to="/contact"
                     className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
-                      active
+                      isActive('/contact') 
                         ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5' 
                         : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 transition-colors ${active ? 'text-primary-600' : 'opacity-40'}`} />
-                    {link.label}
+                    <MessageCircle className={`w-4 h-4 transition-colors ${isActive('/contact') ? 'text-primary-600' : 'opacity-40'}`} />
+                    {t('nav.contact')}
                   </Link>
-                );
-              })}
-
-              {/* Knowledge Dropdown (Desktop) */}
-              <div className="relative" ref={knowledgeRef}>
-                <button
-                  onMouseEnter={() => setIsKnowledgeOpen(true)}
-                  onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
-                  className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
-                    isKnowledgeOpen || isKnowledgeActive
-                      ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5'
-                      : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
-                  }`}
-                >
-                  <Library className={`w-4 h-4 transition-colors ${isKnowledgeOpen || isKnowledgeActive ? 'text-primary-600' : 'opacity-40'}`} />
-                  {t('nav.knowledge')}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isKnowledgeOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isKnowledgeOpen && (
-                  <div 
-                    className="absolute top-full left-0 mt-3 w-56 bg-white border border-gray-100 rounded-[1.5rem] shadow-2xl py-2.5 animate-in fade-in slide-in-from-top-2 duration-300 z-50"
-                    onMouseLeave={() => setIsKnowledgeOpen(false)}
-                  >
-                    <div className="px-4 py-2 mb-1 border-b border-gray-50">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('nav.knowledge')}</p>
-                    </div>
-                    {knowledgeLinks.map((link) => {
-                      const Icon = link.icon;
-                      const active = isActive(link.to);
-                      return (
-                        <Link
-                          key={link.to}
-                          to={link.to}
-                          onClick={() => setIsKnowledgeOpen(false)}
-                          className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold transition-all ${
-                            active
-                              ? 'text-primary-700 bg-primary-50 mx-2 rounded-xl'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600 mx-2 rounded-xl'
-                          }`}
-                        >
-                          <div className={`p-1.5 rounded-lg ${active ? 'bg-white text-primary-600 shadow-sm' : 'bg-gray-50 text-gray-400'}`}>
-                             <Icon className="w-4 h-4" />
-                          </div>
-                          {link.label}
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Contact Admin Link (Desktop) */}
-              <Link
-                to="/contact"
-                className={`flex items-center gap-2 px-2 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
-                  isActive('/contact') 
-                    ? 'text-primary-700 bg-white shadow-sm ring-1 ring-black/5' 
-                    : 'text-gray-500 hover:text-primary-600 hover:bg-white/50'
-                }`}
-              >
-                <MessageCircle className={`w-4 h-4 transition-colors ${isActive('/contact') ? 'text-primary-600' : 'opacity-40'}`} />
-                {t('nav.contact')}
-              </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -330,76 +364,113 @@ const Navbar = () => {
             )}
 
             <div className="p-4 space-y-6">
-              {/* Main Links */}
-              <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.menu.main')}</p>
-                <div className="space-y-1">
-                  {mainLinks.map((link) => {
-                    if (link.authRequired && !isAuthenticated) return null;
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                          isActive(link.to) 
-                            ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className={`p-1.5 rounded-lg ${isActive(link.to) ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        {link.label}
-                      </Link>
-                    );
-                  })}
+              {!isAuthenticated ? (
+                /* Public Mobile Menu */
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.menu.main')}</p>
+                  <div className="space-y-1">
+                    {[
+                      { to: '/detect', label: t('nav.detect'), icon: Camera },
+                      { to: '/vegetables', label: t('nav.vegetables'), icon: Sprout },
+                      { to: '/diseases', label: t('nav.diseases'), icon: Activity },
+                      { to: '/pests', label: t('nav.pests'), icon: Bug },
+                    ].map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <Link
+                          key={link.to}
+                          to={link.to}
+                          onClick={() => setIsMenuOpen(false)}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                            isActive(link.to) 
+                              ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
+                              : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className={`p-1.5 rounded-lg ${isActive(link.to) ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          {link.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Authenticated Mobile Menu */
+                <>
+                  {/* Main Links */}
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.menu.main')}</p>
+                    <div className="space-y-1">
+                      {mainLinks.map((link) => {
+                        if (link.authRequired && !isAuthenticated) return null;
+                        const Icon = link.icon;
+                        return (
+                          <Link
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                              isActive(link.to) 
+                                ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            <div className={`p-1.5 rounded-lg ${isActive(link.to) ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-              {/* Knowledge Links (Accordion style in Mobile) */}
-              <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.knowledge')}</p>
-                <div className="space-y-1">
-                  {knowledgeLinks.map((link) => {
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                          isActive(link.to) 
-                            ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className={`p-1.5 rounded-lg ${isActive(link.to) ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        {link.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
+                  {/* Knowledge Links */}
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-3">{t('nav.knowledge')}</p>
+                    <div className="space-y-1">
+                      {knowledgeLinks.map((link) => {
+                        const Icon = link.icon;
+                        return (
+                          <Link
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                              isActive(link.to) 
+                                ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            <div className={`p-1.5 rounded-lg ${isActive(link.to) ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-              {/* Contact Admin (Mobile) */}
-              <Link
-                to="/contact"
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                  isActive('/contact') 
-                    ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <div className={`p-1.5 rounded-lg ${isActive('/contact') ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
-                  <MessageCircle className="w-4 h-4" />
-                </div>
-                {t('nav.contact')}
-              </Link>
+                  {/* Contact Admin (Mobile) */}
+                  <Link
+                    to="/contact"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                      isActive('/contact') 
+                        ? 'bg-primary-50 text-primary-700 shadow-sm shadow-primary-100/50' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`p-1.5 rounded-lg ${isActive('/contact') ? 'bg-white text-primary-600' : 'bg-gray-100 text-gray-400'}`}>
+                      <MessageCircle className="w-4 h-4" />
+                    </div>
+                    {t('nav.contact')}
+                  </Link>
+                </>
+              )}
 
               {/* Settings & Account */}
               <div>
