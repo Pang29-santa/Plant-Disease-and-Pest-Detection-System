@@ -10,6 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
 const DetectPublic = lazy(() => import('./pages/DetectPublic'));
 const DetectWithPlot = lazy(() => import('./pages/user/DetectWithPlot'));
 const Vegetables = lazy(() => import('./pages/user/Vegetables'));
@@ -43,7 +45,7 @@ const AdminUserDetail = lazy(() => import('./pages/admin/AdminUserDetail'));
 
 function App() {
   const location = useLocation();
-  const hideNavFooter = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/admin');
+  const hideNavFooter = ['/login', '/register', '/forgot-password', '/reset-password'].includes(location.pathname) || location.pathname.startsWith('/admin');
 
   return (
     <AuthProvider>
@@ -58,6 +60,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               
               {/* Feature Routes */}
               <Route path="/detect" element={<DetectPublic />} />
