@@ -173,7 +173,8 @@ const DetectWithPlot = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+    <>
+      <div className="min-h-screen bg-[#F8FAFC] pb-24">
       {/* Page Header */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="flex items-center justify-between mb-8">
@@ -524,10 +525,6 @@ const DetectWithPlot = () => {
 
                     {/* Content */}
                     <div className="space-y-4 max-w-lg mx-auto w-full">
-
-                    {/* Right Side */}
-                    <div className="flex-1 p-8 md:p-16 flex flex-col overflow-y-auto custom-scrollbar">
-                      <div className="max-w-2xl mx-auto w-full space-y-12">
                         
                         {/* แสดงวินิจฉัยและแนวทางแก้ไขเฉพาะเมื่อตรวจพบโรค/ศัตรูพืช */}
                         {result.category !== 'healthy' && (
@@ -543,9 +540,10 @@ const DetectWithPlot = () => {
                                   <p className="text-xs font-bold text-secondary-400 uppercase tracking-widest">{isThai ? 'สาเหตุและการปรากฏ' : 'Root Cause & Symptoms'}</p>
                                 </div>
                               </div>
-                              <div className="text-lg leading-relaxed text-slate-600 font-medium pl-6 border-l-4 border-primary-100">
-                                 {result.cause || result.symptoms || (isThai ? 'ไม่พบข้อมูลอาการที่ระบุชัดเจน' : 'No specific clinical symptoms reported.')}
-                              </div>
+                              <div 
+                                className="text-lg leading-relaxed text-slate-600 font-medium pl-6 border-l-4 border-primary-100 html-content"
+                                dangerouslySetInnerHTML={{ __html: result.cause || result.symptoms || (isThai ? 'ไม่พบข้อมูลอาการที่ระบุชัดเจน' : 'No specific clinical symptoms reported.') }}
+                              />
                             </section>
 
                             {/* Section: Prescriptive Actions */}
@@ -567,7 +565,7 @@ const DetectWithPlot = () => {
                                   <div className="w-8 h-8 rounded-xl bg-white text-primary-600 flex items-center justify-center text-xs font-black shadow-sm shrink-0 border border-secondary-100 group-hover/item:scale-110 transition-transform">
                                     {i + 1}
                                   </div>
-                                  <p className="text-slate-700 font-bold leading-relaxed">{step}</p>
+                                  <div className="text-slate-700 font-bold leading-relaxed html-content" dangerouslySetInnerHTML={{ __html: step }} />
                                 </div>
                               ))
                             ) : (
@@ -597,6 +595,7 @@ const DetectWithPlot = () => {
                             </p>
                           </div>
                         )}
+                    </div> {/* Closes "Content" div */}
 
                   {/* Buttons */}
                   <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100 max-w-lg mx-auto">
@@ -632,14 +631,12 @@ const DetectWithPlot = () => {
                 </div>
               )}
               </div>
-              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-      `}</style>
-    </div>
+      </div>
+    </>
   );
 };
 
