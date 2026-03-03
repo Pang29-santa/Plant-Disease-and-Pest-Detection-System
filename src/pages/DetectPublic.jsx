@@ -94,7 +94,7 @@ const DetectPublic = () => {
   const isThai = i18n.language === 'th';
 
   return (
-    <div className="min-h-screen bg-secondary-50 pb-24">
+    <div className="bg-secondary-50 pb-24 flex-grow">
       {/* Premium Hero Header */}
       <div className="relative bg-primary-900 pt-16 pb-32 px-4 overflow-hidden mb-12">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-800/40 via-primary-900 to-primary-950" />
@@ -139,9 +139,10 @@ const DetectPublic = () => {
                   <input type="file" id="public-file-input" className="hidden" accept="image/*" onChange={handleImageSelect} />
                   <label 
                     htmlFor="public-file-input"
-                    className="cursor-pointer px-12 py-5 bg-primary-600 text-white font-black rounded-2xl hover:bg-primary-500 transition-all flex items-center justify-center gap-3 shadow-2xl shadow-primary-200 active:scale-95 uppercase tracking-widest text-sm"
+                    className="cursor-pointer px-12 py-5 bg-gradient-to-r from-primary-600 to-emerald-500 hover:from-primary-500 hover:to-emerald-400 text-white font-bold rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-[0_12px_25px_-5px_rgba(35,158,78,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(35,158,78,0.4)] hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-sm relative overflow-hidden group/btn"
                   >
-                    <Camera className="w-6 h-6" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <Camera className="w-6 h-6 group-hover/btn:rotate-12 transition-transform" />
                     {isThai ? 'เริ่มวิเคราะห์ทันที' : 'START ANALYSIS NOW'}
                   </label>
                 </div>
@@ -183,9 +184,10 @@ const DetectPublic = () => {
 
                     <button 
                       onClick={startAnalysis} 
-                      className="w-full py-5 bg-primary-600 hover:bg-primary-500 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-primary-200 transition-all active:scale-95 flex items-center justify-center gap-3"
+                      className="w-full py-5 bg-gradient-to-r from-primary-600 to-emerald-500 hover:from-primary-500 hover:to-emerald-400 text-white font-bold rounded-2xl text-base uppercase tracking-widest shadow-[0_12px_25px_-5px_rgba(35,158,78,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(35,158,78,0.4)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden group/btn"
                     >
-                      <Scan className="w-6 h-6" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      <Scan className="w-6 h-6 group-hover/btn:animate-pulse" />
                       {isThai ? 'ส่งให้ AI วิเคราะห์' : 'SEND TO AI ANALYSIS'}
                     </button>
                   </div>

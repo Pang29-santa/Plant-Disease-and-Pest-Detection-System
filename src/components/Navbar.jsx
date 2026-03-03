@@ -75,7 +75,6 @@ const Navbar = () => {
   const mainLinks = [
     { to: '/cctv', label: t('nav.cctv'), icon: BookOpen, authRequired: true },
     { to: '/detect', label: t('nav.detect'), icon: Camera },
-    { to: '/detect/plots', label: isThai ? 'วิเคราะห์ตามแปลง' : 'Plot Analysis', icon: Sprout, authRequired: true },
     { to: '/plots', label: t('nav.plots'), icon: Map, authRequired: true },
     { to: '/history', label: t('nav.history'), icon: History, authRequired: true },
   ];
