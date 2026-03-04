@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { getImageUrl } from '../../utils/urlHelper';
 import { ArrowLeft, User, Mail, Phone, MapPin, Shield, Calendar, Edit, ShieldAlert } from 'lucide-react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -80,7 +81,7 @@ const AdminUserDetail = () => {
                     <div className="w-40 h-40 rounded-full border-4 border-green-50 overflow-hidden shadow-inner mb-6 bg-gray-50 flex items-center justify-center">
                         {user.image_path ? (
                             <img 
-                                src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} 
+                                src={getImageUrl(user.image_path)} 
                                 alt={user.fullname} 
                                 className="w-full h-full object-cover"
                                 onError={(e) => {e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullname)}}

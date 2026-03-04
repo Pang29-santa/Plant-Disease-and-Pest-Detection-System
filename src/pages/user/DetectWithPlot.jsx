@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { useAuth } from '../../context/AuthContext';
 import { useDetection } from '../../context/DetectionContext';
 import { getTelegramConnection } from '../../services/telegramApi';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const DetectWithPlot = () => {
   const { t, i18n } = useTranslation();
@@ -205,7 +206,7 @@ const DetectWithPlot = () => {
               <div key={plot.id || plot._id} className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 hover:shadow-2xl transition-all duration-300 overflow-hidden border border-transparent hover:border-primary-100 flex flex-col group cursor-pointer active:scale-95">
                 <div className="h-52 overflow-hidden relative">
                   <img 
-                    src={plot.image_url || 'https://via.placeholder.com/300x150?text=No+Image'} 
+                    src={getImageUrl(plot.image_url) || 'https://via.placeholder.com/300x150?text=No+Image'} 
                     alt={plot.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                   />

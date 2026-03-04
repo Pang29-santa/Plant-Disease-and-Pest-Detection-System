@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils/urlHelper';
 import LanguageSwitcher from './LanguageSwitcher';
 import Swal from 'sweetalert2';
 import { 
@@ -246,7 +247,7 @@ const Navbar = () => {
                 >
                   <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 shadow-sm">
                     {user?.image_path ? (
-                      <img src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} alt="User" className="w-full h-full object-cover" />
+                      <img src={getImageUrl(user.image_path)} alt="User" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-primary-100">
                         <User className="w-4 h-4 text-primary-600" />
@@ -349,7 +350,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-white shadow-md flex items-center justify-center overflow-hidden border border-white">
                     {user?.image_path ? (
-                      <img src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} alt="User" className="w-full h-full object-cover" />
+                      <img src={getImageUrl(user.image_path)} alt="User" className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-6 h-6 text-primary-500" />
                     )}

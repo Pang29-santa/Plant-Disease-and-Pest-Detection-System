@@ -5,6 +5,7 @@ import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Pencil, Trash2, Plus, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const AdminVegetables = () => {
     const { t } = useTranslation();
@@ -119,7 +120,7 @@ const AdminVegetables = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <img 
                                                 alt={veg.thai_name}
-                                                src={(veg.image_paths && veg.image_paths.length > 0) ? `${import.meta.env.VITE_API_URL}/${veg.image_paths[0]}` : (veg.image_path ? `${import.meta.env.VITE_API_URL}/${veg.image_path}` : 'https://placehold.co/100')} 
+                                                src={(veg.image_paths && veg.image_paths.length > 0) ? getImageUrl(veg.image_paths[0]) : (veg.image_path ? getImageUrl(veg.image_path) : 'https://placehold.co/100')} 
                                                 className="w-24 h-24 rounded-lg object-cover"
                                                 onError={(e) => {e.target.src = 'https://placehold.co/100'}} 
                                             />

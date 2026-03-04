@@ -6,7 +6,7 @@ import { Mail, ArrowLeft, Leaf, Send, CheckCircle, RefreshCw, Inbox } from 'luci
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 
 const ForgotPassword = () => {
   const { t } = useTranslation();
@@ -30,7 +30,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/api/auth/forgot-password`, {
+      const response = await axios.post(`/api/auth/forgot-password`, {
         email: email
       });
 
@@ -58,7 +58,7 @@ const ForgotPassword = () => {
     
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/api/auth/forgot-password`, {
+      const response = await axios.post(`/api/auth/forgot-password`, {
         email: email
       });
 

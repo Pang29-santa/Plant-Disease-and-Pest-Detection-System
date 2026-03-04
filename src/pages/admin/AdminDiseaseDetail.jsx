@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { ChevronLeft, Pencil } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const AdminDiseaseDetail = () => {
     const { t } = useTranslation();
@@ -27,7 +28,6 @@ const AdminDiseaseDetail = () => {
         }
     };
 
-    const getImageUrl = (path) => `${import.meta.env.VITE_API_URL}/${path.split('/').map(p => encodeURIComponent(p)).join('/')}`;
 
     if (loading) return <AdminLayout title={t('common.loading')}><div className="flex justify-center p-12 text-gray-400">{t('common.loading')}</div></AdminLayout>;
     if (!disease) return <AdminLayout title={t('admin.alerts.error')}><div className="flex justify-center p-12 text-gray-400">{t('admin.common.noResults')}</div></AdminLayout>;

@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { getImageUrl } from '../../utils/urlHelper';
 import { ChevronLeft, Save, Plus, Trash2, Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ReactQuill from 'react-quill-new';
@@ -268,7 +269,6 @@ const AdminVegetableForm = () => {
         ],
     };
 
-    const getImageUrl = (path) => `${import.meta.env.VITE_API_URL}/${path.split('/').map(p => encodeURIComponent(p)).join('/')}`;
 
     return (
         <AdminLayout title={isEditMode ? t('admin.vegetables.edit') : t('admin.vegetables.add')}>

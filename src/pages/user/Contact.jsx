@@ -18,7 +18,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useAuth } from '../../context/AuthContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8888';
+
 
 const ContactPage = () => {
   const { t } = useTranslation();
@@ -86,7 +86,7 @@ const ContactPage = () => {
         phone: user.phone || '' // ถ้ามีเบอร์โทรใน profile
       };
       
-      const response = await axios.post(`${API_URL}/api/contact/send`, payload);
+      const response = await axios.post(`/api/contact/send`, payload);
 
       Swal.fire({
         icon: 'success',

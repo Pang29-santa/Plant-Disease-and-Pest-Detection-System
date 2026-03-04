@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { ArrowLeft, Upload, Save, RotateCcw, User as UserIcon } from 'lucide-react';
 import axios from 'axios';
+import { getImageUrl } from '../../utils/urlHelper';
 import Swal from 'sweetalert2';
 
 const AdminUserForm = () => {
@@ -80,7 +81,7 @@ const AdminUserForm = () => {
                 password: '' // Don't show password
             });
             if (user.image_path) {
-                setPreviewImage(`${import.meta.env.VITE_API_URL}/${user.image_path}`);
+                setPreviewImage(getImageUrl(user.image_path));
             }
             
             if (user.subdistricts_id) {

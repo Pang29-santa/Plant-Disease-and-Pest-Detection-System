@@ -5,6 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { Search, Plus, Eye, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const AdminUsers = () => {
     const { t } = useTranslation();
@@ -161,7 +162,7 @@ const AdminUsers = () => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={user.image_path ? `${import.meta.env.VITE_API_URL}/${user.image_path}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}`}
+                                                        src={user.image_path ? getImageUrl(user.image_path) : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}`}
                                                         alt={user.fullname}
                                                         className="w-10 h-10 rounded-full object-cover"
                                                         onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}`}}

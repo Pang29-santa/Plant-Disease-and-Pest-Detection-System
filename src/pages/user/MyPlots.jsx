@@ -9,8 +9,7 @@ import {
   Leaf, LayoutGrid, AlertCircle, Loader2, Image as ImageIcon, Upload, Download
 } from 'lucide-react';
 
-/* ─────────────────────────── helpers ─────────────────────────── */
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8888';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const fmt = (dateStr) => {
   if (!dateStr) return '-';
@@ -56,7 +55,7 @@ const PlotCard = ({ plot, onPlant, onHarvest, onHistory, onEdit, onDelete }) => 
       {/* Cover image */}
       <div className="myplots-card-img-wrap">
         {plot.image_url
-          ? <img src={plot.image_url} alt={plot.name} className="myplots-card-img" />
+          ? <img src={getImageUrl(plot.image_url)} alt={plot.name} className="myplots-card-img" />
           : (
             <div className="myplots-card-img-placeholder">
               <LayoutGrid size={36} color="#aaa" />
@@ -152,7 +151,7 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
     setUploading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${API}/api/upload-image`, formData, {
+      const res = await axios.post(`/api/upload-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           ...(token && { 'Authorization': `Bearer ${token}` })
@@ -186,9 +185,9 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
       };
 
       if (isEdit) {
-        await axios.put(`${API}/api/plots/${plot.id || plot._id}`, payload);
+        await axios.put(`/api/plots/${plot.id || plot._id}`, payload);
       } else {
-        await axios.post(`${API}/api/plots`, payload);
+        await axios.post(`/api/plots`, payload);
       }
       onSaved();
       onClose();
@@ -231,7 +230,7 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
             {form.image_url ? (
               <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
                 <img 
-                  src={form.image_url.startsWith('http') ? form.image_url : `${API}${form.image_url}`} 
+                  src={getImageUrl(form.image_url)} 
                   alt="Plot" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
@@ -293,7 +292,7 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
     const fetchVeg = async () => {
       setLoadingVeg(true);
       try {
-        const res = await axios.get(`${API}/api/vegetable`, { params: { limit: 500 } });
+        const res = await axios.get(`/api/vegetable`, { params: { limit: 500 } });
         setVegetables(res.data?.data || []);
       } catch (err) {
         console.error('Failed to load vegetables:', err);
@@ -333,7 +332,7 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
     }
     setSaving(true);
     try {
-      await axios.post(`${API}/api/plots/${plot.id || plot._id}/plant`, form);
+      await axios.post(`/api/plots/${plot.id || plot._id}/plant`, form);
       Swal.fire({ icon: 'success', title: 'บันทึกการปลูกสำเร็จ', timer: 1500, showConfirmButton: false });
       onSaved();
       onClose();
@@ -416,7 +415,7 @@ const HarvestModal = ({ plot, planting, onClose, onSaved }) => {
     }
     setSaving(true);
     try {
-      await axios.post(`${API}/api/plots/${plot.id || plot._id}/harvest`, form);
+      await axios.post(`/api/plots/${plot.id || plot._id}/harvest`, form);
       Swal.fire({ icon: 'success', title: 'บันทึกการเก็บเกี่ยวสำเร็จ', timer: 1500, showConfirmButton: false });
       onSaved();
       onClose();
@@ -498,7 +497,7 @@ const HistoryView = ({ plot, onBack }) => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/api/plots/${plot.id || plot._id}/history`);
+      const res = await axios.get(`/api/plots/${plot.id || plot._id}/history`);
       setRecords(res.data || []);
       setFiltered(res.data || []);
     } catch {
@@ -702,7 +701,7 @@ const MyPlotsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${API}/api/plots`, { params: { user_id: userId } });
+      const res = await axios.get(`/api/plots`, { params: { user_id: userId } });
       const mappedPlots = (res.data || []).map(p => ({
         ...p,
         name: p.plot_name || p.name,
@@ -733,7 +732,7 @@ const MyPlotsPage = () => {
     });
     if (!result.isConfirmed) return;
     try {
-      await axios.delete(`${API}/api/plots/${plot.id || plot._id}`);
+      await axios.delete(`/api/plots/${plot.id || plot._id}`);
       Swal.fire({ icon: 'success', title: 'ลบแปลงผักสำเร็จ', timer: 1200, showConfirmButton: false });
       fetchPlots();
     } catch (err) {

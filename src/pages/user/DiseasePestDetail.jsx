@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getImageUrl } from '../../utils/urlHelper';
 import { ChevronLeft, AlertTriangle, Shield, Thermometer, Info, Sparkles, LayoutGrid, X, Bug, Activity, Droplets, Skull } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -105,7 +106,7 @@ const DiseasePestDetail = () => {
                 <div className={`w-full md:w-5/12 ${bgGradient} relative flex flex-col transition-all duration-500 ease-out ${isScrolled ? 'basis-24 min-h-[6rem]' : 'basis-64 min-h-[16rem]'} md:basis-auto md:min-h-0 shadow-2xl z-10`}>
                    <div className={`relative w-full h-full transition-all duration-500 ${isScrolled ? 'opacity-90' : 'opacity-100'}`}>
                       <img
-                         src={item.image_path ? `${import.meta.env.VITE_API_URL}/${item.image_path}` : 'https://placehold.co/800x600?text=No+Image'}
+                         src={item.image_path ? getImageUrl(item.image_path) : 'https://placehold.co/800x600?text=No+Image'}
                          className={`w-full h-full object-cover opacity-80 transition-all duration-700 ${isScrolled ? 'scale-110 blur-sm' : 'scale-100'}`}
                          alt={item.thai_name}
                       />
@@ -136,7 +137,7 @@ const DiseasePestDetail = () => {
                                      onClick={() => setSelectedImage(path)}
                                   >
                                      <img
-                                        src={`${import.meta.env.VITE_API_URL}/${path}`}
+                                        src={getImageUrl(path)}
                                         alt={`Gallery ${index}`}
                                         className="w-full h-full object-cover group-hover/thumb:scale-125 transition-transform duration-700"
                                      />
@@ -220,7 +221,7 @@ const DiseasePestDetail = () => {
                                {item.image_paths.slice(1).map((path, index) => (
                                   <div key={index} className="aspect-square rounded-3xl overflow-hidden shadow-sm border border-gray-100 group relative active:scale-95 transition-transform" onClick={() => setSelectedImage(path)}>
                                      <img
-                                        src={`${import.meta.env.VITE_API_URL}/${path}`}
+                                        src={getImageUrl(path)}
                                         alt={`Gallery ${index + 1}`}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                      />
@@ -249,7 +250,7 @@ const DiseasePestDetail = () => {
                   <X className="w-6 h-6" />
                 </button>
                 <img 
-                  src={`${import.meta.env.VITE_API_URL}/${selectedImage}`}
+                  src={getImageUrl(selectedImage)}
                   className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
                   alt="Gallery Full size"
                   onClick={(e) => e.stopPropagation()}

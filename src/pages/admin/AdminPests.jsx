@@ -5,6 +5,7 @@ import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Pencil, Trash2, Plus, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const AdminPests = () => {
     const { t } = useTranslation();
@@ -120,9 +121,9 @@ const AdminPests = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.ID}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <img 
-                                                src={item.image_path ? `${import.meta.env.VITE_API_URL}/${item.image_path}` : 'https://placehold.co/100'} 
-                                                alt={item.thai_name} 
-                                                className="w-16 h-16 rounded-lg object-cover"
+                                                alt={item.thai_name}
+                                                src={item.image_path ? getImageUrl(item.image_path) : 'https://placehold.co/100'} 
+                                                className="w-24 h-24 rounded-lg object-cover"
                                                 onError={(e) => {e.target.src = 'https://placehold.co/100'}} 
                                             />
                                         </td>

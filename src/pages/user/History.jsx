@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { getDetectionHistory } from '../../services/aiApi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Swal from 'sweetalert2';
+import { getImageUrl } from '../../utils/urlHelper';
 
 // Utility for date formatting
 const formatDate = (dateString) => {
@@ -428,7 +429,7 @@ const HistoryPage = () => {
                                                 <div className="flex items-center gap-3">
                                                     {item.image_path && (
                                                         <img 
-                                                            src={`${import.meta.env.VITE_API_URL || ''}/${item.image_path}`} 
+                                                            src={getImageUrl(item.image_path)} 
                                                             alt="Detect" 
                                                             className="w-10 h-10 rounded-lg object-cover shadow-sm group-hover:scale-110 transition-transform"
                                                         />
@@ -520,7 +521,7 @@ const HistoryPage = () => {
                         <div className={`w-full md:w-5/12 ${selectedDetail.type === '1' ? 'bg-red-950' : 'bg-orange-950'} relative flex flex-col transition-all duration-500 ease-out ${isScrolled ? 'basis-24 min-h-[6rem]' : 'basis-64 min-h-[16rem]'} md:basis-auto md:min-h-0 shadow-2xl z-10`}>
                             <div className={`relative w-full h-full transition-all duration-500 ${isScrolled ? 'opacity-90' : 'opacity-100'}`}>
                                 <img
-                                    src={selectedDetail.image_path ? `${import.meta.env.VITE_API_URL}/${selectedDetail.image_path}` : 'https://placehold.co/800x600?text=No+Image'}
+                                    src={selectedDetail.image_path ? getImageUrl(selectedDetail.image_path) : 'https://placehold.co/800x600?text=No+Image'}
                                     className={`w-full h-full object-cover opacity-80 transition-all duration-700 ${isScrolled ? 'scale-110 blur-sm' : 'scale-100'}`}
                                     alt={selectedDetail.thai_name}
                                 />
@@ -551,7 +552,7 @@ const HistoryPage = () => {
                                                     onClick={() => setSelectedImage(path)}
                                                 >
                                                     <img
-                                                        src={`${import.meta.env.VITE_API_URL}/${path}`}
+                                                        src={getImageUrl(path)}
                                                         alt={`Gallery ${index}`}
                                                         className="w-full h-full object-cover group-hover/thumb:scale-125 transition-transform duration-700"
                                                     />
@@ -626,7 +627,7 @@ const HistoryPage = () => {
                         <X className="w-6 h-6" />
                     </button>
                     <img
-                        src={`${import.meta.env.VITE_API_URL}/${selectedImage}`}
+                        src={getImageUrl(selectedImage)}
                         alt="Full size"
                         className="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300"
                         onClick={(e) => e.stopPropagation()}

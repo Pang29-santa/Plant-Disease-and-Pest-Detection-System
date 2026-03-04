@@ -15,6 +15,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import axios from 'axios';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const Pests = () => {
   const { t, i18n } = useTranslation();
@@ -148,7 +149,7 @@ const Pests = () => {
               >
                 <div className="relative aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 bg-orange-50">
                   <img
-                    src={pest.image_path ? `${import.meta.env.VITE_API_URL}/${pest.image_path}` : 'https://placehold.co/600x400?text=No+Image'}
+                    src={getImageUrl(pest.image_path)}
                     alt={pest.thai_name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => {e.target.src = 'https://placehold.co/600x400?text=No+Image'}}
@@ -211,11 +212,11 @@ const Pests = () => {
             {/* Left: Image & Quick Stats */}
             <div className={`w-full md:w-5/12 bg-orange-950 relative flex flex-col transition-all duration-500 ease-out ${isScrolled ? 'basis-24 min-h-[6rem]' : 'basis-64 min-h-[16rem]'} md:basis-auto md:min-h-0 shadow-2xl z-10`}>
                <div className={`relative w-full h-full transition-all duration-500 ${isScrolled ? 'opacity-90' : 'opacity-100'}`}>
-                  <img
-                     src={selectedPest.image_path ? `${import.meta.env.VITE_API_URL}/${selectedPest.image_path}` : 'https://placehold.co/800x600?text=No+Image'}
-                     className={`w-full h-full object-cover opacity-80 transition-all duration-700 ${isScrolled ? 'scale-110 blur-sm' : 'scale-100'}`}
-                     alt={selectedPest.thai_name}
-                  />
+                   <img
+                      src={getImageUrl(selectedPest.image_path)}
+                      className={`w-full h-full object-cover opacity-80 transition-all duration-700 ${isScrolled ? 'scale-110 blur-sm' : 'scale-100'}`}
+                      alt={selectedPest.thai_name}
+                   />
                   <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-b from-orange-950/95 via-transparent to-transparent md:from-transparent md:to-orange-950/90" />
 
                   <div className={`absolute bottom-0 left-0 p-8 md:p-12 md:top-0 md:left-0 text-white w-full transition-all duration-500 md:transform-none ${isScrolled ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100'}`}>
@@ -242,11 +243,11 @@ const Pests = () => {
                                  className="aspect-square rounded-2xl overflow-hidden border-2 border-white/10 cursor-pointer hover:border-white transition-all bg-black/20 group/thumb"
                                  onClick={() => setSelectedImage(path)}
                               >
-                                 <img
-                                    src={`${import.meta.env.VITE_API_URL}/${path}`}
-                                    alt={`Gallery ${index}`}
-                                    className="w-full h-full object-cover group-hover/thumb:scale-125 transition-transform duration-700"
-                                 />
+                                  <img
+                                     src={getImageUrl(path)}
+                                     alt={`Gallery ${index}`}
+                                     className="w-full h-full object-cover group-hover/thumb:scale-125 transition-transform duration-700"
+                                  />
                               </div>
                            ))}
                         </div>
@@ -314,11 +315,11 @@ const Pests = () => {
                         <div className="grid grid-cols-2 gap-4">
                            {selectedPest.image_paths.slice(1).map((path, index) => (
                               <div key={index} className="aspect-square rounded-3xl overflow-hidden shadow-sm border border-gray-100 group relative active:scale-95 transition-transform" onClick={() => setSelectedImage(path)}>
-                                 <img
-                                    src={`${import.meta.env.VITE_API_URL}/${path}`}
-                                    alt={`Gallery ${index + 1}`}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                 />
+                                  <img
+                                     src={getImageUrl(path)}
+                                     alt={`Gallery ${index + 1}`}
+                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                  />
                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                                     <Sparkles className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                                  </div>
@@ -342,12 +343,12 @@ const Pests = () => {
           >
              <X className="w-6 h-6" />
           </button>
-          <img
-             src={`${import.meta.env.VITE_API_URL}/${selectedImage}`}
-             alt="Full size"
-             className="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300"
-             onClick={(e) => e.stopPropagation()}
-          />
+           <img
+              src={getImageUrl(selectedImage)}
+              alt="Full size"
+              className="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300"
+              onClick={(e) => e.stopPropagation()}
+           />
         </div>
       )}
 

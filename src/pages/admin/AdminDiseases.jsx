@@ -5,6 +5,7 @@ import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Pencil, Trash2, Plus, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const AdminDiseases = () => {
     const { t } = useTranslation();
@@ -119,10 +120,10 @@ const AdminDiseases = () => {
                                     <tr key={item._id || item.ID} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.ID}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <img
+                                            <img 
                                                 alt={item.thai_name}
-                                                src={(item.image_paths && item.image_paths.length > 0) ? `${import.meta.env.VITE_API_URL}/${item.image_paths[0]}` : (item.image_path ? `${import.meta.env.VITE_API_URL}/${item.image_path}` : 'https://placehold.co/100')} 
-                                                className="w-16 h-16 rounded-lg object-cover"
+                                                src={(item.image_paths && item.image_paths.length > 0) ? getImageUrl(item.image_paths[0]) : (item.image_path ? getImageUrl(item.image_path) : 'https://placehold.co/100')} 
+                                                className="w-24 h-24 rounded-lg object-cover"
                                                 onError={(e) => {e.target.src = 'https://placehold.co/100'}} 
                                             />
                                         </td>

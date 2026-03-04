@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { getImageUrl } from '../../utils/urlHelper';
 import { checkDiseasePestName } from '../../services/validationApi';
 
 // Debounce utility
@@ -222,7 +223,6 @@ const AdminPestForm = () => {
         }
     };
 
-    const getImageUrl = (path) => `${import.meta.env.VITE_API_URL}/${path.split('/').map(p => encodeURIComponent(p)).join('/')}`;
 
     return (
         <AdminLayout title={isEdit ? t('admin.diseases.form.editTitle') : t('admin.diseases.form.addTitle')}>

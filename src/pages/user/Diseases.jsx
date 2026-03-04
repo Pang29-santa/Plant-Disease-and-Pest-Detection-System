@@ -14,6 +14,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import axios from 'axios';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const Diseases = () => {
   const { t, i18n } = useTranslation();
@@ -147,7 +148,7 @@ const Diseases = () => {
               >
                 <div className="relative aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 bg-red-50">
                   <img
-                    src={disease.image_path ? `${import.meta.env.VITE_API_URL}/${disease.image_path}` : 'https://placehold.co/600x400?text=No+Image'}
+                    src={getImageUrl(disease.image_path)}
                     alt={disease.thai_name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => {e.target.src = 'https://placehold.co/600x400?text=No+Image'}}
@@ -211,7 +212,7 @@ const Diseases = () => {
             <div className={`w-full md:w-5/12 bg-red-950 relative flex flex-col transition-all duration-500 ease-out ${isScrolled ? 'basis-24 min-h-[6rem]' : 'basis-64 min-h-[16rem]'} md:basis-auto md:min-h-0 shadow-2xl z-10`}>
                <div className={`relative w-full h-full transition-all duration-500 ${isScrolled ? 'opacity-90' : 'opacity-100'}`}>
                   <img
-                     src={selectedDisease.image_path ? `${import.meta.env.VITE_API_URL}/${selectedDisease.image_path}` : 'https://placehold.co/800x600?text=No+Image'}
+                     src={getImageUrl(selectedDisease.image_path)}
                      className={`w-full h-full object-cover opacity-80 transition-all duration-700 ${isScrolled ? 'scale-110 blur-sm' : 'scale-100'}`}
                      alt={selectedDisease.thai_name}
                   />
@@ -242,7 +243,7 @@ const Diseases = () => {
                                  onClick={() => setSelectedImage(path)}
                               >
                                  <img
-                                    src={`${import.meta.env.VITE_API_URL}/${path}`}
+                                    src={getImageUrl(path)}
                                     alt={`Gallery ${index}`}
                                     className="w-full h-full object-cover group-hover/thumb:scale-125 transition-transform duration-700"
                                  />
@@ -314,7 +315,7 @@ const Diseases = () => {
                            {selectedDisease.image_paths.slice(1).map((path, index) => (
                               <div key={index} className="aspect-square rounded-3xl overflow-hidden shadow-sm border border-gray-100 group relative active:scale-95 transition-transform" onClick={() => setSelectedImage(path)}>
                                  <img
-                                    src={`${import.meta.env.VITE_API_URL}/${path}`}
+                                    src={getImageUrl(path)}
                                     alt={`Gallery ${index + 1}`}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                  />
@@ -342,7 +343,7 @@ const Diseases = () => {
              <X className="w-6 h-6" />
           </button>
           <img
-             src={`${import.meta.env.VITE_API_URL}/${selectedImage}`}
+             src={getImageUrl(selectedImage)}
              alt="Full size"
              className="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300"
              onClick={(e) => e.stopPropagation()}

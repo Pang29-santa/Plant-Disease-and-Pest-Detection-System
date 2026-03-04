@@ -16,6 +16,7 @@ import {
   ThermometerSun
 } from 'lucide-react';
 import axios from 'axios';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const Vegetables = () => {
   const { t, i18n } = useTranslation();
@@ -183,7 +184,7 @@ const Vegetables = () => {
               >
                 <div className="relative aspect-[4/3] rounded-[1.5rem] overflow-hidden mb-4 bg-emerald-50">
                   <img
-                    src={veg.image_path ? `${import.meta.env.VITE_API_URL}/${veg.image_path}` : 'https://placehold.co/600x400?text=No+Image'}
+                    src={getImageUrl(veg.image_path)}
                     alt={veg.thai_name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => {e.target.src = 'https://placehold.co/600x400?text=No+Image'}}
@@ -256,11 +257,11 @@ const Vegetables = () => {
             {/* Left: Image & Quick Stats */}
             <div className={`w-full md:w-5/12 bg-emerald-900 relative flex flex-col transition-all duration-300 ease-out ${isScrolled ? 'basis-24 min-h-[6rem]' : 'basis-64 min-h-[16rem]'} md:basis-auto md:min-h-0`}>
                <div className={`relative w-full h-full transition-all duration-300 ${isScrolled ? 'opacity-90' : 'opacity-100'}`}>
-                  <img
-                     src={selectedVeg.image_path ? `${import.meta.env.VITE_API_URL}/${selectedVeg.image_path}` : 'https://placehold.co/600x400?text=No+Image'}
-                     className={`w-full h-full object-cover opacity-80 transition-all duration-300 ${isScrolled ? 'scale-105' : 'scale-100'}`}
-                     alt={selectedVeg.thai_name}
-                  />
+                   <img
+                      src={getImageUrl(selectedVeg.image_path)}
+                      className={`w-full h-full object-cover opacity-80 transition-all duration-300 ${isScrolled ? 'scale-105' : 'scale-100'}`}
+                      alt={selectedVeg.thai_name}
+                   />
                   <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-b from-emerald-950/95 via-transparent to-transparent md:from-transparent md:to-emerald-950/90" />
 
                   <div className={`absolute bottom-0 left-0 p-6 md:top-0 md:left-0 text-white w-full transition-all duration-300 md:transform-none ${isScrolled ? 'translate-y-2' : 'translate-y-0'}`}>
@@ -296,11 +297,11 @@ const Vegetables = () => {
                                  className="aspect-square rounded-lg overflow-hidden border border-white/20 cursor-pointer hover:border-white transition-colors bg-black/20"
                                  onClick={() => setSelectedImage(path)}
                               >
-                                 <img
-                                    src={`${import.meta.env.VITE_API_URL}/${path}`}
-                                    alt={`Gallery ${index}`}
-                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                                 />
+                                  <img
+                                     src={getImageUrl(path)}
+                                     alt={`Gallery ${index}`}
+                                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                                  />
                               </div>
                            ))}
                         </div>
@@ -387,11 +388,11 @@ const Vegetables = () => {
                         <div className="grid grid-cols-2 gap-3">
                            {selectedVeg.image_paths.slice(1).map((path, index) => (
                               <div key={index} className="aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-100 group relative cursor-pointer" onClick={() => setSelectedImage(path)}>
-                                 <img
-                                    src={`${import.meta.env.VITE_API_URL}/${path}`}
-                                    alt={`Gallery ${index + 1}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                 />
+                                  <img
+                                     src={getImageUrl(path)}
+                                     alt={`Gallery ${index + 1}`}
+                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                  />
                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                               </div>
                            ))}
@@ -413,12 +414,12 @@ const Vegetables = () => {
           >
              <X className="w-6 h-6" />
           </button>
-          <img
-             src={`${import.meta.env.VITE_API_URL}/${selectedImage}`}
-             alt="Full size"
-             className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
-             onClick={(e) => e.stopPropagation()}
-          />
+           <img
+              src={getImageUrl(selectedImage)}
+              alt="Full size"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+           />
         </div>
       )}
 

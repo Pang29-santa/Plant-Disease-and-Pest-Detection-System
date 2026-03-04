@@ -17,7 +17,7 @@ import {
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -59,7 +59,7 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/api/auth/verify-otp`, {
+      const response = await axios.post(`/api/auth/verify-otp`, {
         email: formData.email,
         otp: formData.otp
       });
@@ -121,7 +121,7 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/api/auth/reset-password`, {
+      const response = await axios.post(`/api/auth/reset-password`, {
         email: formData.email,
         otp: formData.otp,
         new_password: formData.newPassword

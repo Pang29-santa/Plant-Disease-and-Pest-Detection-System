@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import SearchableSelect from '../../components/SearchableSelect';
+import { getImageUrl } from '../../utils/urlHelper';
 
 const ProfilePage = () => {
     const { t, i18n } = useTranslation();
@@ -307,7 +308,7 @@ const ProfilePage = () => {
                               ) : (
                                   <>
                                     {user?.image_path ? (
-                                        <img src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} alt={t('nav.profile')} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
+                                        <img src={getImageUrl(user.image_path)} alt={t('nav.profile')} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
                                             <User className="w-16 h-16 text-white/50" />

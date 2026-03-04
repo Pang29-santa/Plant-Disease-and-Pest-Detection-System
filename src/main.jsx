@@ -8,6 +8,8 @@ import i18n from './i18n/i18n'
 
 // Set Axios Base URL from Environment Variable
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+// Bypass ngrok browser warning
+axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

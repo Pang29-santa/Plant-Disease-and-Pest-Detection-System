@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../../utils/urlHelper';
 import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import { 
@@ -120,7 +121,7 @@ const Dashboard = () => {
               <div className="relative">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[2.5rem] border-4 border-white/10 overflow-hidden bg-white/5 backdrop-blur-xl shadow-2xl flex-shrink-0 transform hover:rotate-6 transition-transform duration-500">
                   {user?.image_path ? (
-                    <img src={`${import.meta.env.VITE_API_URL}/${user.image_path}`} alt="Profile" className="w-full h-full object-cover" />
+                    <img src={getImageUrl(user.image_path)} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <User className="w-10 h-10 text-white/30" />

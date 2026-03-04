@@ -9,7 +9,7 @@ import {
   Settings, Trash2, Sprout, Network, Play
 } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8888';
+
 
 const CCTVPage = () => {
   const { t } = useTranslation();
@@ -40,7 +40,7 @@ const CCTVPage = () => {
     if (!userId || userId === 'unknown') return;
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/api/cctv`, { params: { user_id: userId } });
+      const res = await axios.get(`/api/cctv`, { params: { user_id: userId } });
       setCctvs(res.data || []);
     } catch (err) {
       console.error('Failed to load CCTVs:', err);
@@ -321,7 +321,7 @@ const CCTVPage = () => {
                 </select>
                 {plots.length === 0 && (
                   <p className="cctv-form-hint">
-                    คุณยังไม่มีแปลงผัก <a href="/my-plots" style={{color: '#0284c7', textDecoration: 'underline'}}>คลิกที่นี่เพื่อไปสร้างแปลงก่อน</a>
+                    คุณยังไม่มีแปลงผัก <a href="/plots" style={{color: '#0284c7', textDecoration: 'underline'}}>คลิกที่นี่เพื่อไปสร้างแปลงก่อน</a>
                   </p>
                 )}
               </div>
