@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -13,7 +13,8 @@ const AdminVegetables = () => {
     const [vegetables, setVegetables] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [page, setPage] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = 5;
     const [totalCount, setTotalCount] = useState(0);
 
@@ -42,10 +43,21 @@ const AdminVegetables = () => {
         fetchData();
     }, [page, searchTerm]);
     
+    const goToPage = (newPage) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (newPage <= 1) {
+            newParams.delete('page');
+        } else {
+            newParams.set('page', String(newPage));
+        }
+        setSearchParams(newParams, { replace: true });
+    };
+
     const handleSearch = (e) => {
         e.preventDefault();
-        setPage(1);
-        fetchData();
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('page');
+        setSearchParams(newParams, { replace: true });
     };
 
     const handleDelete = async (id) => {
@@ -56,8 +68,8 @@ const AdminVegetables = () => {
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: t('admin.confirm'),
-            cancelButtonText: t('admin.cancel')
+confirmButtonText: t('common.confirm'),
+cancelButtonText: t('common.cancel')
         });
 
         if (result.isConfirmed) {
@@ -129,10 +141,10 @@ const AdminVegetables = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{veg.eng_name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex items-center gap-3">
-                                                <Link to={`/admin/vegetables/view/${veg._id}`} className="text-blue-600 hover:text-blue-900" title={t('admin.users.actions.view')}>
+                                                <Link to={`/admin/vegetables/view/${veg._id}?page=${page}`} className="text-blue-600 hover:text-blue-900" title={t('admin.users.actions.view')}>
                                                     <Eye className="w-5 h-5" />
                                                 </Link>
-                                                <Link to={`/admin/vegetables/edit/${veg._id}`} className="text-yellow-600 hover:text-yellow-900" title={t('admin.editInfo')}>
+                                                <Link to={`/admin/vegetables/edit/${veg._id}?page=${page}`} className="text-yellow-600 hover:text-yellow-900" title={t('admin.editInfo')}>
                                                     <Pencil className="w-5 h-5" />
                                                 </Link>
                                                 <button 
@@ -154,7 +166,7 @@ const AdminVegetables = () => {
                 <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-center sm:px-6">
                     <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label={t('common.pagination')}>
                         <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            onClick={() => goToPage(page - 1)}
                             disabled={page === 1}
                             className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -164,7 +176,7 @@ const AdminVegetables = () => {
                         {Array.from({ length: Math.ceil(totalCount / limit) }, (_, idx) => (
                             <button
                                 key={idx + 1}
-                                onClick={() => setPage(idx + 1)}
+                                onClick={() => goToPage(idx + 1)}
                                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${
                                     page === idx + 1
                                         ? 'z-10 bg-green-600 border-green-600 text-white'
@@ -176,7 +188,7 @@ const AdminVegetables = () => {
                         ))}
                         
                         <button
-                            onClick={() => setPage(p => p + 1)}
+                            onClick={() => goToPage(page + 1)}
                             disabled={page >= Math.ceil(totalCount / limit)}
                             className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >

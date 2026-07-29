@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Search, 
@@ -20,6 +21,8 @@ import { getImageUrl } from '../../utils/urlHelper';
 
 const Vegetables = () => {
   const { t, i18n } = useTranslation();
+  const isThai = i18n.language === 'th';
+
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [vegetables, setVegetables] = useState([]);
@@ -28,7 +31,7 @@ const Vegetables = () => {
   const [nutrition, setNutrition] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeModalImg, setActiveModalImg] = useState(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -69,9 +72,10 @@ const Vegetables = () => {
   useEffect(() => {
     if (selectedVeg) {
       document.body.style.overflow = 'hidden';
-      setIsScrolled(false);
+      setActiveModalImg(selectedVeg.image_path);
     } else {
       document.body.style.overflow = 'unset';
+      setActiveModalImg(null);
     }
     return () => {
       document.body.style.overflow = 'unset';
@@ -103,7 +107,7 @@ const Vegetables = () => {
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
-    <div className="min-h-screen bg-[#F8FAF9] font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-[#F8FAF9] font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-20">
        {/* Modern Header Section */}
        <div className="bg-white border-b border-gray-100 pb-12 pt-8 sm:pt-12 px-4 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
@@ -153,46 +157,41 @@ const Vegetables = () => {
           </div>
        </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Loading State */}
+      {/* Main Content Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map(n => (
-              <div key={n} className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 h-96 animate-pulse">
-                <div className="w-full h-48 bg-slate-100 rounded-2xl mb-4" />
-                <div className="h-6 w-3/4 bg-slate-100 rounded mb-2" />
-                <div className="h-4 w-1/2 bg-slate-100 rounded" />
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                <div key={n} className="bg-white rounded-3xl h-80 animate-pulse shadow-sm border border-slate-100" />
+             ))}
           </div>
         ) : vegetables.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
-             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                <Leaf className="w-8 h-8" />
-             </div>
-             <h3 className="text-lg font-bold text-slate-700 mb-1">{t('vegetablesPage.noData')}</h3>
-             <p className="text-slate-500">{t('vegetablesPage.tryAgain')}</p>
-          </div>
+           <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 max-w-md mx-auto shadow-sm">
+              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
+                 <Leaf className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-700 mb-1">{t('vegetablesPage.noResults')}</h3>
+              <p className="text-slate-400 text-sm">{t('vegetablesPage.tryOtherKeywords')}</p>
+           </div>
         ) : (
-          /* Vegetable Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 mb-12">
-            {vegetables.map((veg, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {vegetables.map((veg) => (
               <div
-                key={veg._id || index}
+                key={veg._id}
                 onClick={() => openDetail(veg)}
-                className="group bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 border border-slate-100 hover:border-emerald-100 transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1"
+                className="group bg-white rounded-[2.5rem] p-4 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 border border-slate-100/80 flex flex-col cursor-pointer transform hover:-translate-y-1"
               >
-                <div className="relative aspect-[4/3] rounded-[1.5rem] overflow-hidden mb-4 bg-emerald-50">
+                <div className="relative aspect-[4/3] rounded-[2rem] overflow-hidden mb-4 bg-slate-100">
                   <img
                     src={getImageUrl(veg.image_path)}
                     alt={veg.thai_name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {e.target.src = 'https://placehold.co/600x400?text=No+Image'}}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-emerald-800 shadow-sm flex items-center gap-1">
-                     <Clock className="w-3 h-3" /> {t('vegetablesPage.growth', { days: veg.growth || '?' })}
+                     <Clock className="w-3 h-3 text-emerald-600" /> {t('vegetablesPage.growth', { days: veg.growth || '?' })}
                   </div>
                 </div>
 
@@ -240,187 +239,190 @@ const Vegetables = () => {
         )}
       </div>
 
-      {/* Modal - Recipe/Profile Card Style */}
-      {selectedVeg && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedVeg(null)} />
-
-          <div className="relative w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] animate-in zoom-in-95 duration-200">
+      {/* Detailed Modal */}
+      {selectedVeg && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
             {/* Close Button */}
             <button
               onClick={() => setSelectedVeg(null)}
-              className="absolute top-4 right-4 z-50 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white md:text-slate-500 md:bg-slate-100 md:hover:bg-slate-200 transition-colors"
+              className="absolute top-4 right-4 z-50 w-11 h-11 flex items-center justify-center bg-white/90 hover:bg-red-50 text-slate-500 hover:text-red-600 backdrop-blur-md rounded-2xl transition-all shadow-md active:scale-95 group"
+              title={isThai ? 'ปิด' : 'Close'}
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 transform group-hover:rotate-90 transition-transform duration-300" />
             </button>
 
-            {/* Left: Image & Quick Stats */}
-            <div className={`w-full md:w-5/12 bg-emerald-900 relative flex flex-col transition-all duration-300 ease-out ${isScrolled ? 'basis-24 min-h-[6rem]' : 'basis-64 min-h-[16rem]'} md:basis-auto md:min-h-0`}>
-               <div className={`relative w-full h-full transition-all duration-300 ${isScrolled ? 'opacity-90' : 'opacity-100'}`}>
-                   <img
-                      src={getImageUrl(selectedVeg.image_path)}
-                      className={`w-full h-full object-cover opacity-80 transition-all duration-300 ${isScrolled ? 'scale-105' : 'scale-100'}`}
-                      alt={selectedVeg.thai_name}
-                   />
-                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-b from-emerald-950/95 via-transparent to-transparent md:from-transparent md:to-emerald-950/90" />
+            {/* Left: Image & Hero */}
+            <div className="w-full md:w-5/12 bg-slate-950 relative flex flex-col justify-between p-6 md:p-8 shrink-0 min-h-[220px] md:min-h-full">
+              {/* Background Image */}
+              <div className="absolute inset-0 overflow-hidden">
+                <img
+                  src={getImageUrl(activeModalImg || selectedVeg.image_path)}
+                  className="w-full h-full object-cover filter brightness-90 transform hover:scale-105 transition-transform duration-700"
+                  alt={selectedVeg.thai_name}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+              </div>
 
-                  <div className={`absolute bottom-0 left-0 p-6 md:top-0 md:left-0 text-white w-full transition-all duration-300 md:transform-none ${isScrolled ? 'translate-y-2' : 'translate-y-0'}`}>
-                     <h2 className={`font-extrabold mb-1 drop-shadow-md transition-all duration-300 origin-left ${isScrolled ? 'text-2xl' : 'text-3xl md:text-4xl'}`}>
-                        {selectedVeg.thai_name}
-                     </h2>
-                     <div className={`transition-all duration-300 origin-top overflow-hidden ${isScrolled ? 'h-0 opacity-0' : 'h-auto opacity-100'}`}>
-                        <p className="text-white/90 font-medium text-lg drop-shadow-md mb-4">{selectedVeg.eng_name}</p>
+              {/* Top Badges */}
+              <div className="relative z-10 flex flex-wrap gap-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 backdrop-blur-md text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-bold shadow-sm">
+                  <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{t('vegetablesPage.growth', { days: selectedVeg.growth })}</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 backdrop-blur-md text-amber-300 border border-amber-500/30 rounded-full text-xs font-bold shadow-sm">
+                  <ThermometerSun className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t('vegetablesPage.sunLoving')}</span>
+                </div>
+              </div>
 
-                        <div className="flex flex-wrap gap-2">
-                           <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 text-xs font-bold flex items-center gap-2">
-                              <Clock className="w-3.5 h-3.5 text-emerald-300" />
-                              {t('vegetablesPage.growth', { days: selectedVeg.growth })}
-                           </div>
-                           <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 text-xs font-bold flex items-center gap-2">
-                              <ThermometerSun className="w-3.5 h-3.5 text-yellow-300" />
-                              {t('vegetablesPage.sunLoving')}
-                           </div>
-                        </div>
-                     </div>
+              {/* Hero Title & Thumbnails */}
+              <div className="relative z-10 mt-auto space-y-4">
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md">
+                    {selectedVeg.thai_name}
+                  </h2>
+                  <p className="text-xs md:text-sm font-bold text-emerald-300 uppercase tracking-widest mt-1 drop-shadow-sm">
+                    {selectedVeg.eng_name}
+                  </p>
+                </div>
+
+                {/* Interactive Gallery Thumbnails */}
+                {selectedVeg.image_paths && selectedVeg.image_paths.length > 1 && (
+                  <div className="pt-2">
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-emerald-400" />
+                      {t('vegetablesPage.moreImages') || 'รูปภาพเพิ่มเติม'}
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                      {selectedVeg.image_paths.map((path, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveModalImg(path)}
+                          className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
+                            (activeModalImg || selectedVeg.image_path) === path 
+                              ? 'border-emerald-500 scale-105 shadow-md shadow-emerald-500/40' 
+                              : 'border-white/30 opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={getImageUrl(path)} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
-
-                  {/* Desktop Gallery (Bottom Left) */}
-                  {selectedVeg.image_paths && selectedVeg.image_paths.length > 1 && (
-                     <div className="hidden md:block absolute bottom-0 left-0 w-full p-6 z-10">
-                        <p className="text-emerald-200 text-xs font-bold uppercase mb-3 flex items-center gap-2">
-                           <Sparkles className="w-3 h-3" /> {t('vegetablesPage.moreImages')}
-                        </p>
-                        <div className="grid grid-cols-4 gap-2">
-                           {selectedVeg.image_paths.slice(1).map((path, index) => (
-                              <div
-                                 key={index}
-                                 className="aspect-square rounded-lg overflow-hidden border border-white/20 cursor-pointer hover:border-white transition-colors bg-black/20"
-                                 onClick={() => setSelectedImage(path)}
-                              >
-                                  <img
-                                     src={getImageUrl(path)}
-                                     alt={`Gallery ${index}`}
-                                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                                  />
-                              </div>
-                           ))}
-                        </div>
-                     </div>
-                  )}
-               </div>
+                )}
+              </div>
             </div>
 
             {/* Right: Content */}
-            <div
-               className="w-full md:w-7/12 bg-white flex-1 md:h-full overflow-y-auto custom-scrollbar flex flex-col"
-               onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 50)}
-            >
-               <div className="p-6 md:p-10 space-y-8">
-                  {/* Details Info */}
-                  <div className="space-y-6">
-                     <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 mt-1">
-                           <Info className="w-5 h-5" />
-                        </div>
-                         <div>
-                           <h3 className="font-bold text-slate-800 text-lg mb-2">{t('vegetablesPage.details')}</h3>
-                           <div className="text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-2" dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.details_en || selectedVeg.details) : selectedVeg.details || t('vegetablesPage.noDataDetails') }} />
-                        </div>
-                     </div>
-
-                     <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-1">
-                           <Hand className="w-5 h-5" />
-                        </div>
-                        <div>
-                           <h3 className="font-bold text-slate-800 text-lg mb-2">{t('vegetablesPage.planting')}</h3>
-                           <div className="text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-2" dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.planting_method_en || selectedVeg.planting_method) : selectedVeg.planting_method || t('vegetablesPage.noDataDetails') }} />
-                        </div>
-                     </div>
-
-                     <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
-                           <Droplets className="w-5 h-5" />
-                        </div>
-                        <div>
-                           <h3 className="font-bold text-slate-800 text-lg mb-2">{t('vegetablesPage.care')}</h3>
-                           <div className="text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-2" dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.care_en || selectedVeg.care) : selectedVeg.care || t('vegetablesPage.noDataDetails') }} />
-                        </div>
-                     </div>
+            <div className="w-full md:w-7/12 bg-white flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10 space-y-6">
+              {/* Details Info */}
+              <section className="bg-amber-50/60 rounded-3xl p-5 md:p-6 border border-amber-100/80 shadow-xs">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-200 shrink-0">
+                    <Info className="w-5 h-5" />
                   </div>
-
-                  {/* Nutrition */}
-                  <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                     <div className="flex items-center gap-2 mb-4">
-                        <Apple className="w-5 h-5 text-red-500" />
-                        <h3 className="font-bold text-slate-800">{t('vegetablesPage.nutrition')}</h3>
-                     </div>
-
-                     {modalLoading ? (
-                        <div className="space-y-2 animate-pulse">
-                           <div className="h-4 bg-slate-200 rounded w-full" />
-                           <div className="h-4 bg-slate-200 rounded w-2/3" />
-                        </div>
-                     ) : nutrition.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-3">
-                           {nutrition.map((n, i) => (
-                              <div key={i} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col">
-                                 <span className="text-xs text-slate-400 font-bold uppercase">{n.nutrient_name || n.nutrition_name}</span>
-                                 <div className="flex items-baseline gap-1 mt-1">
-                                    <span className="text-lg font-black text-emerald-600">{n.nutrition_qty || n.amount}</span>
-                                    <span className="text-xs text-slate-500">{n.unit}</span>
-                                 </div>
-                              </div>
-                           ))}
-                        </div>
-                     ) : (
-                        <p className="text-sm text-slate-400 italic">{t('vegetablesPage.noNutrition')}</p>
-                     )}
+                  <div>
+                    <h3 className="font-black text-slate-900 text-lg tracking-tight">{t('vegetablesPage.details') || 'รายละเอียดทั่วไป'}</h3>
+                    <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">{isThai ? 'ข้อมูลสายพันธุ์และลักษณะพืช' : 'Crop Description'}</p>
                   </div>
+                </div>
+                <div 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content" 
+                  dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.details_en || selectedVeg.details) : selectedVeg.details || t('vegetablesPage.noDataDetails') }} 
+                />
+              </section>
 
-                  {/* Gallery Section - Mobile Only */}
-                  {selectedVeg.image_paths && selectedVeg.image_paths.length > 1 && (
-                     <div className="space-y-4 md:hidden">
-                        <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                           <Sparkles className="w-5 h-5 text-yellow-500" />
-                           {t('vegetablesPage.moreImages')}
-                        </h3>
-                        <div className="grid grid-cols-2 gap-3">
-                           {selectedVeg.image_paths.slice(1).map((path, index) => (
-                              <div key={index} className="aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-100 group relative cursor-pointer" onClick={() => setSelectedImage(path)}>
-                                  <img
-                                     src={getImageUrl(path)}
-                                     alt={`Gallery ${index + 1}`}
-                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                  />
-                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                              </div>
-                           ))}
+              {/* Planting Method */}
+              <section className="bg-emerald-50/60 rounded-3xl p-5 md:p-6 border border-emerald-100/80 shadow-xs">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-200 shrink-0">
+                    <Hand className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-lg tracking-tight">{t('vegetablesPage.planting') || 'วิธีและขั้นตอนการปลูก'}</h3>
+                    <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">{isThai ? 'คำแนะนำการเพาะปลูก' : 'Planting Instructions'}</p>
+                  </div>
+                </div>
+                <div 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content" 
+                  dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.planting_method_en || selectedVeg.planting_method) : selectedVeg.planting_method || t('vegetablesPage.noDataDetails') }} 
+                />
+              </section>
+
+              {/* Care & Maintenance */}
+              <section className="bg-sky-50/60 rounded-3xl p-5 md:p-6 border border-sky-100/80 shadow-xs">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-md shadow-sky-200 shrink-0">
+                    <Droplets className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-lg tracking-tight">{t('vegetablesPage.care') || 'การดูแลรักษาและให้น้ำ'}</h3>
+                    <p className="text-[10px] font-bold text-sky-700 uppercase tracking-widest">{isThai ? 'การดูแลและใส่ปุ๋ย' : 'Watering & Maintenance'}</p>
+                  </div>
+                </div>
+                <div 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content" 
+                  dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.care_en || selectedVeg.care) : selectedVeg.care || t('vegetablesPage.noDataDetails') }} 
+                />
+              </section>
+
+              {/* Nutrition Card */}
+              <section className="bg-slate-50 rounded-3xl p-5 md:p-6 border border-slate-200/80 shadow-xs">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200 shrink-0">
+                    <Apple className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-lg tracking-tight">{t('vegetablesPage.nutrition') || 'คุณค่าทางโภชนาการ'}</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{isThai ? 'สารอาหารสำคัญต่อ 100g' : 'Nutritional Values per 100g'}</p>
+                  </div>
+                </div>
+
+                {modalLoading ? (
+                  <div className="space-y-2 animate-pulse">
+                    <div className="h-4 bg-slate-200 rounded w-full" />
+                    <div className="h-4 bg-slate-200 rounded w-2/3" />
+                  </div>
+                ) : nutrition.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {nutrition.map((n, i) => (
+                      <div key={i} className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{n.nutrient_name || n.nutrition_name}</span>
+                        <div className="flex items-baseline gap-1 mt-1">
+                          <span className="text-base font-black text-emerald-600">{n.nutrition_qty || n.amount}</span>
+                          <span className="text-xs font-bold text-slate-500">{n.unit}</span>
                         </div>
-                     </div>
-                  )}
-               </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 font-medium italic">{t('vegetablesPage.noNutrition') || 'ไม่มีข้อมูลสารอาหาร'}</p>
+                )}
+              </section>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Image Popup Modal */}
-      {selectedImage && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedImage(null)}>
+      {selectedImage && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedImage(null)}>
           <button
-             className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-             onClick={() => setSelectedImage(null)}
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all active:scale-95"
+            onClick={() => setSelectedImage(null)}
           >
-             <X className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
-           <img
-              src={getImageUrl(selectedImage)}
-              alt="Full size"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
-              onClick={(e) => e.stopPropagation()}
-           />
-        </div>
+          <img
+            src={getImageUrl(selectedImage)}
+            alt="Full size"
+            className="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>,
+        document.body
       )}
 
       <style>{`
@@ -443,4 +445,3 @@ const Vegetables = () => {
 };
 
 export default Vegetables;
-

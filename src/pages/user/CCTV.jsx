@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -6,16 +7,15 @@ import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
   Camera, ChevronLeft, Plus, X, Loader2, Video, 
-  Settings, Trash2, Sprout, Network, Play
+  Settings, Trash2, Sprout, Network, Play, Info
 } from 'lucide-react';
 
-
-
 const CCTVPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id || user?.user_id || 'unknown';
+  const isThai = i18n.language === 'th';
 
   const [cctvs, setCctvs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,18 @@ const CCTVPage = () => {
     plot_id: ''
   });
 
+  // Lock scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isModalOpen]);
+
   const fetchCctvs = useCallback(async () => {
     if (!userId || userId === 'unknown') return;
     try {
@@ -52,7 +64,7 @@ const CCTVPage = () => {
   const fetchPlots = useCallback(async () => {
     if (!userId || userId === 'unknown') return;
     try {
-      const res = await axios.get(`${API}/api/plots`, { params: { user_id: userId } });
+      const res = await axios.get(`/api/plots`, { params: { user_id: userId } });
       setPlots(res.data || []);
     } catch (err) {
       console.error('Failed to load plots:', err);
@@ -93,7 +105,7 @@ const CCTVPage = () => {
         icon: 'warning',
         title: 'ข้อมูลไม่ครบ',
         text: 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน',
-        confirmButtonColor: '#2E7D32'
+        confirmButtonColor: '#059669'
       });
       return;
     }
@@ -102,7 +114,7 @@ const CCTVPage = () => {
       setIsSubmitting(true);
       const payload = { ...form, user_id: userId };
       
-      await axios.post(`${API}/api/cctv`, payload);
+      await axios.post(`/api/cctv`, payload);
       
       Swal.fire({
         icon: 'success',
@@ -118,7 +130,8 @@ const CCTVPage = () => {
       Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด',
-        text: 'ไม่สามารถเพิ่มกล้องระบบวงจรปิดได้ โปรดลองอีกครั้ง',
+        text: 'ไม่สามารถเพิ่มกล้องวงจรปิดได้ โปรดลองอีกครั้ง',
+        confirmButtonColor: '#ef4444'
       });
     } finally {
       setIsSubmitting(false);
@@ -131,8 +144,8 @@ const CCTVPage = () => {
       text: "หากลบแล้วจะไม่สามารถเรียกคืนการตั้งค่ากลับมาได้!",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#C62828',
-      cancelButtonColor: '#9e9e9e',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#94a3b8',
       confirmButtonText: 'ลบข้อมูล',
       cancelButtonText: 'ยกเลิก',
       reverseButtons: true
@@ -140,7 +153,7 @@ const CCTVPage = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`${API}/api/cctv/${id}`);
+        await axios.delete(`/api/cctv/${id}`);
         Swal.fire({
           icon: 'success',
           title: 'ลบสำเร็จ',
@@ -154,84 +167,139 @@ const CCTVPage = () => {
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
           text: 'ไม่สามารถลบข้อมูลได้ เกิดปัญหาบางอย่าง',
+          confirmButtonColor: '#ef4444'
         });
       }
     }
   };
 
   return (
-    <div className="cctv-page">
-      {/* Background Ambience */}
-      <div className="cctv-bg-blur top-right" />
-      <div className="cctv-bg-blur bottom-left" />
-
-      <div className="cctv-container">
-        {/* Header Section */}
-        <div className="cctv-header">
+    <div className="bg-[#F8FAFC] pb-24 flex-grow">
+      {/* Page Header */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="cctv-title">จัดการกล้องวงจรปิด (CCTV)</h1>
-            <p className="cctv-subtitle">ควบคุมและตรวจดูความเรียบร้อยของแปลงผักแบบเรียลไทม์</p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-700 text-xs font-bold mb-2">
+              <Video className="w-3.5 h-3.5 text-emerald-600" />
+              {isThai ? 'กล้องวงจรปิด & ระบบสตรีมมิ่งสด' : 'CCTV & Live Monitoring'}
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              {isThai ? 'จัดการกล้องวงจรปิด (CCTV)' : 'CCTV Management'}
+            </h1>
+            <p className="text-base sm:text-lg text-slate-500 mt-1 font-medium">
+              {isThai 
+                ? 'ควบคุมและตรวจดูความเรียบร้อยของแปลงผักแบบเรียลไทม์' 
+                : 'Monitor and inspect your vegetable plots in real-time.'}
+            </p>
           </div>
-          <button className="cctv-add-btn" onClick={handleOpenModal}>
-            <Plus size={18} strokeWidth={2.5} /> เพิ่มกล้องวงจรปิด
+          <button
+            onClick={handleOpenModal}
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-200/80 active:scale-95 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            {isThai ? 'เพิ่มกล้องวงจรปิด' : 'Add CCTV Camera'}
           </button>
         </div>
 
-        {/* CCTVs List */}
+        {/* Content Section */}
         {loading ? (
-          <div className="cctv-loading">
-            <Loader2 className="spin" size={32} color="#2E7D32" />
-            <p>กำลังโหลดข้อมูลกล้อง...</p>
+          <div className="flex flex-col items-center justify-center py-20 text-slate-500 gap-3">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+            <p className="font-bold text-sm">{isThai ? 'กำลังโหลดข้อมูลกล้อง...' : 'Loading CCTV data...'}</p>
           </div>
         ) : cctvs.length === 0 ? (
-          <div className="cctv-empty">
-            <div className="cctv-empty-icon">
-              <Camera size={48} />
+          <div className="bg-white rounded-[3rem] p-12 md:p-16 border border-slate-100 text-center shadow-xl shadow-slate-200/50 max-w-2xl mx-auto overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-100 transition-colors" />
+            <div className="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 relative z-10 transform group-hover:rotate-6 transition-transform border border-emerald-100">
+              <Camera className="w-10 h-10 text-emerald-600" />
             </div>
-            <h2>ยังไม่มีกล้องในระบบ</h2>
-            <p>เพิ่มกล้องวงจรปิดเพื่อเริ่มต้นดูแลแปลงผักของคุณตลอด 24 ชั่วโมง</p>
-            <button className="cctv-empty-btn" onClick={handleOpenModal}>
-              <Plus size={16} /> เริ่มเพิ่มกล้องตัวแรก
+            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight uppercase">
+              {isThai ? 'ยังไม่มีกล้องในระบบ' : 'NO CCTV CAMERAS'}
+            </h3>
+            <p className="text-slate-500 font-medium text-base mb-8 max-w-sm mx-auto leading-relaxed">
+              {isThai 
+                ? 'เพิ่มกล้องวงจรปิดเพื่อเริ่มต้นดูแลแปลงผักของคุณตลอด 24 ชั่วโมง' 
+                : 'Add a CCTV camera to start monitoring your plots 24/7.'}
+            </p>
+            <button 
+              onClick={handleOpenModal}
+              className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-2xl transition-all duration-300 flex items-center gap-2.5 mx-auto shadow-[0_12px_25px_-5px_rgba(16,185,129,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest text-xs relative overflow-hidden group/btn"
+            >
+              <Plus className="w-5 h-5" />
+              {isThai ? 'เริ่มเพิ่มกล้องตัวแรก' : 'ADD FIRST CAMERA'}
             </button>
           </div>
         ) : (
-          <div className="cctv-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {cctvs.map(cam => (
-              <div key={cam.id || cam._id} className="cctv-card">
-                <div className="cctv-card-header">
-                  <div className="cctv-card-title">
-                    <Video size={18} color="#2E7D32" />
-                    <h3>{cam.camera_name || 'ไม่ระบุชื่อกล้อง'}</h3>
+              <div 
+                key={cam.id || cam._id} 
+                className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-100 hover:border-emerald-200 flex flex-col group"
+              >
+                {/* Card Header */}
+                <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shadow-xs">
+                      <Video className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-800 text-base">{cam.camera_name || 'ไม่ระบุชื่อกล้อง'}</h3>
+                      <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                        {isThai ? 'เชื่อมต่อแล้ว' : 'CONNECTED'}
+                      </span>
+                    </div>
                   </div>
-                  <button className="cctv-delete-btn" onClick={() => handleDelete(cam.id || cam._id)} title="ลบกล้อง">
-                    <Trash2 size={16} />
+                  <button 
+                    onClick={() => handleDelete(cam.id || cam._id)} 
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
+                    title={isThai ? 'ลบกล้อง' : 'Delete Camera'}
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
                 
-                <div className="cctv-card-body">
-                  <div className="cctv-info-item">
-                    <Network size={14} className="icon" />
-                    <span><strong>IP/URL:</strong> {cam.ip_address || '-'}</span>
+                {/* Card Body */}
+                <div className="p-5 flex-1 space-y-3 bg-white">
+                  <div className="flex items-start gap-2.5 text-xs text-slate-600">
+                    <Network className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-slate-700">IP/URL: </span>
+                      <span className="font-mono text-slate-600">{cam.ip_address || '-'}</span>
+                    </div>
                   </div>
-                  <div className="cctv-info-item">
-                    <Settings size={14} className="icon" />
-                    <span><strong>RTSP User:</strong> {cam.rtsp_username ? '********' : 'ไม่มี'}</span>
+
+                  <div className="flex items-start gap-2.5 text-xs text-slate-600">
+                    <Settings className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-slate-700">RTSP User: </span>
+                      <span className="text-slate-600">{cam.rtsp_username ? '********' : (isThai ? 'ไม่มี' : 'None')}</span>
+                    </div>
                   </div>
-                  <div className="cctv-info-item">
-                    <Sprout size={14} className="icon" />
-                    <span><strong>IP พ่นน้ำ:</strong> {cam.device_ip || 'ไม่ได้ตั้งต่า'}</span>
+
+                  <div className="flex items-start gap-2.5 text-xs text-slate-600">
+                    <Sprout className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-slate-700">{isThai ? 'IP พ่นน้ำ:' : 'Sprinkler IP:'} </span>
+                      <span className="font-mono text-slate-600">{cam.device_ip || (isThai ? 'ไม่ได้ตั้งค่า' : 'Not set')}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="cctv-card-footer">
-                  <button className="cctv-play-btn" onClick={() => {
-                    Swal.fire({
-                       icon: 'info',
-                       title: 'Coming Soon!',
-                       text: 'ระบบหน้าจอ Live Streaming กำลังอยู่ในช่วงพัฒนาครับ'
-                    });
-                  }}>
-                    <Play size={15} fill="currentColor" /> เปิดดูกล้อง
+                {/* Card Footer */}
+                <div className="p-4 border-t border-slate-100 bg-slate-50/30">
+                  <button 
+                    onClick={() => {
+                      Swal.fire({
+                        icon: 'info',
+                        title: 'Coming Soon!',
+                        text: isThai ? 'ระบบหน้าจอ Live Streaming กำลังอยู่ในช่วงพัฒนาครับ' : 'Live Streaming view is under development.',
+                        confirmButtonColor: '#059669'
+                      });
+                    }}
+                    className="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95 border border-emerald-100/80"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    {isThai ? 'เปิดดูกล้อง' : 'Live Stream'}
                   </button>
                 </div>
               </div>
@@ -241,78 +309,115 @@ const CCTVPage = () => {
       </div>
 
       {/* Add CCTV Modal */}
-      {isModalOpen && (
-        <div className="cctv-modal-overlay" onMouseDown={handleCloseModal}>
-          <div className="cctv-modal" onMouseDown={e => e.stopPropagation()}>
-            <div className="cctv-modal-header">
-              <h2>เพิ่มกล้องวงจรปิดใหม่</h2>
-              <button className="cctv-modal-close" onClick={handleCloseModal}>
-                <X size={20} />
+      {isModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+          <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-2xl w-full max-w-lg relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col border border-white/20">
+            {/* Modal Header */}
+            <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-200">
+                  <Video className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">{isThai ? 'เพิ่มกล้องวงจรปิดใหม่' : 'Add New CCTV Camera'}</h2>
+                  <p className="text-xs font-medium text-slate-400">{isThai ? 'กรอกรายละเอียด IP และแปลงที่ต้องการติดตั้ง' : 'Fill camera RTSP & plot connection'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={handleCloseModal}
+                className="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="cctv-modal-body">
-              <div className="cctv-form-group">
-                <label>ชื่อกล้องวงจรปิด <span className="req">*</span></label>
+
+            {/* Modal Body / Form */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                  {isThai ? 'ชื่อกล้องวงจรปิด' : 'Camera Name'} <span className="text-red-500">*</span>
+                </label>
                 <input 
                   type="text" 
                   name="camera_name" 
                   value={form.camera_name} 
                   onChange={handleChange} 
-                  placeholder="เช่น กล้องแปลงกะเพรา 1" 
+                  placeholder={isThai ? 'เช่น กล้องแปลงกะเพรา 1' : 'e.g., Plot #1 Camera'} 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                   required 
                 />
               </div>
 
-              <div className="cctv-form-group">
-                <label>IP หรือ URL ของกล้องวงจรปิด <span className="req">*</span></label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                  {isThai ? 'IP หรือ URL ของกล้องวงจรปิด' : 'CCTV IP or Stream URL'} <span className="text-red-500">*</span>
+                </label>
                 <input 
                   type="text" 
                   name="ip_address" 
                   value={form.ip_address} 
                   onChange={handleChange} 
-                  placeholder="เช่น 192.168.1.100 หรือ rtsp://..." 
+                  placeholder={isThai ? 'เช่น 192.168.1.100 หรือ rtsp://...' : 'e.g., 192.168.1.100 or rtsp://...'} 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                   required 
                 />
               </div>
 
-              <div className="cctv-form-row">
-                <div className="cctv-form-group">
-                  <label>ชื่อผู้ใช้ RTSP (Username)</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">
+                    {isThai ? 'ชื่อผู้ใช้ RTSP (Username)' : 'RTSP Username'}
+                  </label>
                   <input 
                     type="text" 
                     name="rtsp_username" 
                     value={form.rtsp_username} 
                     onChange={handleChange} 
                     placeholder="admin" 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                   />
                 </div>
-                <div className="cctv-form-group">
-                  <label>รหัสผ่าน RTSP (Password)</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">
+                    {isThai ? 'รหัสผ่าน RTSP (Password)' : 'RTSP Password'}
+                  </label>
                   <input 
-                    type="text" 
+                    type="password" 
                     name="rtsp_password" 
                     value={form.rtsp_password} 
                     onChange={handleChange} 
-                    placeholder="123456" 
+                    placeholder="••••••••" 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="cctv-form-group">
-                <label>IP ของเครื่องพ่นน้ำ (Relay ESP)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">
+                  {isThai ? 'IP ของเครื่องพ่นน้ำ (Relay ESP)' : 'Sprinkler Relay IP (ESP)'}
+                </label>
                 <input 
                   type="text" 
                   name="device_ip" 
                   value={form.device_ip} 
                   onChange={handleChange} 
-                  placeholder="เช่น 192.168.1.105" 
+                  placeholder={isThai ? 'เช่น 192.168.1.105' : 'e.g., 192.168.1.105'} 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                 />
               </div>
 
-              <div className="cctv-form-group">
-                <label>แปลงที่ติดตั้ง (Plot) <span className="req">*</span></label>
-                <select name="plot_id" value={form.plot_id} onChange={handleChange} required>
-                  <option value="" disabled>-- กรุณาเลือกแปลงที่ติดตั้ง --</option>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                  {isThai ? 'แปลงที่ติดตั้ง (Plot)' : 'Installed Plot'} <span className="text-red-500">*</span>
+                </label>
+                <select 
+                  name="plot_id" 
+                  value={form.plot_id} 
+                  onChange={handleChange} 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all cursor-pointer"
+                  required
+                >
+                  <option value="" disabled>{isThai ? '-- กรุณาเลือกแปลงที่ติดตั้ง --' : '-- Select Plot --'}</option>
                   {plots.map(p => (
                     <option key={p.id || p._id} value={p.id || p._id}>
                       {p.name || p.plot_name || 'ไม่ระบุชื่อ'} {p.size ? `(${p.size} ${p.unit || p.area_unit || 'ตร.ม.'})` : ''}
@@ -320,257 +425,40 @@ const CCTVPage = () => {
                   ))}
                 </select>
                 {plots.length === 0 && (
-                  <p className="cctv-form-hint">
-                    คุณยังไม่มีแปลงผัก <a href="/plots" style={{color: '#0284c7', textDecoration: 'underline'}}>คลิกที่นี่เพื่อไปสร้างแปลงก่อน</a>
+                  <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 p-2.5 rounded-xl flex items-center gap-1.5 mt-2">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {isThai ? 'คุณยังไม่มีแปลงผัก' : 'No active plots.'}{' '}
+                      <a href="/plots" className="text-sky-600 underline font-bold">
+                        {isThai ? 'คลิกที่นี่เพื่อสร้างแปลง' : 'Create plot'}
+                      </a>
+                    </span>
                   </p>
                 )}
               </div>
 
-              <div className="cctv-modal-footer">
-                <button type="button" className="cctv-cancel" onClick={handleCloseModal}>
-                  ยกเลิก
+              {/* Modal Footer Buttons */}
+              <div className="pt-4 border-t border-slate-100 flex gap-3">
+                <button 
+                  type="button" 
+                  onClick={handleCloseModal}
+                  className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs uppercase tracking-widest transition-all"
+                >
+                  {isThai ? 'ยกเลิก' : 'Cancel'}
                 </button>
-                <button type="submit" className="cctv-save" disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 size={16} className="spin" /> : 'สร้างและบันทึก'}
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (isThai ? 'สร้างและบันทึก' : 'Save Camera')}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-
-      {/* STYLES */}
-      <style>{`
-        .cctv-page {
-          min-height: 100vh;
-          background: #f8fafc;
-          padding: 30px 20px 80px;
-          position: relative;
-          overflow: hidden;
-          font-family: 'Prompt', 'Inter', sans-serif;
-        }
-        
-        /* Blur Backgrounds */
-        .cctv-bg-blur {
-          position: fixed;
-          border-radius: 50%;
-          filter: blur(100px);
-          opacity: 0.5;
-          z-index: 0;
-          pointer-events: none;
-        }
-        .cctv-bg-blur.top-right {
-          width: 50vw; height: 50vw;
-          max-width: 600px; max-height: 600px;
-          background: #E8F5E9; /* light green */
-          top: -10vw; right: -10vw;
-        }
-        .cctv-bg-blur.bottom-left {
-          width: 40vw; height: 40vw;
-          max-width: 500px; max-height: 500px;
-          background: #C8E6C9; /* light green */
-          bottom: -10vw; left: -10vw;
-        }
-
-        .cctv-container {
-          max-width: 1000px;
-          margin: 0 auto;
-          position: relative;
-          z-index: 10;
-        }
-
-        /* Header */
-        .cctv-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          flex-wrap: wrap;
-          gap: 16px;
-          margin-bottom: 30px;
-        }
-        .cctv-back-btn {
-          display: inline-flex; align-items: center; gap: 4px;
-          background: transparent; border: none;
-          color: #64748b; font-size: 14px; font-weight: 700;
-          cursor: pointer; padding: 4px 0 12px; transition: color 0.15s;
-        }
-        .cctv-back-btn:hover { color: #2E7D32; }
-        .cctv-title {
-          font-size: 32px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;
-          letter-spacing: -0.02em;
-        }
-        .cctv-subtitle {
-          font-size: 15px; color: #64748b; margin: 0;
-        }
-        .cctv-add-btn {
-          display: flex; align-items: center; gap: 6px;
-          background: #2E7D32; color: #fff;
-          border: none; border-radius: 12px;
-          padding: 12px 20px; font-size: 15px; font-weight: 700;
-          cursor: pointer; transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
-        }
-        .cctv-add-btn:hover { background: #1B5E20; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(27, 94, 32, 0.3); }
-        .cctv-add-btn:active { transform: translateY(0); }
-
-        /* Loading & Empty state */
-        .cctv-loading {
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-          padding: 60px 20px; color: #64748b; gap: 16px; font-weight: 600;
-        }
-        .spin { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .cctv-empty {
-          background: rgba(255, 255, 255, 0.6);
-          border: 1px dashed #cbd5e1;
-          border-radius: 20px;
-          padding: 60px 20px;
-          text-align: center;
-          display: flex; flex-direction: column; align-items: center;
-          backdrop-filter: blur(10px);
-        }
-        .cctv-empty-icon {
-          width: 80px; height: 80px; background: #F1F8E9; color: #C5E1A5;
-          border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          margin-bottom: 20px;
-        }
-        .cctv-empty h2 { margin: 0 0 8px; font-size: 20px; font-weight: 800; color: #334155; }
-        .cctv-empty p { margin: 0 0 24px; color: #64748b; font-size: 15px; }
-        .cctv-empty-btn {
-          display: flex; align-items: center; gap: 8px;
-          background: #fff; border: 1.5px solid #e2e8f0; color: #0f172a;
-          padding: 10px 18px; border-radius: 10px; font-weight: 700; cursor: pointer;
-          transition: all 0.15s;
-        }
-        .cctv-empty-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
-
-        /* Grid */
-        .cctv-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 20px;
-        }
-        .cctv-card {
-          background: #fff; border-radius: 16px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-          border: 1px solid rgba(0,0,0,0.03);
-          overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
-          display: flex; flex-direction: column;
-        }
-        .cctv-card:hover { 
-          transform: translateY(-2px); 
-          box-shadow: 0 8px 30px rgba(0,0,0,0.08); 
-        }
-        .cctv-card-header {
-          padding: 18px 20px; border-bottom: 1px solid #f1f5f9;
-          display: flex; justify-content: space-between; align-items: center;
-        }
-        .cctv-card-title {
-          display: flex; align-items: center; gap: 10px;
-        }
-        .cctv-card-title h3 {
-          margin: 0; font-size: 16px; font-weight: 800; color: #1e293b;
-        }
-        .cctv-delete-btn {
-          background: none; border: none; color: #cbd5e1; cursor: pointer;
-          padding: 6px; border-radius: 8px; transition: all 0.15s;
-        }
-        .cctv-delete-btn:hover { background: #fee2e2; color: #ef4444; }
-        
-        .cctv-card-body {
-          padding: 20px; display: flex; flex-direction: column; gap: 12px;
-          flex: 1; background: #fafafa;
-        }
-        .cctv-info-item {
-          display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #475569;
-        }
-        .cctv-info-item .icon {
-          color: #94a3b8; flex-shrink: 0; margin-top: 2px;
-        }
-        .cctv-info-item strong { color: #334155; }
-        
-        .cctv-card-footer {
-          padding: 14px 20px; background: #fff; border-top: 1px solid #f1f5f9;
-        }
-        .cctv-play-btn {
-          width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
-          padding: 10px; background: #F1F8E9; color: #2E7D32;
-          border: none; border-radius: 10px; font-weight: 700; font-size: 14px;
-          cursor: pointer; transition: all 0.15s;
-        }
-        .cctv-play-btn:hover { background: #E8F5E9; color: #1B5E20; }
-
-        /* Modal */
-        .cctv-modal-overlay {
-          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
-          display: flex; align-items: center; justify-content: center;
-          z-index: 1000; padding: 20px;
-        }
-        .cctv-modal {
-          background: #fff; width: 100%; max-width: 520px;
-          border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-          overflow: hidden; display: flex; flex-direction: column;
-          animation: modalIn 0.2s ease-out;
-        }
-        @keyframes modalIn {
-          0% { transform: scale(0.95); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .cctv-modal-header {
-          padding: 24px 24px 20px; border-bottom: 1px solid #f1f5f9;
-          display: flex; justify-content: space-between; align-items: center;
-        }
-        .cctv-modal-header h2 { margin: 0; font-size: 20px; font-weight: 800; color: #0f172a; }
-        .cctv-modal-close {
-          background: #f1f5f9; border: none; width: 32px; height: 32px;
-          border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          color: #64748b; cursor: pointer; transition: background 0.15s;
-        }
-        .cctv-modal-close:hover { background: #e2e8f0; color: #0f172a; }
-        
-        .cctv-modal-body {
-          padding: 24px; display: flex; flex-direction: column; gap: 16px;
-          overflow-y: auto; max-height: calc(100vh - 120px);
-        }
-        .cctv-form-group { display: flex; flex-direction: column; gap: 6px; }
-        .cctv-form-row { display: flex; gap: 16px; }
-        .cctv-form-row > * { flex: 1; }
-        
-        .cctv-form-group label { font-size: 13px; font-weight: 700; color: #334155; }
-        .req { color: #ef4444; }
-        .cctv-form-group input, .cctv-form-group select {
-          padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
-          font-size: 14px; outline: none; transition: border-color 0.15s; font-family: 'Prompt', sans-serif;
-        }
-        .cctv-form-group input:focus, .cctv-form-group select:focus {
-          border-color: #2E7D32;
-        }
-        .cctv-form-hint { font-size: 12px; color: #64748b; margin-top: 4px; }
-        
-        .cctv-modal-footer {
-          padding-top: 8px; display: flex; justify-content: flex-end; gap: 10px;
-        }
-        .cctv-cancel {
-          padding: 10px 20px; background: #f1f5f9; color: #475569;
-          border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.15s;
-        }
-        .cctv-cancel:hover { background: #e2e8f0; }
-        .cctv-save {
-          display: flex; align-items: center; gap: 8px;
-          padding: 10px 24px; background: #2E7D32; color: #fff;
-          border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.15s;
-        }
-        .cctv-save:hover:not(:disabled) { background: #1B5E20; }
-        .cctv-save:disabled { background: #A5D6A7; cursor: not-allowed; }
-
-        @media (max-width: 600px) {
-          .cctv-header { flex-direction: column; align-items: stretch; gap: 20px; }
-          .cctv-title { font-size: 24px; }
-          .cctv-form-row { flex-direction: column; gap: 16px; }
-        }
-      `}</style>
     </div>
   );
 };

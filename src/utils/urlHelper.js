@@ -14,13 +14,11 @@ export const getImageUrl = (path) => {
     return path;
   }
   
-  // ถ้าเริ่มต้นด้วย / ให้พยายามใช้ผ่าน Proxy ของ Frontend ก่อน (เพื่อเลี่ยงปัญหา ngrok warning)
-  if (path.startsWith('/')) {
-    return path;
-  }
-  
-  // กรณีอื่นๆ (เช่น ส่งมาแค่ "static/...") ให้ใส่ / เข้าไปข้างหน้า
-  return `/${path}`;
+  // Static files are served by FastAPI, not by the Vite frontend server.
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const apiBaseUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+  return apiBaseUrl ? `${apiBaseUrl}${normalizedPath}` : normalizedPath;
 };
 
 export default {

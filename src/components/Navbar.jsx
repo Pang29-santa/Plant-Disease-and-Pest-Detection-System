@@ -75,7 +75,7 @@ const Navbar = () => {
   // Re-order links as requested
   const mainLinks = [
     { to: '/cctv', label: t('nav.cctv'), icon: BookOpen, authRequired: true },
-    { to: '/detect', label: t('nav.detect'), icon: Camera },
+    { to: isAuthenticated ? '/detect/plots' : '/detect', label: t('nav.detect'), icon: Camera },
     { to: '/plots', label: t('nav.plots'), icon: Map, authRequired: true },
     { to: '/history', label: t('nav.history'), icon: History, authRequired: true },
   ];
@@ -86,7 +86,12 @@ const Navbar = () => {
     { to: '/pests', label: t('nav.pests'), icon: Bug },
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/detect') {
+      return location.pathname.startsWith('/detect');
+    }
+    return location.pathname === path;
+  };
   const isKnowledgeActive = knowledgeLinks.some(link => isActive(link.to));
 
   return (

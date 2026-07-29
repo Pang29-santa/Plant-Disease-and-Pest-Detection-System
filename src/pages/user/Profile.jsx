@@ -62,7 +62,7 @@ const ProfilePage = () => {
                  fetchLocationDetails(user.subdistricts_id);
              }
         }
-    }, [user]);
+    }, [user?.user_id || user?._id]);
 
     // Fetch Provinces on Mount
     useEffect(() => {

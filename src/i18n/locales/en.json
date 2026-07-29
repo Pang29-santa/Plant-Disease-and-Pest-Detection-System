@@ -349,6 +349,7 @@
     "back": "Back",
     "noData": "Data not found",
     "noDataDesc": "Sorry, the details of the disease or pest you are looking for could not be found.",
+    "description": "Description & Appearance",
     "symptoms": "Symptoms & Appearance",
     "cause": "Cause",
     "treatment": "Treatment & Management",

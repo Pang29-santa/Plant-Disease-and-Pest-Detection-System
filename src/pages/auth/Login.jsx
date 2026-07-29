@@ -7,7 +7,7 @@ import { Eye, EyeOff, Mail, Lock, Leaf, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
   const { t } = useTranslation();
-  const { login } = useAuth();
+  const { login, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || null;
@@ -20,6 +20,19 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // If already authenticated, redirect admin to /admin or user to /
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (from) {
+        navigate(from, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate, from]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -28,12 +41,13 @@ const Login = () => {
     const result = await login(formData.username, formData.password);
     
     if (result.success) {
-      if (from) {
+      const loggedInUser = result.user || user;
+      if (loggedInUser?.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (from) {
         navigate(from, { replace: true });
-      } else if (result.user?.role === 'admin') {
-        navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     } else {
       const msg = result.message || '';

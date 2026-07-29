@@ -59,8 +59,8 @@ const AdminUsers = () => {
             showCancelButton: true,
             confirmButtonColor: newStatus === 'active' ? '#10b981' : '#ef4444',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: t('admin.confirm'),
-            cancelButtonText: t('admin.cancel')
+confirmButtonText: t('common.confirm'),
+cancelButtonText: t('common.cancel')
         });
 
         if (result.isConfirmed) {

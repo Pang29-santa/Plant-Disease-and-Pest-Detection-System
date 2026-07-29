@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { ChevronLeft, Pencil } from 'lucide-react';
@@ -9,6 +9,8 @@ import { getImageUrl } from '../../utils/urlHelper';
 const AdminPestDetail = () => {
     const { t } = useTranslation();
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    const fromPage = parseInt(searchParams.get('page') || '1', 10);
     const [pest, setPest] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -35,12 +37,12 @@ const AdminPestDetail = () => {
     return (
         <AdminLayout title={t('admin.diseases.detail.title')}>
             <div className="mb-6 flex justify-between items-center">
-                <Link to="/admin/pests" className="inline-flex items-center text-gray-600 hover:text-primary-600 transition-colors">
+                <Link to={fromPage > 1 ? `/admin/pests?page=${fromPage}` : '/admin/pests'} className="inline-flex items-center text-gray-600 hover:text-primary-600 transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1" />
                     {t('admin.diseases.form.back')}
                 </Link>
                 <Link
-                    to={`/admin/pests/edit/${pest._id}`}
+                    to={`/admin/pests/edit/${pest._id}?page=${fromPage}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors"
                 >
                     <Pencil className="w-4 h-4 mr-2" />
@@ -96,6 +98,25 @@ const AdminPestDetail = () => {
                             </div>
                         </div>
                     ))}
+
+                    {pest.image_paths && pest.image_paths.length > 1 && (
+                        <div className="space-y-6 pt-6 border-t">
+                            <h3 className="text-lg font-bold text-primary-800 flex items-center border-l-4 border-primary-500 pl-3">{t('admin.diseases.detail.gallery')}</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                {pest.image_paths.slice(1).map((path, index) => (
+                                    <div key={index} className="aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all group relative cursor-pointer"
+                                         onClick={() => window.open(getImageUrl(path), '_blank')}>
+                                        <img
+                                            src={getImageUrl(path)}
+                                            alt={`Gallery ${index + 1}`}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AdminLayout>

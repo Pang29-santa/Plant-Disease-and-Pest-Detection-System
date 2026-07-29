@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -10,6 +10,8 @@ const AdminVegetableDetail = () => {
     const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const fromPage = parseInt(searchParams.get('page') || '1', 10);
     const [vegetable, setVegetable] = useState(null);
     const [nutrition, setNutrition] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -39,12 +41,12 @@ const AdminVegetableDetail = () => {
     return (
         <AdminLayout title={t('admin.vegetables.detail.title')}>
              <div className="mb-6 flex justify-between items-center">
-                <button onClick={() => navigate('/admin/vegetables')} className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
+                <button onClick={() => navigate(fromPage > 1 ? `/admin/vegetables?page=${fromPage}` : '/admin/vegetables')} className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1" />
                     {t('admin.diseases.form.back')}
                 </button>
                 <Link
-                    to={`/admin/vegetables/edit/${id}`}
+                    to={`/admin/vegetables/edit/${id}?page=${fromPage}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors"
                 >
                     <Pencil className="w-4 h-4 mr-2" />

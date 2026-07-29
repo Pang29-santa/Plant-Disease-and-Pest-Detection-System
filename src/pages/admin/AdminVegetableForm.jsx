@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -23,6 +23,8 @@ const AdminVegetableForm = () => {
     const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const fromPage = parseInt(searchParams.get('page') || '1', 10);
     const isEditMode = !!id;
 
     const [formData, setFormData] = useState({
@@ -250,7 +252,9 @@ const AdminVegetableForm = () => {
                     }));
                     await axios.post(`/api/vegetable/${vegDbId}/nutrition`, nutritionPayload);
                 }
-                Swal.fire(t('admin.alerts.success'), t('admin.alerts.successSave'), 'success').then(() => navigate('/admin/vegetables'));
+                Swal.fire(t('admin.alerts.success'), t('admin.alerts.successSave'), 'success').then(() => {
+                    navigate(fromPage > 1 ? `/admin/vegetables?page=${fromPage}` : '/admin/vegetables');
+                });
             }
         } catch (error) {
             console.error("Error saving vegetable:", error);
@@ -273,7 +277,7 @@ const AdminVegetableForm = () => {
     return (
         <AdminLayout title={isEditMode ? t('admin.vegetables.edit') : t('admin.vegetables.add')}>
             <div className="mb-6">
-                <Link to="/admin/vegetables" className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
+                <Link to={fromPage > 1 ? `/admin/vegetables?page=${fromPage}` : '/admin/vegetables'} className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1" />
                     {t('admin.diseases.form.back')}
                 </Link>
@@ -468,7 +472,7 @@ const AdminVegetableForm = () => {
                 </div>
 
                 <div className="flex justify-end gap-4 mt-16 pt-8 border-t border-gray-100">
-                    <button onClick={() => navigate('/admin/vegetables')} className="px-8 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-bold hover:bg-gray-50 transition-all active:scale-95">{t('admin.diseases.form.cancel')}</button>
+                    <button onClick={() => navigate(fromPage > 1 ? `/admin/vegetables?page=${fromPage}` : '/admin/vegetables')} className="px-8 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-bold hover:bg-gray-50 transition-all active:scale-95">{t('admin.diseases.form.cancel')}</button>
                     <button onClick={handleSubmit} disabled={loading} className="px-10 py-2.5 bg-green-700 text-white rounded-xl font-bold hover:bg-green-800 transition-all shadow-lg hover:shadow-green-900/20 flex items-center gap-2 active:scale-95 disabled:opacity-50">
                         <Save className="w-4.5 h-4.5" />
                         {loading ? t('admin.diseases.form.saving') : t('admin.diseases.form.save')}

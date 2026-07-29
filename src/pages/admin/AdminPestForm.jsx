@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { ChevronLeft, Save, Upload, X, Plus, CheckCircle, AlertCircle } from 'lucide-react';
@@ -24,6 +24,8 @@ const AdminPestForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const fromPage = parseInt(searchParams.get('page') || '1', 10);
     const isEdit = !!id;
     const defaultType = location.state?.defaultType || '2';
 
@@ -214,7 +216,7 @@ const AdminPestForm = () => {
                 await axios.post('/api/diseases-pest/with-images', data, { headers: { 'Content-Type': 'multipart/form-data' } });
                 await Swal.fire(t('admin.alerts.success'), t('admin.diseases.form.successAdd'), 'success');
             }
-            navigate('/admin/pests');
+            navigate(fromPage > 1 ? `/admin/pests?page=${fromPage}` : '/admin/pests');
         } catch (err) {
             console.error('Error saving:', err);
             Swal.fire(t('admin.alerts.error'), `${t('admin.diseases.form.errorSave')}: ${err.response?.data?.detail || err.message}`, 'error');
@@ -227,7 +229,7 @@ const AdminPestForm = () => {
     return (
         <AdminLayout title={isEdit ? t('admin.diseases.form.editTitle') : t('admin.diseases.form.addTitle')}>
             <div className="mb-6">
-                <Link to="/admin/pests" className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
+                <Link to={fromPage > 1 ? `/admin/pests?page=${fromPage}` : '/admin/pests'} className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1" />
                     {t('admin.diseases.form.back')}
                 </Link>
@@ -410,7 +412,7 @@ const AdminPestForm = () => {
                     </div>
 
                     <div className="flex justify-end gap-4 pt-6 border-t">
-                        <Link to="/admin/pests" className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
+                        <Link to={fromPage > 1 ? `/admin/pests?page=${fromPage}` : '/admin/pests'} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
                             <X className="w-4 h-4 mr-2" /> {t('admin.diseases.form.cancel')}
                         </Link>
                         <button

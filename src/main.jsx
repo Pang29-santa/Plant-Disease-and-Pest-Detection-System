@@ -11,6 +11,13 @@ axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 // Bypass ngrok browser warning
 axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
 
+// Avoid stale PWA bundles while developing with Vite.
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister());
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <App />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { ChevronLeft, Pencil } from 'lucide-react';
@@ -9,6 +9,8 @@ import { getImageUrl } from '../../utils/urlHelper';
 const AdminDiseaseDetail = () => {
     const { t } = useTranslation();
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    const fromPage = parseInt(searchParams.get('page') || '1', 10);
     const [disease, setDisease] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -35,12 +37,12 @@ const AdminDiseaseDetail = () => {
     return (
         <AdminLayout title={t('admin.diseases.detail.title')}>
             <div className="mb-6 flex justify-between items-center">
-                <Link to="/admin/diseases" className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
+                <Link to={fromPage > 1 ? `/admin/diseases?page=${fromPage}` : '/admin/diseases'} className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1" />
                     {t('admin.diseases.form.back')}
                 </Link>
                 <Link
-                    to={`/admin/diseases/edit/${disease._id}`}
+                    to={`/admin/diseases/edit/${disease._id}?page=${fromPage}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors"
                 >
                     <Pencil className="w-4 h-4 mr-2" />
