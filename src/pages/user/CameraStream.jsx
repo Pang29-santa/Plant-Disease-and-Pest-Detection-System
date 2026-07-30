@@ -99,9 +99,9 @@ const CameraStreamPage = () => {
             <div>
               <h1 className="text-xl font-black flex items-center gap-2">
                 <Video className="w-6 h-6 text-primary-400" />
-                หน้าจอติดตามกล้อง
+                {t('cameraStreamPage.title')}
               </h1>
-              <p className="text-gray-400 text-sm">ดูสตรีมสดจากกล้องวงจรปิดทั้งหมด</p>
+              <p className="text-gray-400 text-sm">{t('cameraStreamPage.subtitle')}</p>
             </div>
           </div>
           <button
@@ -110,7 +110,7 @@ const CameraStreamPage = () => {
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            ตรวจสอบสถานะ
+            {t('cameraStreamPage.checkStatus')}
           </button>
         </div>
       </div>
@@ -119,18 +119,18 @@ const CameraStreamPage = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-primary-400" />
-            <p className="mt-4 text-gray-400">กำลังโหลดข้อมูลกล้อง...</p>
+            <p className="mt-4 text-gray-400">{t('cameraStreamPage.loading')}</p>
           </div>
         ) : cctvs.length === 0 ? (
           <div className="bg-gray-800 rounded-2xl p-12 text-center">
             <Camera className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-            <p className="text-xl font-bold text-gray-300">ยังไม่มีกล้องวงจรปิด</p>
-            <p className="text-gray-400 mt-2">ไปที่หน้าจัดการ CCTV เพื่อเพิ่มกล้อง</p>
+            <p className="text-xl font-bold text-gray-300">{t('cameraStreamPage.noCameras')}</p>
+            <p className="text-gray-400 mt-2">{t('workerPage.noCameras')}</p>
             <button
               onClick={() => navigate('/cctv')}
               className="mt-6 px-6 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors"
             >
-              ไปที่หน้า CCTV
+              {t('cameraStreamPage.goToCctv')}
             </button>
           </div>
         ) : (
@@ -145,7 +145,7 @@ const CameraStreamPage = () => {
                     {selectedStatus && (
                       <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${isOnline ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
                         {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                        {isOnline ? 'ออนไลน์' : 'ออฟไลน์'}
+                        {isOnline ? t('cameraStreamPage.online') : t('cameraStreamPage.offline')}
                       </span>
                     )}
                   </div>

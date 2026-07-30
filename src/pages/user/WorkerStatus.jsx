@@ -12,7 +12,8 @@ import {
 import Swal from 'sweetalert2';
 
 const WorkerStatus = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id || user?.user_id;
@@ -62,7 +63,7 @@ const WorkerStatus = () => {
       await fetchStatus();
       Swal.fire({
         icon: 'success',
-        title: 'Worker เริ่มทำงานแล้ว',
+        title: isThai ? 'Worker เริ่มทำงานแล้ว' : 'Worker Started',
         timer: 1500,
         showConfirmButton: false
       });
@@ -70,7 +71,7 @@ const WorkerStatus = () => {
       console.error(err);
       Swal.fire({
         icon: 'error',
-        title: 'ไม่สามารถเริ่ม Worker',
+        title: isThai ? 'ไม่สามารถเริ่ม Worker' : 'Failed to Start Worker',
         text: err?.response?.data?.message || err.message
       });
     } finally {
@@ -81,11 +82,11 @@ const WorkerStatus = () => {
   const handleStop = async () => {
     const confirmed = await Swal.fire({
       icon: 'warning',
-      title: 'หยุด Worker?',
-      text: 'ระบบจะหยุดตรวจสอบกล้องอัตโนมัติชั่วคราว',
+      title: isThai ? 'หยุด Worker?' : 'Stop Worker?',
+      text: isThai ? 'ระบบจะหยุดตรวจสอบกล้องอัตโนมัติชั่วคราว' : 'Automatic camera monitoring will be paused',
       showCancelButton: true,
-      confirmButtonText: 'หยุด',
-      cancelButtonText: 'ยกเลิก',
+      confirmButtonText: isThai ? 'หยุด' : 'Stop',
+      cancelButtonText: isThai ? 'ยกเลิก' : 'Cancel',
       confirmButtonColor: '#ef4444'
     });
     if (!confirmed.isConfirmed) return;
@@ -95,7 +96,7 @@ const WorkerStatus = () => {
       await fetchStatus();
       Swal.fire({
         icon: 'success',
-        title: 'Worker หยุดแล้ว',
+        title: isThai ? 'Worker หยุดแล้ว' : 'Worker Stopped',
         timer: 1500,
         showConfirmButton: false
       });
@@ -103,7 +104,7 @@ const WorkerStatus = () => {
       console.error(err);
       Swal.fire({
         icon: 'error',
-        title: 'ไม่สามารถหยุด Worker',
+        title: isThai ? 'ไม่สามารถหยุด Worker' : 'Failed to Stop Worker',
         text: err?.response?.data?.message || err.message
       });
     } finally {
@@ -124,8 +125,8 @@ const WorkerStatus = () => {
             <p><b>พบ:</b> ${res?.is_detected ? 'ใช่' : 'ไม่'}</p>
             <p><b>สุขภาพดี:</b> ${res?.is_healthy ? 'ใช่' : 'ไม่'}</p>
             <p><b>ผลลัพธ์:</b> ${res?.label || '-'}</p>
-            <p><b>ความมั่นใจ:</b> ${res?.confidence ? (res.confidence * 100).toFixed(1) + '%' : '-'}</p>
-            <p><b>เกณฑ์:</b> ${res?.threshold ? (res.threshold * 100).toFixed(0) + '%' : '-'}</p>
+            <p><b>ความมั่นใจ:</b> ${res?.confidence ? (res.confidence >= 1 ? res.confidence : res.confidence * 100).toFixed(1) + '%' : '-'}</p>
+            <p><b>เกณฑ์:</b> ${res?.threshold ? (res.threshold >= 1 ? res.threshold : res.threshold * 100).toFixed(0) + '%' : '-'}</p>
           </div>
         `,
         confirmButtonText: 'ปิด'
@@ -157,8 +158,8 @@ const WorkerStatus = () => {
               <ChevronLeft className="w-6 h-6 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-xl font-black text-gray-800">สถานะ Detection Worker</h1>
-              <p className="text-sm text-gray-500">ระบบตรวจสอบกล้อง CCTV อัตโนมัติ</p>
+              <h1 className="text-xl font-black text-gray-800">{t('workerPage.title')}</h1>
+              <p className="text-sm text-gray-500">{t('workerPage.subtitle')}</p>
             </div>
           </div>
           <button
@@ -166,7 +167,7 @@ const WorkerStatus = () => {
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-700 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            รีเฟรช
+            {t('workerPage.refresh')}
           </button>
         </div>
       </div>
@@ -181,10 +182,10 @@ const WorkerStatus = () => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-800">
-                  {isRunning ? 'Worker กำลังทำงาน' : 'Worker หยุดทำงาน'}
+                  {isRunning ? t('workerPage.running') : t('workerPage.stopped')}
                 </h2>
                 <p className="text-sm text-gray-500">
-                  {isEnabled ? 'เปิดใช้งานตามการตั้งค่า' : 'ปิดใช้งานใน .env'}
+                  {isEnabled ? (isThai ? 'เปิดใช้งานตามการตั้งค่า' : 'Enabled in settings') : (isThai ? 'ปิดใช้งานใน .env' : 'Disabled in .env')}
                 </p>
               </div>
             </div>
@@ -196,7 +197,7 @@ const WorkerStatus = () => {
                   className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors disabled:opacity-50"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4" />}
-                  หยุด Worker
+                  {t('workerPage.stop')}
                 </button>
               ) : (
                 <button
@@ -205,7 +206,7 @@ const WorkerStatus = () => {
                   className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                  เริ่ม Worker
+                  {t('workerPage.start')}
                 </button>
               )}
             </div>
@@ -217,25 +218,25 @@ const WorkerStatus = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={RefreshCw}
-              label="รอบการตรวจสอบ"
+              label={t('workerPage.loopCount')}
               value={status.loop_count || 0}
               color="blue"
             />
             <StatCard
               icon={Camera}
-              label="กล้องที่ประมวลผลล่าสุด"
+              label={t('workerPage.processedCameras')}
               value={status.cameras_processed || 0}
               color="sky"
             />
             <StatCard
               icon={AlertCircle}
-              label="กล้องที่ผิดพลาด"
+              label={t('workerPage.errorCameras')}
               value={status.cameras_error || 0}
               color="red"
             />
             <StatCard
               icon={Bug}
-              label="การตรวจจับวันนี้"
+              label={t('workerPage.detectionsToday')}
               value={status.detections_today || 0}
               color="orange"
             />
@@ -270,12 +271,12 @@ const WorkerStatus = () => {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-2 mb-4">
             <TestTube className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-bold text-gray-800">ทดสอบกล้องทีละตัว</h3>
+            <h3 className="text-lg font-bold text-gray-800">{t('workerPage.testCameras')}</h3>
           </div>
           {cctvs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Camera className="w-12 h-12 mx-auto mb-3 opacity-20" />
-              <p>ไม่พบกล้อง กรุณาเพิ่มกล้องในหน้า CCTV</p>
+              <p>{t('workerPage.noCameras')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -287,7 +288,7 @@ const WorkerStatus = () => {
                     <div className="flex items-center gap-3">
                       <Camera className="w-5 h-5 text-gray-400" />
                       <div>
-                        <p className="font-bold text-gray-800">{cam.camera_name || `กล้อง #${id}`}</p>
+                        <p className="font-bold text-gray-800">{cam.camera_name || (isThai ? `กล้อง #${id}` : `Camera #${id}`)}</p>
                         <p className="text-xs text-gray-500">{cam.ip_address}</p>
                       </div>
                     </div>
@@ -297,7 +298,7 @@ const WorkerStatus = () => {
                       className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
                     >
                       {isTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <TestTube className="w-4 h-4" />}
-                      ทดสอบ
+                      {t('workerPage.test')}
                     </button>
                   </div>
                 );

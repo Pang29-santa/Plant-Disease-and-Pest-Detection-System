@@ -17,7 +17,8 @@ import {
 import Swal from 'sweetalert2';
 
 const ReportPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
@@ -58,12 +59,12 @@ const ReportPage = () => {
   }, [selectedDate]);
 
   const statCards = [
-    { icon: Leaf, label: 'ผัก', value: stats?.vegetables || 0, color: 'bg-green-500' },
-    { icon: Sprout, label: 'โรคพืช', value: stats?.diseases || 0, color: 'bg-red-500' },
-    { icon: Bug, label: 'ศัตรูพืช', value: stats?.pests || 0, color: 'bg-orange-500' },
-    { icon: Users, label: 'ผู้ใช้งาน', value: stats?.users || 0, color: 'bg-blue-500' },
-    { icon: Camera, label: 'กล้อง CCTV', value: stats?.cctv || 0, color: 'bg-purple-500' },
-    { icon: Activity, label: 'การตรวจจับ', value: stats?.detections || 0, color: 'bg-teal-500' },
+    { icon: Leaf, label: t('nav.vegetables'), value: stats?.vegetables || 0, color: 'bg-green-500' },
+    { icon: Sprout, label: t('nav.diseases'), value: stats?.diseases || 0, color: 'bg-red-500' },
+    { icon: Bug, label: t('nav.pests'), value: stats?.pests || 0, color: 'bg-orange-500' },
+    { icon: Users, label: t('profile.userRole', 'ผู้ใช้งาน'), value: stats?.users || 0, color: 'bg-blue-500' },
+    { icon: Camera, label: t('nav.cctv'), value: stats?.cctv || 0, color: 'bg-purple-500' },
+    { icon: Activity, label: t('nav.detect'), value: stats?.detections || 0, color: 'bg-teal-500' },
   ];
 
   return (
@@ -82,9 +83,9 @@ const ReportPage = () => {
             <div>
               <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
                 <FileBarChart className="w-8 h-8 text-primary-600" />
-                รายงานสรุประบบ
+                {t('reportPage.title')}
               </h1>
-              <p className="text-gray-500 mt-1">ภาพรวมข้อมูลและสถิติของระบบทั้งหมด</p>
+              <p className="text-gray-500 mt-1">{t('reportPage.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
               <Calendar className="w-4 h-4 text-gray-400" />
@@ -125,7 +126,7 @@ const ReportPage = () => {
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Sprout className="w-5 h-5 text-red-500" />
-                  โรคพืชที่ตรวจพบมากที่สุด ({selectedDate})
+                  {t('reportPage.topDiseases')} ({selectedDate})
                 </h2>
                 {dailyStats?.top_diseases?.length > 0 ? (
                   <div className="space-y-3">
@@ -133,20 +134,20 @@ const ReportPage = () => {
                       <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                         <span className="font-medium text-gray-700">{idx + 1}. {item.name}</span>
                         <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-bold">
-                          {item.count} ครั้ง
+                          {item.count} {t('reportPage.times')}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">ไม่มีข้อมูลการตรวจพบโรคพืชในวันที่เลือก</p>
+                  <p className="text-gray-500 text-center py-8">{t('reportPage.noDiseases')}</p>
                 )}
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Bug className="w-5 h-5 text-orange-500" />
-                  ศัตรูพืชที่ตรวจพบมากที่สุด ({selectedDate})
+                  {t('reportPage.topPests')} ({selectedDate})
                 </h2>
                 {dailyStats?.top_pests?.length > 0 ? (
                   <div className="space-y-3">
@@ -154,13 +155,13 @@ const ReportPage = () => {
                       <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                         <span className="font-medium text-gray-700">{idx + 1}. {item.name}</span>
                         <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-bold">
-                          {item.count} ครั้ง
+                          {item.count} {t('reportPage.times')}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">ไม่มีข้อมูลการตรวจพบศัตรูพืชในวันที่เลือก</p>
+                  <p className="text-gray-500 text-center py-8">{t('reportPage.noPests')}</p>
                 )}
               </div>
             </div>

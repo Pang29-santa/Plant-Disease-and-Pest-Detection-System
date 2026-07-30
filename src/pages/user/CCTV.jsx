@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,7 @@ import cctvStreamApi from '../../services/cctvStreamApi';
 import {
   Camera, ChevronLeft, Plus, X, Loader2, Video, 
   Settings, Trash2, Sprout, Network, Play, Info,
-  Pencil, Wifi, WifiOff, RefreshCw, Bug, Cpu
+  Pencil, Wifi, WifiOff, RefreshCw, Bug, Cpu, CheckCircle2
 } from 'lucide-react';
 
 const CCTVPage = () => {
@@ -17,7 +17,7 @@ const CCTVPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id || user?.user_id || 'unknown';
-  const isThai = i18n.language === 'th';
+  const isThai = i18n.language?.startsWith('th');
 
   const [cctvs, setCctvs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +34,10 @@ const CCTVPage = () => {
   const [detecting, setDetecting] = useState({});
   const [detectionResults, setDetectionResults] = useState({});
   
+  // Custom dropdown state
+  const [isPlotDropdownOpen, setIsPlotDropdownOpen] = useState(false);
+  const plotDropdownRef = useRef(null);
+
   const [form, setForm] = useState({
     camera_name: '',
     ip_address: '',
@@ -54,6 +58,17 @@ const CCTVPage = () => {
       document.body.style.overflow = 'unset';
     };
   }, [isModalOpen]);
+
+  // Click outside to close plot dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (plotDropdownRef.current && !plotDropdownRef.current.contains(e.target)) {
+        setIsPlotDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchCctvs = useCallback(async () => {
     if (!userId || userId === 'unknown') return;
@@ -89,6 +104,8 @@ const CCTVPage = () => {
 
   const handleOpenModal = () => {
     setEditingCamera(null);
+    setIsPlotDropdownOpen(false);
+    fetchPlots();
     setForm({
       camera_name: '',
       ip_address: '',
@@ -97,27 +114,28 @@ const CCTVPage = () => {
       device_ip: '',
       plot_id: plots.length > 0 ? plots[0].id || plots[0]._id : ''
     });
-    fetchPlots();
     setIsModalOpen(true);
   };
 
   const handleEdit = (cam) => {
     setEditingCamera(cam);
+    setIsPlotDropdownOpen(false);
+    fetchPlots();
     setForm({
       camera_name: cam.camera_name || '',
       ip_address: cam.ip_address || '',
       rtsp_username: cam.rtsp_username || '',
       rtsp_password: cam.rtsp_password || '',
       device_ip: cam.device_ip || '',
-      plot_id: cam.plot_id || cam.plot_object_id || plots[0]?.id || plots[0]?._id || ''
+      plot_id: cam.plot_id || cam.plot_object_id || (plots[0]?.id || plots[0]?._id || '')
     });
-    fetchPlots();
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingCamera(null);
+    setIsPlotDropdownOpen(false);
   };
 
   const handleSubmit = async (e) => {
@@ -125,8 +143,8 @@ const CCTVPage = () => {
     if (!form.camera_name || !form.ip_address || !form.plot_id) {
       Swal.fire({
         icon: 'warning',
-        title: 'ข้อมูลไม่ครบ',
-        text: 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน',
+        title: isThai ? 'ข้อมูลไม่ครบถ้วน' : 'Incomplete Form',
+        text: isThai ? 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน' : 'Please fill in all required fields marked with *.',
         confirmButtonColor: '#059669'
       });
       return;
@@ -140,8 +158,8 @@ const CCTVPage = () => {
         await axios.put(`/api/cctv/${editingCamera._id || editingCamera.id}`, payload);
         Swal.fire({
           icon: 'success',
-          title: 'สำเร็จ!',
-          text: 'อัปเดตข้อมูลกล้องวงจรปิดเรียบร้อยแล้ว',
+          title: isThai ? 'สำเร็จ!' : 'Success!',
+          text: isThai ? 'อัปเดตข้อมูลกล้องวงจรปิดเรียบร้อยแล้ว' : 'CCTV camera updated successfully.',
           timer: 1500,
           showConfirmButton: false
         });
@@ -149,8 +167,8 @@ const CCTVPage = () => {
         await axios.post(`/api/cctv`, payload);
         Swal.fire({
           icon: 'success',
-          title: 'สำเร็จ!',
-          text: 'เพิ่มกล้องวงจรปิดเรียบร้อยแล้ว',
+          title: isThai ? 'สำเร็จ!' : 'Success!',
+          text: isThai ? 'เพิ่มกล้องวงจรปิดเรียบร้อยแล้ว' : 'CCTV camera added successfully.',
           timer: 1500,
           showConfirmButton: false
         });
@@ -162,10 +180,10 @@ const CCTVPage = () => {
       console.error('Error saving CCTV:', err);
       Swal.fire({
         icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
+        title: isThai ? 'เกิดข้อผิดพลาด' : 'Error',
         text: editingCamera
-          ? 'ไม่สามารถอัปเดตข้อมูลกล้องวงจรปิดได้ โปรดลองอีกครั้ง'
-          : 'ไม่สามารถเพิ่มกล้องวงจรปิดได้ โปรดลองอีกครั้ง',
+          ? (isThai ? 'ไม่สามารถอัปเดตข้อมูลกล้องวงจรปิดได้ โปรดลองอีกครั้ง' : 'Failed to update camera. Please try again.')
+          : (isThai ? 'ไม่สามารถเพิ่มกล้องวงจรปิดได้ โปรดลองอีกครั้ง' : 'Failed to add camera. Please try again.'),
         confirmButtonColor: '#ef4444'
       });
     } finally {
@@ -174,38 +192,43 @@ const CCTVPage = () => {
   };
 
   const handleTestConnection = async (cam) => {
-    setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: true }));
+    const camId = cam._id || cam.id;
+    setCheckingStatus(prev => ({ ...prev, [camId]: true }));
     try {
-      const res = await axios.post(`/api/cctv/${cam._id || cam.id}/test-connection`);
+      const res = await axios.post(`/api/cctv/${camId}/test-connection`);
+      const isOk = res.data?.status === 'connected';
       Swal.fire({
-        icon: res.data?.status === 'connected' ? 'success' : 'warning',
-        title: res.data?.status === 'connected' ? 'เชื่อมต่อสำเร็จ' : 'เชื่อมต่อไม่สำเร็จ',
-        text: res.data?.message || `สถานะ: ${res.data?.status}`,
+        icon: isOk ? 'success' : 'warning',
+        title: isOk 
+          ? (isThai ? 'เชื่อมต่อสำเร็จ' : 'Connection Successful')
+          : (isThai ? 'เชื่อมต่อไม่สำเร็จ' : 'Connection Failed'),
+        text: res.data?.message || `${isThai ? 'สถานะ:' : 'Status:'} ${res.data?.status}`,
         confirmButtonColor: '#059669'
       });
     } catch (err) {
       console.error('Test connection error:', err);
       Swal.fire({
         icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
-        text: 'ไม่สามารถทดสอบการเชื่อมต่อได้',
+        title: isThai ? 'เกิดข้อผิดพลาด' : 'Error',
+        text: isThai ? 'ไม่สามารถทดสอบการเชื่อมต่อได้' : 'Could not test connection.',
         confirmButtonColor: '#ef4444'
       });
     } finally {
-      setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: false }));
+      setCheckingStatus(prev => ({ ...prev, [camId]: false }));
     }
   };
 
   const checkCameraStatus = async (cam) => {
-    setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: true }));
+    const camId = cam._id || cam.id;
+    setCheckingStatus(prev => ({ ...prev, [camId]: true }));
     try {
-      const res = await axios.get(`/api/cctv/status/${cam._id || cam.id}`);
-      setStatuses(prev => ({ ...prev, [cam._id || cam.id]: res.data }));
+      const res = await axios.get(`/api/cctv/status/${camId}`);
+      setStatuses(prev => ({ ...prev, [camId]: res.data }));
     } catch (err) {
       console.error('Status check error:', err);
-      setStatuses(prev => ({ ...prev, [cam._id || cam.id]: { status: 'offline', reason: 'error' } }));
+      setStatuses(prev => ({ ...prev, [camId]: { status: 'offline', reason: 'error' } }));
     } finally {
-      setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: false }));
+      setCheckingStatus(prev => ({ ...prev, [camId]: false }));
     }
   };
 
@@ -217,15 +240,12 @@ const CCTVPage = () => {
     const camId = cam._id || cam.id;
     setDetecting(prev => ({ ...prev, [camId]: true }));
     try {
-      // ดึง snapshot จากสตรีมกล้อง
       const snapshotUrl = await cctvStreamApi.captureSnapshot(camId);
       
-      // แปลง data URL เป็น Blob/File
       const response = await fetch(snapshotUrl);
       const blob = await response.blob();
       const file = new File([blob], `cctv_${camId}_${Date.now()}.jpg`, { type: 'image/jpeg' });
       
-      // ส่งไปวิเคราะห์
       const formData = new FormData();
       formData.append('file', file);
       formData.append('camera_id', camId);
@@ -238,26 +258,28 @@ const CCTVPage = () => {
       setDetectionResults(prev => ({ ...prev, [camId]: res.data }));
       
       const isPest = res.data?.analysis?.category === 'pest';
-      const targetName = res.data?.analysis?.target_name_th || res.data?.analysis?.target_name_en || 'ไม่ระบุ';
+      const targetName = res.data?.analysis?.target_name_th || res.data?.analysis?.target_name_en || (isThai ? 'ไม่ระบุ' : 'Unknown');
       
       Swal.fire({
         icon: isPest ? 'warning' : 'success',
-        title: isPest ? `พบศัตรูพืช: ${targetName}` : 'ไม่พบศัตรูพืช',
+        title: isPest 
+          ? `${isThai ? 'พบศัตรูพืช:' : 'Pest Detected:'} ${targetName}` 
+          : (isThai ? 'ไม่พบศัตรูพืช' : 'No Pest Detected'),
         html: isPest
           ? `<div class="text-left">
-              <p><b>ความมั่นใจ:</b> ${res.data?.analysis?.confidence || 0}%</p>
-              <p><b>IoT ทำงาน:</b> ${res.data?.iot_triggered ? 'ใช่ ✅' : 'ไม่ ❌'}</p>
-              ${res.data?.iot_device_ip ? `<p><b>อุปกรณ์:</b> ${res.data.iot_device_ip}</p>` : ''}
+              <p><b>${isThai ? 'ความมั่นใจ:' : 'Confidence:'}</b> ${res.data?.analysis?.confidence ? (res.data.analysis.confidence >= 1 ? Math.round(res.data.analysis.confidence) : Math.round(res.data.analysis.confidence * 100)) : 0}%</p>
+              <p><b>${isThai ? 'ระบบพ่นน้ำสั่งงาน:' : 'Sprinkler Triggered:'}</b> ${res.data?.iot_triggered ? 'ใช่ ✅' : 'ไม่ ❌'}</p>
+              ${res.data?.iot_device_ip ? `<p><b>${isThai ? 'ไอพีอุปกรณ์:' : 'Device IP:'}</b> ${res.data.iot_device_ip}</p>` : ''}
              </div>`
-          : 'ภาพจากกล้องดูปกติ',
+          : (isThai ? 'ภาพถ่ายจากกล้องเป็นปกติ ไม่พบศัตรูพืช' : 'Camera frame looks clear.'),
         confirmButtonColor: isPest ? '#ef4444' : '#059669'
       });
     } catch (err) {
       console.error('Pest detection error:', err);
       Swal.fire({
         icon: 'error',
-        title: 'ตรวจจับไม่สำเร็จ',
-        text: err.response?.data?.detail || 'ไม่สามารถวิเคราะห์ภาพจากกล้องได้',
+        title: isThai ? 'ตรวจจับไม่สำเร็จ' : 'Detection Failed',
+        text: err.response?.data?.detail || (isThai ? 'ไม่สามารถวิเคราะห์ภาพจากกล้องได้' : 'Could not analyze frame from camera.'),
         confirmButtonColor: '#ef4444'
       });
     } finally {
@@ -267,14 +289,14 @@ const CCTVPage = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: 'ต้องการลบกล้องวงจรปิด?',
-      text: "หากลบแล้วจะไม่สามารถเรียกคืนการตั้งค่ากลับมาได้!",
+      title: isThai ? 'ยืนยันการลบกล้อง?' : 'Delete CCTV Camera?',
+      text: isThai ? 'หากลบแล้วจะไม่สามารถเรียกคืนการตั้งค่ากลับมาได้!' : 'This action cannot be undone!',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#94a3b8',
-      confirmButtonText: 'ลบข้อมูล',
-      cancelButtonText: 'ยกเลิก',
+      confirmButtonText: isThai ? 'ลบกล้อง' : 'Delete',
+      cancelButtonText: isThai ? 'ยกเลิก' : 'Cancel',
       reverseButtons: true
     });
 
@@ -283,7 +305,7 @@ const CCTVPage = () => {
         await axios.delete(`/api/cctv/${id}`);
         Swal.fire({
           icon: 'success',
-          title: 'ลบสำเร็จ',
+          title: isThai ? 'ลบสำเร็จ' : 'Deleted Successfully',
           timer: 1500,
           showConfirmButton: false
         });
@@ -292,13 +314,15 @@ const CCTVPage = () => {
         console.error('Error deleting CCTV:', err);
         Swal.fire({
           icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถลบข้อมูลได้ เกิดปัญหาบางอย่าง',
+          title: isThai ? 'เกิดข้อผิดพลาด' : 'Error',
+          text: isThai ? 'ไม่สามารถลบข้อมูลกล้องได้' : 'Could not delete CCTV camera.',
           confirmButtonColor: '#ef4444'
         });
       }
     }
   };
+
+  const selectedPlotObj = plots.find(p => (p.id || p._id) === form.plot_id);
 
   return (
     <div className="bg-[#F8FAFC] pb-24 flex-grow">
@@ -308,31 +332,24 @@ const CCTVPage = () => {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-700 text-xs font-bold mb-2">
               <Video className="w-3.5 h-3.5 text-emerald-600" />
-              {isThai ? 'กล้องวงจรปิด & ระบบสตรีมมิ่งสด' : 'CCTV & Live Monitoring'}
+              <span>{isThai ? 'กล้องวงจรปิด & ระบบสตรีมมิ่งสด' : 'CCTV & Live Monitoring'}</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
               {isThai ? 'จัดการกล้องวงจรปิด (CCTV)' : 'CCTV Management'}
             </h1>
-            <p className="text-base sm:text-lg text-slate-500 mt-1 font-medium">
+            <p className="text-xs sm:text-base text-slate-500 mt-1 font-medium">
               {isThai 
                 ? 'ควบคุมและตรวจดูความเรียบร้อยของแปลงผักแบบเรียลไทม์' 
                 : 'Monitor and inspect your vegetable plots in real-time.'}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/worker-status')}
-              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700 font-bold rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-95 shrink-0"
-            >
-              <Cpu className="w-4 h-4 text-indigo-600" />
-              {isThai ? 'สถานะ Worker' : 'Worker Status'}
-            </button>
+          <div>
             <button
               onClick={handleOpenModal}
-              className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-200/80 active:scale-95 shrink-0"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-200 active:scale-95 shrink-0 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              {isThai ? 'เพิ่มกล้องวงจรปิด' : 'Add CCTV Camera'}
+              <span>{isThai ? 'เพิ่มกล้องวงจรปิด' : 'Add CCTV Camera'}</span>
             </button>
           </div>
         </div>
@@ -341,28 +358,27 @@ const CCTVPage = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-500 gap-3">
             <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
-            <p className="font-bold text-sm">{isThai ? 'กำลังโหลดข้อมูลกล้อง...' : 'Loading CCTV data...'}</p>
+            <p className="font-bold text-xs sm:text-sm">{isThai ? 'กำลังโหลดข้อมูลกล้อง...' : 'Loading CCTV data...'}</p>
           </div>
         ) : cctvs.length === 0 ? (
-          <div className="bg-white rounded-[3rem] p-12 md:p-16 border border-slate-100 text-center shadow-xl shadow-slate-200/50 max-w-2xl mx-auto overflow-hidden relative group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-100 transition-colors" />
-            <div className="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 relative z-10 transform group-hover:rotate-6 transition-transform border border-emerald-100">
-              <Camera className="w-10 h-10 text-emerald-600" />
+          <div className="bg-white rounded-3xl p-8 sm:p-14 border border-slate-200/80 text-center shadow-xs max-w-xl mx-auto overflow-hidden relative">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+              <Camera className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight uppercase">
-              {isThai ? 'ยังไม่มีกล้องในระบบ' : 'NO CCTV CAMERAS'}
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-2">
+              {isThai ? 'ยังไม่มีกล้องวงจรปิดในระบบ' : 'NO CCTV CAMERAS'}
             </h3>
-            <p className="text-slate-500 font-medium text-base mb-8 max-w-sm mx-auto leading-relaxed">
+            <p className="text-slate-500 font-medium text-xs sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed">
               {isThai 
                 ? 'เพิ่มกล้องวงจรปิดเพื่อเริ่มต้นดูแลแปลงผักของคุณตลอด 24 ชั่วโมง' 
                 : 'Add a CCTV camera to start monitoring your plots 24/7.'}
             </p>
             <button 
               onClick={handleOpenModal}
-              className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-2xl transition-all duration-300 flex items-center gap-2.5 mx-auto shadow-[0_12px_25px_-5px_rgba(16,185,129,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest text-xs relative overflow-hidden group/btn"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all flex items-center gap-2 mx-auto shadow-md shadow-emerald-200 active:scale-95 text-xs cursor-pointer"
             >
-              <Plus className="w-5 h-5" />
-              {isThai ? 'เริ่มเพิ่มกล้องตัวแรก' : 'ADD FIRST CAMERA'}
+              <Plus className="w-4 h-4" />
+              <span>{isThai ? 'เริ่มเพิ่มกล้องตัวแรก' : 'ADD FIRST CAMERA'}</span>
             </button>
           </div>
         ) : (
@@ -370,22 +386,22 @@ const CCTVPage = () => {
             {cctvs.map(cam => (
               <div 
                 key={cam.id || cam._id} 
-                className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-100 hover:border-emerald-200 flex flex-col group"
+                className="bg-white rounded-3xl shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden border border-slate-200/80 flex flex-col group"
               >
                 {/* Card Header */}
-                <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shadow-xs">
+                <div className="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
                       <Video className="w-5 h-5 text-emerald-600" />
                     </div>
-                    <div>
-                      <h3 className="font-black text-slate-800 text-base">{cam.camera_name || 'ไม่ระบุชื่อกล้อง'}</h3>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border ${
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-slate-900 text-sm truncate">{cam.camera_name || (isThai ? 'ไม่ระบุชื่อกล้อง' : 'Unnamed Camera')}</h3>
+                      <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                         statuses[cam._id || cam.id]?.status === 'online'
-                          ? 'bg-green-50 text-green-600 border-green-100'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : statuses[cam._id || cam.id]?.status === 'offline'
-                          ? 'bg-red-50 text-red-600 border-red-100'
-                          : 'bg-gray-50 text-gray-500 border-gray-100'
+                          ? 'bg-rose-50 text-rose-700 border-rose-200'
+                          : 'bg-slate-100 text-slate-500 border-slate-200'
                       }`}>
                         {checkingStatus[cam._id || cam.id]
                           ? (isThai ? 'กำลังตรวจสอบ...' : 'Checking...')
@@ -397,25 +413,25 @@ const CCTVPage = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => checkCameraStatus(cam)}
                       disabled={checkingStatus[cam._id || cam.id]}
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-90 disabled:opacity-50"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
                       title={isThai ? 'ตรวจสอบสถานะ' : 'Check Status'}
                     >
                       {checkingStatus[cam._id || cam.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                     </button>
                     <button
                       onClick={() => handleEdit(cam)}
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all active:scale-90"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all active:scale-90 cursor-pointer"
                       title={isThai ? 'แก้ไขกล้อง' : 'Edit Camera'}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => handleDelete(cam.id || cam._id)} 
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all active:scale-90 cursor-pointer"
                       title={isThai ? 'ลบกล้อง' : 'Delete Camera'}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -424,16 +440,16 @@ const CCTVPage = () => {
                 </div>
                 
                 {/* Card Body */}
-                <div className="p-5 flex-1 space-y-3 bg-white">
-                  <div className="flex items-start gap-2.5 text-xs text-slate-600">
+                <div className="p-4 sm:p-5 flex-1 space-y-2.5 bg-white text-xs">
+                  <div className="flex items-start gap-2 text-slate-600">
                     <Network className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                    <div>
+                    <div className="truncate">
                       <span className="font-bold text-slate-700">IP/URL: </span>
                       <span className="font-mono text-slate-600">{cam.ip_address || '-'}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 text-xs text-slate-600">
+                  <div className="flex items-start gap-2 text-slate-600">
                     <Settings className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold text-slate-700">RTSP User: </span>
@@ -441,7 +457,7 @@ const CCTVPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2.5 text-xs text-slate-600">
+                  <div className="flex items-start gap-2 text-slate-600">
                     <Sprout className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold text-slate-700">{isThai ? 'IP พ่นน้ำ:' : 'Sprinkler IP:'} </span>
@@ -451,29 +467,29 @@ const CCTVPage = () => {
                 </div>
 
                 {/* Card Footer */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50/30 grid grid-cols-3 gap-2">
+                <div className="p-3 border-t border-slate-100 bg-slate-50/40 grid grid-cols-3 gap-2">
                   <button 
                     onClick={() => handleTestConnection(cam)}
                     disabled={checkingStatus[cam._id || cam.id]}
-                    className="py-3 bg-white hover:bg-slate-50 text-slate-600 font-bold text-[10px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-slate-200 disabled:opacity-50"
+                    className="py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-slate-200 disabled:opacity-50 cursor-pointer"
                   >
-                    {checkingStatus[cam._id || cam.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
-                    {isThai ? 'ทดสอบ' : 'Test'}
+                    {checkingStatus[cam._id || cam.id] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-blue-600" />}
+                    <span>{isThai ? 'ทดสอบ' : 'Test'}</span>
                   </button>
                   <button 
                     onClick={() => handleDetectPest(cam)}
                     disabled={detecting[cam._id || cam.id]}
-                    className="py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-[10px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-amber-100/80 disabled:opacity-50"
+                    className="py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-amber-200/60 disabled:opacity-50 cursor-pointer"
                   >
-                    {detecting[cam._id || cam.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bug className="w-4 h-4" />}
-                    {isThai ? 'ตรวจแมลง' : 'Detect'}
+                    {detecting[cam._id || cam.id] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bug className="w-3.5 h-3.5 text-amber-600" />}
+                    <span>{isThai ? 'ตรวจแมลง' : 'Detect'}</span>
                   </button>
                   <button 
                     onClick={() => handleLiveStream(cam)}
-                    className="py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[10px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-emerald-100/80"
+                    className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 shadow-xs shadow-emerald-200 cursor-pointer"
                   >
-                    <Play className="w-4 h-4 fill-current" />
-                    {isThai ? 'ดูกล้อง' : 'Live'}
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>{isThai ? 'ดูกล้อง' : 'Live'}</span>
                   </button>
                 </div>
               </div>
@@ -482,34 +498,37 @@ const CCTVPage = () => {
         )}
       </div>
 
-      {/* Add CCTV Modal */}
+      {/* Add/Edit CCTV Modal */}
       {isModalOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-          <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-2xl w-full max-w-lg relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col border border-white/20">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md relative overflow-hidden flex flex-col border border-slate-100">
             {/* Modal Header */}
-            <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-200">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
                   <Video className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">{editingCamera ? (isThai ? 'แก้ไขกล้องวงจรปิด' : 'Edit CCTV Camera') : (isThai ? 'เพิ่มกล้องวงจรปิดใหม่' : 'Add New CCTV Camera')}</h2>
-                  <p className="text-xs font-medium text-slate-400">{isThai ? 'กรอกรายละเอียด IP และแปลงที่ต้องการติดตั้ง' : 'Fill camera RTSP & plot connection'}</p>
+                  <h2 className="text-base font-black text-slate-900 tracking-tight">
+                    {editingCamera ? (isThai ? 'แก้ไขกล้องวงจรปิด' : 'Edit CCTV Camera') : (isThai ? 'เพิ่มกล้องวงจรปิดใหม่' : 'Add New CCTV Camera')}
+                  </h2>
+                  <p className="text-xs text-slate-400 font-medium">{isThai ? 'กรอกรายละเอียด IP และแปลงที่ติดตั้ง' : 'Configure camera connection settings'}</p>
                 </div>
               </div>
               <button 
                 onClick={handleCloseModal}
-                className="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all"
+                className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Body / Form */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+            {/* Modal Form Body */}
+            <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                  {isThai ? 'ชื่อกล้องวงจรปิด' : 'Camera Name'} <span className="text-red-500">*</span>
+                  <span>{isThai ? 'ชื่อกล้องวงจรปิด' : 'Camera Name'}</span>
+                  <span className="text-rose-500">*</span>
                 </label>
                 <input 
                   type="text" 
@@ -517,14 +536,15 @@ const CCTVPage = () => {
                   value={form.camera_name} 
                   onChange={handleChange} 
                   placeholder={isThai ? 'เช่น กล้องแปลงกะเพรา 1' : 'e.g., Plot #1 Camera'} 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all"
                   required 
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                  {isThai ? 'IP หรือ URL ของกล้องวงจรปิด' : 'CCTV IP or Stream URL'} <span className="text-red-500">*</span>
+                  <span>{isThai ? 'IP หรือ Stream URL' : 'CCTV IP or Stream URL'}</span>
+                  <span className="text-rose-500">*</span>
                 </label>
                 <input 
                   type="text" 
@@ -532,15 +552,15 @@ const CCTVPage = () => {
                   value={form.ip_address} 
                   onChange={handleChange} 
                   placeholder={isThai ? 'เช่น 192.168.1.100 หรือ rtsp://...' : 'e.g., 192.168.1.100 or rtsp://...'} 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all"
                   required 
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700">
-                    {isThai ? 'ชื่อผู้ใช้ RTSP (Username)' : 'RTSP Username'}
+                    {isThai ? 'ชื่อผู้ใช้ RTSP' : 'RTSP Username'}
                   </label>
                   <input 
                     type="text" 
@@ -548,12 +568,12 @@ const CCTVPage = () => {
                     value={form.rtsp_username} 
                     onChange={handleChange} 
                     placeholder="admin" 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700">
-                    {isThai ? 'รหัสผ่าน RTSP (Password)' : 'RTSP Password'}
+                    {isThai ? 'รหัสผ่าน RTSP' : 'RTSP Password'}
                   </label>
                   <input 
                     type="password" 
@@ -561,7 +581,7 @@ const CCTVPage = () => {
                     value={form.rtsp_password} 
                     onChange={handleChange} 
                     placeholder="••••••••" 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all"
                   />
                 </div>
               </div>
@@ -576,30 +596,64 @@ const CCTVPage = () => {
                   value={form.device_ip} 
                   onChange={handleChange} 
                   placeholder={isThai ? 'เช่น 192.168.1.105' : 'e.g., 192.168.1.105'} 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              {/* Custom Interactive Dropdown for Plot Selection (Prevents Mobile Overflow) */}
+              <div className="space-y-1.5 relative" ref={plotDropdownRef}>
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                  {isThai ? 'แปลงที่ติดตั้ง (Plot)' : 'Installed Plot'} <span className="text-red-500">*</span>
+                  <span>{isThai ? 'แปลงที่ติดตั้ง (Plot)' : 'Installed Plot'}</span>
+                  <span className="text-rose-500">*</span>
                 </label>
-                <select 
-                  name="plot_id" 
-                  value={form.plot_id} 
-                  onChange={handleChange} 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all cursor-pointer"
-                  required
+                
+                <button
+                  type="button"
+                  onClick={() => setIsPlotDropdownOpen(!isPlotDropdownOpen)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 flex items-center justify-between hover:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all cursor-pointer"
                 >
-                  <option value="" disabled>{isThai ? '-- กรุณาเลือกแปลงที่ติดตั้ง --' : '-- Select Plot --'}</option>
-                  {plots.map(p => (
-                    <option key={p.id || p._id} value={p.id || p._id}>
-                      {p.name || p.plot_name || 'ไม่ระบุชื่อ'} {p.size ? `(${p.size} ${p.unit || p.area_unit || 'ตร.ม.'})` : ''}
-                    </option>
-                  ))}
-                </select>
+                  <span className={form.plot_id ? 'text-slate-800 font-bold truncate' : 'text-slate-400 font-medium truncate'}>
+                    {selectedPlotObj 
+                      ? `${selectedPlotObj.name || selectedPlotObj.plot_name || 'ไม่ระบุชื่อ'} ${selectedPlotObj.size ? `(${selectedPlotObj.size} ${selectedPlotObj.unit || selectedPlotObj.area_unit || 'ตร.ม.'})` : ''}`
+                      : (isThai ? '-- กรุณาเลือกแปลงที่ติดตั้ง --' : '-- Select Plot --')}
+                  </span>
+                  <ChevronLeft className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${isPlotDropdownOpen ? '-rotate-90' : 'rotate-180'}`} />
+                </button>
+
+                {isPlotDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150">
+                    {plots.length === 0 ? (
+                      <div className="px-4 py-3 text-xs text-slate-400 font-medium text-center">
+                        {isThai ? 'ไม่พบแปลงผักในระบบ' : 'No plots found'}
+                      </div>
+                    ) : (
+                      plots.map(p => {
+                        const pId = p.id || p._id;
+                        const isSelected = form.plot_id === pId;
+                        return (
+                          <div
+                            key={pId}
+                            onClick={() => {
+                              setForm(prev => ({ ...prev, plot_id: pId }));
+                              setIsPlotDropdownOpen(false);
+                            }}
+                            className={`px-4 py-2.5 text-xs cursor-pointer flex items-center justify-between transition-colors hover:bg-emerald-50 hover:text-emerald-700 ${
+                              isSelected ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700 font-medium'
+                            }`}
+                          >
+                            <span className="truncate">
+                              {p.name || p.plot_name || 'ไม่ระบุชื่อ'} {p.size ? `(${p.size} ${p.unit || p.area_unit || 'ตร.ม.'})` : ''}
+                            </span>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 ml-2" />}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+
                 {plots.length === 0 && (
-                  <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 p-2.5 rounded-xl flex items-center gap-1.5 mt-2">
+                  <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 p-2 rounded-xl flex items-center gap-1.5 mt-2">
                     <Info className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>
                       {isThai ? 'คุณยังไม่มีแปลงผัก' : 'No active plots.'}{' '}
@@ -612,20 +666,24 @@ const CCTVPage = () => {
               </div>
 
               {/* Modal Footer Buttons */}
-              <div className="pt-4 border-t border-slate-100 flex gap-3">
+              <div className="pt-3 border-t border-slate-100 flex gap-2">
                 <button 
                   type="button" 
                   onClick={handleCloseModal}
-                  className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs uppercase tracking-widest transition-all"
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition-all cursor-pointer"
                 >
                   {isThai ? 'ยกเลิก' : 'Cancel'}
                 </button>
                 <button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingCamera ? (isThai ? 'บันทึกการเปลี่ยนแปลง' : 'Update Camera') : (isThai ? 'สร้างและบันทึก' : 'Save Camera'))}
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <span>{editingCamera ? (isThai ? 'บันทึกการแก้ไข' : 'Update Camera') : (isThai ? 'เพิ่มกล้อง' : 'Save Camera')}</span>
+                  )}
                 </button>
               </div>
             </form>

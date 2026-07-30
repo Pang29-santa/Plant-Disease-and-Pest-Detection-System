@@ -1,10 +1,36 @@
-import React, { Suspense, lazy } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './context/AuthContext';
 import { DetectionProvider } from './context/DetectionContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+
+// Component สำหรับซิงค์ URL parameter ?lang= กับ i18n ทุกหน้า
+const LanguageQuerySync = () => {
+  const { i18n } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const langParam = params.get('lang');
+
+    if (langParam && (langParam === 'th' || langParam === 'en')) {
+      if (i18n.language !== langParam) {
+        i18n.changeLanguage(langParam);
+      }
+    } else {
+      // หาก URL ไม่มี ?lang= ให้ใส่ ?lang= ตามภาษาปัจจุบันใน i18n
+      const currentLang = i18n.language?.startsWith('en') ? 'en' : 'th';
+      params.set('lang', currentLang);
+      navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+    }
+  }, [location.pathname, location.search, i18n, navigate]);
+
+  return null;
+};
 
 // Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -55,7 +81,7 @@ function App() {
     <AuthProvider>
       <DetectionProvider>
         <div className="min-h-screen flex flex-col">
-
+          <LanguageQuerySync />
           {!hideNavFooter && <Navbar />}
         <main className="flex-grow">
           <Suspense fallback={<div className="flex h-[80vh] items-center justify-center"><div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div></div>}>
@@ -78,11 +104,7 @@ function App() {
               <Route path="/vegetables" element={<Vegetables />} />
               <Route path="/diseases" element={<Diseases />} />
               <Route path="/pests" element={<Pests />} />
-              <Route path="/diseases-pest/details/:id" element={
-                <ProtectedRoute>
-                  <DiseasePestDetail />
-                </ProtectedRoute>
-              } />
+              <Route path="/diseases-pest/details/:id" element={<DiseasePestDetail />} />
               
               {/* Protected Routes */}
               <Route path="/cctv" element={

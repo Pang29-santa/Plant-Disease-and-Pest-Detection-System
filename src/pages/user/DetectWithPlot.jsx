@@ -37,7 +37,7 @@ const DetectWithPlot = () => {
   const [analysisStep, setAnalysisStep] = useState(0);
 
   const userId = user?.user_id || user?.id || user?._id;
-  const isThai = i18n.language === 'th';
+  const isThai = i18n.language?.startsWith('th');
 
   // ป้องกันการ scroll ของ body เมื่อ modal เปิด
   useEffect(() => {
@@ -196,6 +196,18 @@ const DetectWithPlot = () => {
     setSelectedPlot(null);
   };
 
+  // Lock background scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isModalOpen]);
+
   return (
     <>
       <div className="bg-[#F8FAFC] pb-24 flex-grow">
@@ -322,9 +334,9 @@ const DetectWithPlot = () => {
           {/* Analysis Modal */}
           {isModalOpen && createPortal(
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-              <div className={`bg-white rounded-[32px] md:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] w-full ${
-                result ? 'max-w-5xl' : isAnalyzing ? 'max-w-3xl' : 'max-w-xl'
-              } max-h-[92vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col border border-white/20 transition-all duration-500`}>
+              <div className={`bg-white rounded-3xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] w-full ${
+                result ? 'max-w-3xl' : isAnalyzing ? 'max-w-2xl' : 'max-w-lg'
+              } max-h-[90vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col border border-white/20 transition-all duration-500`}>
 
                 {/* Close Modal Button (Hidden during active analysis) */}
                 {!isAnalyzing && (
@@ -337,7 +349,7 @@ const DetectWithPlot = () => {
                   </button>
                 )}
 
-                <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="p-5 md:p-6 flex-1 overflow-y-auto custom-scrollbar">
 
                   {/* Modal Context Header (Plot info or general) */}
                   {!isAnalyzing && !result && (
@@ -663,165 +675,190 @@ const DetectWithPlot = () => {
                   )}
 
                   {/* RESULT VIEW */}
-                  {!isAnalyzing && result && (
-                    <div className="flex flex-col h-full animate-in fade-in duration-500">
+                  {!isAnalyzing && result && (() => {
+                    const c = result.category === 'pest'    ? { badge: 'bg-amber-100 text-amber-800 border-amber-200', text: 'text-amber-600', bar: 'bg-amber-500', light: 'bg-amber-50/70 border-amber-200/70 text-amber-900' } :
+                              result.category === 'disease' ? { badge: 'bg-rose-100 text-rose-800 border-rose-200',   text: 'text-rose-600',  bar: 'bg-rose-500',  light: 'bg-rose-50/70 border-rose-200/70 text-rose-900' } :
+                                                              { badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', text: 'text-emerald-600', bar: 'bg-emerald-500', light: 'bg-emerald-50/70 border-emerald-200/70 text-emerald-900' };
+                    const confidence = result.confidence >= 1 ? Math.round(result.confidence) : Math.round(result.confidence * 100);
 
-                      {/* Plot Context Banner in Result View */}
-                      {selectedPlot && (
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3.5 mb-6 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                              <Sprout className="w-4 h-4" />
+                    return (
+                      <div className="flex flex-col h-full animate-in fade-in duration-300 space-y-4">
+
+                        {/* Plot Context Banner in Result View */}
+                        {selectedPlot && (
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                                <Sprout className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">{isThai ? 'บันทึกประวัติไปยังแปลง' : 'SAVED TO PLOT'}</p>
+                                <p className="text-xs font-black text-slate-800">{selectedPlot.name}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{isThai ? 'บันทึกประวัติไปยังแปลง' : 'SAVED TO PLOT'}</p>
-                              <p className="text-sm font-black text-slate-800">{selectedPlot.name}</p>
-                            </div>
+                            {selectedPlot.current_planting?.vegetable_name && (
+                              <span className="px-2.5 py-0.5 bg-white border border-emerald-200 text-emerald-800 rounded-full text-xs font-bold shadow-xs">
+                                🌱 {selectedPlot.current_planting.vegetable_name}
+                              </span>
+                            )}
                           </div>
-                          {selectedPlot.current_planting?.vegetable_name && (
-                            <span className="px-3 py-1 bg-white border border-emerald-200 text-emerald-800 rounded-full text-xs font-bold shadow-xs">
-                              🌱 {selectedPlot.current_planting.vegetable_name}
+                        )}
+
+                        {/* Header Badge & Title */}
+                        <div className="text-center pb-2 border-b border-slate-100">
+                          <div className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider mb-1 shadow-xs border ${c.badge}`}>
+                            {result.category === 'pest' ? <Bug className="w-3.5 h-3.5" /> :
+                             result.category === 'disease' ? <Shield className="w-3.5 h-3.5" /> :
+                             <CheckCircle className="w-3.5 h-3.5" />}
+                            <span>
+                              {result.category === 'pest' ? (isThai ? 'ตรวจพบ: ศัตรูพืช' : 'DETECTED: PEST') :
+                               result.category === 'disease' ? (isThai ? 'ตรวจพบ: โรคพืช' : 'DETECTED: DISEASE') :
+                               (isThai ? 'ผลตรวจ: สุขภาพดี' : 'HEALTHY PLANT')}
                             </span>
-                          )}
+                          </div>
+                          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                            {isThai ? result.target_name_th : result.target_name_en}
+                          </h2>
+                          <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">
+                            {isThai ? 'ความแม่นยำ AI' : 'AI Confidence'}: <span className="text-emerald-600 font-black">{confidence}%</span> • Model: {result.fallback_used ? 'Kimi AI Engine' : 'TensorFlow Deep Learning'}
+                          </p>
                         </div>
-                      )}
 
-                      {/* Header */}
-                      <div className="text-center mb-6">
-                        <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-3 shadow-xs ${
-                          result.category === 'pest' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                          result.category === 'disease' ? 'bg-rose-100 text-rose-800 border border-rose-200' :
-                          'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                        }`}>
-                          {result.category === 'pest' ? <Bug className="w-4 h-4" /> :
-                           result.category === 'disease' ? <Shield className="w-4 h-4" /> :
-                           <CheckCircle className="w-4 h-4" />}
-                          {result.category === 'pest' ? (isThai ? 'ตรวจพบ: ศัตรูพืช' : 'DETECTED: PEST') :
-                           result.category === 'disease' ? (isThai ? 'ตรวจพบ: โรคพืช' : 'DETECTED: DISEASE') :
-                           (isThai ? 'ผลตรวจ: สุขภาพดี' : 'HEALTHY PLANT')}
-                        </div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-                          {isThai ? result.target_name_th : result.target_name_en}
-                        </h2>
-                        <p className="text-xs font-bold text-slate-400 mt-1.5 uppercase tracking-widest">
-                          {isThai ? 'ความแม่นยำ AI' : 'AI Confidence'}: <span className="text-emerald-600 font-black">{result.confidence}%</span> • Model: {result.fallback_used ? 'Kimi AI Engine' : 'TensorFlow Deep Learning'}
-                        </p>
-                      </div>
-
-                      {/* Image Preview */}
-                      <div className="relative mb-6 mx-auto max-w-xs">
-                        <div className="aspect-square rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-900">
-                          <img src={selectedImage} alt="Analysis" className="w-full h-full object-cover" />
-                        </div>
-                      </div>
-
-                      {/* Content Details */}
-                      <div className="space-y-6 max-w-2xl mx-auto w-full">
-
-                        {/* Diagnostics Section (For Disease/Pest) */}
-                        {result.category !== 'healthy' && (
-                          <>
-                            <section className="bg-slate-50/80 rounded-3xl p-6 border border-slate-200/80">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-200">
-                                  <AlertCircle className="w-5 h-5" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-black text-slate-900 tracking-tight">{isThai ? 'วินิจฉัยอาการและสาเหตุ' : 'Clinical Diagnostics'}</h3>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{isThai ? 'ลักษณะที่ปรากฏ' : 'Symptoms & Root Cause'}</p>
-                                </div>
-                              </div>
-                              <div
-                                className="text-sm leading-relaxed text-slate-700 font-medium pl-4 border-l-3 border-amber-400 html-content"
-                                dangerouslySetInnerHTML={{ __html: result.cause || result.symptoms || (isThai ? 'ไม่พบข้อมูลอาการระบุไว้' : 'No specific clinical symptoms reported.') }}
-                              />
-                            </section>
-
-                            <section className="space-y-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-200">
-                                  <Sprout className="w-5 h-5" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-black text-slate-900 tracking-tight">{isThai ? 'แนวทางแก้ไขและดูแล' : 'Prescriptive Care'}</h3>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{isThai ? 'ขั้นตอนการรักษา' : 'Expert Management Steps'}</p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                {(result.prevention || result.treatment || []).length > 0 ? (
-                                  [(result.prevention || []), (result.treatment || [])].flat().slice(0, 4).map((step, i) => (
-                                    <div key={i} className="flex gap-4 p-4 bg-white rounded-2xl border border-slate-200/80 hover:border-emerald-300 transition-all shadow-xs">
-                                      <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs font-black shrink-0 border border-emerald-100">
-                                        {i + 1}
-                                      </div>
-                                      <div className="text-slate-700 font-medium text-xs sm:text-sm leading-relaxed html-content" dangerouslySetInnerHTML={{ __html: step }} />
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                    <Leaf className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                                    <p className="text-slate-400 font-bold text-xs">{isThai ? 'อยู่ระหว่างการอัปเดตข้อมูลการรักษา' : 'Treatment steps will be updated soon.'}</p>
-                                  </div>
+                        {/* 2-Column Content Layout */}
+                        <div className="grid sm:grid-cols-12 gap-4 items-start flex-1 overflow-y-auto custom-scrollbar pr-1">
+                          
+                          {/* Left Column: Compact Image & AI Metric Card */}
+                          <div className="sm:col-span-5 space-y-2 flex flex-col items-center">
+                            <div className="relative aspect-square w-full max-w-[210px] rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900 mx-auto">
+                              <img src={selectedImage} alt="Analysis Result" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                              <div className="absolute bottom-2 left-2 right-2 text-white">
+                                <p className="text-xs font-black leading-tight drop-shadow-md">
+                                  {isThai ? result.target_name_th : result.target_name_en}
+                                </p>
+                                {result.target_name_th && result.target_name_en && (
+                                  <p className="text-[10px] text-white/70 font-medium">
+                                    {isThai ? result.target_name_en : result.target_name_th}
+                                  </p>
                                 )}
                               </div>
-                            </section>
-                          </>
-                        )}
-
-                        {/* Healthy state */}
-                        {result.category === 'healthy' && (
-                          <div className="text-center py-8 bg-emerald-50/50 rounded-3xl border border-emerald-100 p-6">
-                            <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200">
-                              <CheckCircle className="w-8 h-8" />
                             </div>
-                            <h3 className="text-xl font-black text-slate-900 mb-2">
-                              {isThai ? 'พืชของคุณแข็งแรงสมบูรณ์ดี! 🎉' : 'Your plant is healthy! 🎉'}
-                            </h3>
-                            <p className="text-slate-600 font-medium text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-                              {isThai
-                                ? 'ไม่พบร่องรอยของโรคพืชหรือศัตรูพืชในภาพ ควรให้น้ำ ให้ปุ๋ย และดูแลตามรอบปกติ'
-                                : 'No disease or pest detected. Continue normal care and regular monitoring.'}
-                            </p>
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-4 border-t border-slate-100 max-w-2xl mx-auto w-full">
-                        {result.detected_class_id ? (
-                          <a
-                            href={`/diseases-pest/details/${result.detected_class_id}`}
-                            className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-center text-xs uppercase tracking-widest shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-2"
-                          >
-                            <span>{isThai ? 'ดูคู่มือการดูแลแบบละเอียด' : 'View Full Care Guide'}</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </a>
-                        ) : result.category !== 'healthy' && result.target_name_en ? (
-                          <a
-                            href={`/diseases-pests?search=${encodeURIComponent(result.target_name_th || result.target_name_en)}`}
-                            className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-center text-xs uppercase tracking-widest shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-2"
-                          >
-                            <span>{isThai ? `ค้นหา: ${result.target_name_th || result.target_name_en}` : `Search: ${result.target_name_en}`}</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </a>
-                        ) : (
+                            {/* AI Metric Box */}
+                            <div className="w-full max-w-[210px] rounded-xl p-2.5 bg-slate-50 border border-slate-200 text-[11px] space-y-1.5 shadow-xs mx-auto">
+                              <div className="flex justify-between items-center font-bold">
+                                <span className="flex items-center gap-1 text-slate-700">
+                                  <Activity className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>{isThai ? 'ความแม่นยำ AI' : 'AI Accuracy'}</span>
+                                </span>
+                                <span className="font-black text-emerald-600">{confidence}%</span>
+                              </div>
+                              <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden p-0.5">
+                                <div className="h-full rounded-full bg-emerald-500 transition-all duration-700" style={{ width: `${confidence}%` }} />
+                              </div>
+                              <p className="text-[9px] text-slate-400 font-medium text-center">
+                                TensorFlow Deep Learning Engine
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Right Column: Diagnostics & Care Steps */}
+                          <div className="sm:col-span-7 space-y-2.5">
+                            {result.category !== 'healthy' ? (
+                              <>
+                                {/* Diagnostics Section */}
+                                <div className="bg-amber-50/70 rounded-xl p-3 border border-amber-200/80 text-xs space-y-1">
+                                  <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <h3 className="text-xs font-black uppercase tracking-wider">{isThai ? 'วินิจฉัยอาการและสาเหตุ' : 'Clinical Diagnostics'}</h3>
+                                  </div>
+                                  <div
+                                    className="text-slate-700 leading-relaxed font-medium pl-2.5 border-l-2 border-amber-400 html-content text-[11px]"
+                                    dangerouslySetInnerHTML={{ __html: result.cause || result.symptoms || (isThai ? 'ไม่พบข้อมูลอาการระบุไว้' : 'No specific clinical symptoms reported.') }}
+                                  />
+                                </div>
+
+                                {/* Care Steps Section */}
+                                <div className="bg-emerald-50/70 rounded-xl p-3 border border-emerald-200/80 text-xs space-y-1.5">
+                                  <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                                    <Sprout className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    <h3 className="text-xs font-black uppercase tracking-wider">{isThai ? 'แนวทางแก้ไขและดูแล' : 'Prescriptive Care'}</h3>
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    {(result.prevention || result.treatment || []).length > 0 ? (
+                                      [(result.prevention || []), (result.treatment || [])].flat().slice(0, 3).map((step, i) => (
+                                        <div key={i} className="flex gap-2 p-2 bg-white rounded-lg border border-emerald-100 shadow-xs">
+                                          <div className="w-4.5 h-4.5 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-black shrink-0">
+                                            {i + 1}
+                                          </div>
+                                          <div className="text-slate-700 font-medium text-[11px] leading-snug html-content" dangerouslySetInnerHTML={{ __html: step }} />
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="p-3 text-center bg-white rounded-lg border border-dashed border-slate-200">
+                                        <Leaf className="w-5 h-5 text-slate-300 mx-auto mb-1" />
+                                        <p className="text-slate-400 font-bold text-[11px]">{isThai ? 'อยู่ระหว่างการอัปเดตข้อมูลการรักษา' : 'Treatment steps will be updated soon.'}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              /* Healthy State */
+                              <div className="text-center py-6 bg-emerald-50/60 rounded-xl border border-emerald-100 p-4 space-y-2">
+                                <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-md">
+                                  <CheckCircle className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-base font-black text-slate-900">
+                                  {isThai ? 'พืชของคุณแข็งแรงสมบูรณ์ดี! 🎉' : 'Your plant is healthy! 🎉'}
+                                </h3>
+                                <p className="text-slate-600 font-medium text-[11px] max-w-md mx-auto leading-relaxed">
+                                  {isThai
+                                    ? 'ไม่พบร่องรอยของโรคพืชหรือศัตรูพืชในภาพ ควรให้น้ำ ให้ปุ๋ย และดูแลตามรอบปกติ'
+                                    : 'No disease or pest detected. Continue normal care and regular monitoring.'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons Bar */}
+                        <div className="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-slate-100">
+                          {result.detected_class_id ? (
+                            <a
+                              href={`/diseases-pest/details/${result.detected_class_id}`}
+                              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-center text-xs uppercase tracking-wider shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-2"
+                            >
+                              <span>{isThai ? 'ดูคู่มือการดูแลแบบละเอียด' : 'View Full Care Guide'}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </a>
+                          ) : result.category !== 'healthy' && result.target_name_en ? (
+                            <a
+                              href={`/diseases-pests?search=${encodeURIComponent(result.target_name_th || result.target_name_en)}`}
+                              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-center text-xs uppercase tracking-wider shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-2"
+                            >
+                              <span>{isThai ? `ค้นหา: ${result.target_name_th || result.target_name_en}` : `Search: ${result.target_name_en}`}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => { setSelectedImage(null); setSelectedFile(null); setResult(null); }}
+                              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs uppercase tracking-wider text-center shadow-md shadow-emerald-200 transition-all"
+                            >
+                              {isThai ? 'วิเคราะห์รูปใหม่' : 'Analyze New Image'}
+                            </button>
+                          )}
                           <button
-                            onClick={() => { setSelectedImage(null); setSelectedFile(null); setResult(null); }}
-                            className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs uppercase tracking-widest text-center shadow-md shadow-emerald-200 transition-all"
+                            onClick={closeModal}
+                            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs uppercase tracking-wider transition-all"
                           >
-                            {isThai ? 'วิเคราะห์รูปใหม่' : 'Analyze New Image'}
+                            {isThai ? 'ปิดหน้าต่าง' : 'Close'}
                           </button>
-                        )}
-                        <button
-                          onClick={closeModal}
-                          className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs uppercase tracking-widest transition-all"
-                        >
-                          {isThai ? 'ปิดหน้าต่าง' : 'Close'}
-                        </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                 </div>
               </div>

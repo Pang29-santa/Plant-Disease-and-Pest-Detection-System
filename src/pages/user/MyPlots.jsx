@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -11,26 +12,28 @@ import {
 
 import { getImageUrl } from '../../utils/urlHelper';
 
-const fmt = (dateStr) => {
+const fmt = (dateStr, isThai = true) => {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('th-TH', {
+  return d.toLocaleDateString(isThai ? 'th-TH' : 'en-US', {
     day: '2-digit', month: '2-digit', year: 'numeric'
   }).replace(/\//g, '/');
 };
 
-const fmtNum = (n) =>
-  n === undefined || n === null ? '-' : Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtNum = (n, isThai = true) =>
+  n === undefined || n === null ? '-' : Number(n).toLocaleString(isThai ? 'th-TH' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /* ─────────────────────────── STATUS BADGE ────────────────────── */
 const StatusBadge = ({ status }) => {
+  const { i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
   const map = {
-    'ว่าง': { bg: '#E8F5E9', color: '#2E7D32', label: 'ว่าง' },
-    '0': { bg: '#E8F5E9', color: '#2E7D32', label: 'ว่าง' },
-    'กำลังปลูก': { bg: '#FFF3E0', color: '#E65100', label: 'กำลังปลูก' },
-    '1': { bg: '#FFF3E0', color: '#E65100', label: 'กำลังปลูก' },
-    'เก็บเกี่ยวแล้ว': { bg: '#E3F2FD', color: '#1565C0', label: 'เก็บเกี่ยวแล้ว' },
-    '2': { bg: '#E3F2FD', color: '#1565C0', label: 'เก็บเกี่ยวแล้ว' },
+    'ว่าง': { bg: '#E8F5E9', color: '#2E7D32', label: isThai ? 'ว่าง' : 'Empty' },
+    '0': { bg: '#E8F5E9', color: '#2E7D32', label: isThai ? 'ว่าง' : 'Empty' },
+    'กำลังปลูก': { bg: '#FFF3E0', color: '#E65100', label: isThai ? 'กำลังปลูก' : 'Growing' },
+    '1': { bg: '#FFF3E0', color: '#E65100', label: isThai ? 'กำลังปลูก' : 'Growing' },
+    'เก็บเกี่ยวแล้ว': { bg: '#E3F2FD', color: '#1565C0', label: isThai ? 'เก็บเกี่ยวแล้ว' : 'Harvested' },
+    '2': { bg: '#E3F2FD', color: '#1565C0', label: isThai ? 'เก็บเกี่ยวแล้ว' : 'Harvested' },
   };
   const s = map[String(status)] || { bg: '#F5F5F5', color: '#616161', label: status };
   return (
@@ -45,10 +48,17 @@ const StatusBadge = ({ status }) => {
 
 /* ─────────────────────────── PLOT CARD ───────────────────────── */
 const PlotCard = ({ plot, onPlant, onHarvest, onHistory, onEdit, onDelete }) => {
+  const { i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
+
   const planting = plot.current_planting;
   const canHarvest = planting && new Date(planting.harvest_date) <= new Date();
   const isGrowing = plot.status === 'กำลังปลูก' || plot.status === '1' || plot.status === 1;
   const isEmpty = plot.status === 'ว่าง' || plot.status === '0' || plot.status === 0;
+
+  const unitLabel = isThai 
+    ? plot.area_unit 
+    : (plot.area_unit === 'ไร่' ? 'Rai' : plot.area_unit === 'ตารางวา' ? 'Sq. Wah' : plot.area_unit === 'ตร.ม.' ? 'sq.m.' : plot.area_unit);
 
   return (
     <div className="myplots-card">
@@ -73,7 +83,7 @@ const PlotCard = ({ plot, onPlant, onHarvest, onHistory, onEdit, onDelete }) => 
         {/* Size */}
         <div className="myplots-card-info-row">
           <Maximize2 size={14} color="#888" />
-          <span>ขนาดแปลง: {plot.area} {plot.area_unit}</span>
+          <span>{isThai ? 'ขนาดแปลง' : 'Area'}: {plot.area} {unitLabel}</span>
         </div>
 
         {/* Planting info */}
@@ -81,20 +91,20 @@ const PlotCard = ({ plot, onPlant, onHarvest, onHistory, onEdit, onDelete }) => 
           <div className="myplots-card-planting">
             <div className="myplots-card-planting-title">
               <Leaf size={14} color="#388E3C" />
-              <span>ผักที่ปลูกอยู่:</span>
+              <span>{isThai ? 'ผักที่ปลูกอยู่:' : 'Current Crop:'}</span>
             </div>
             <p className="myplots-card-planting-name">{planting.vegetable_name}</p>
-            <p className="myplots-card-planting-date">ปลูกเมื่อ: {fmt(planting.plant_date)}</p>
-            <p className="myplots-card-planting-date">เก็บเกี่ยว: {fmt(planting.harvest_date)}</p>
+            <p className="myplots-card-planting-date">{isThai ? 'ปลูกเมื่อ:' : 'Planted:'} {fmt(planting.plant_date, isThai)}</p>
+            <p className="myplots-card-planting-date">{isThai ? 'เก็บเกี่ยว:' : 'Harvest:'} {fmt(planting.harvest_date, isThai)}</p>
           </div>
         ) : isEmpty ? (
-          <p className="myplots-card-empty-text">ไม่มีผักที่ปลูกอยู่</p>
+          <p className="myplots-card-empty-text">{isThai ? 'ไม่มีผักที่ปลูกอยู่' : 'No crop currently planted'}</p>
         ) : null}
 
         {/* Action primary button */}
         {isEmpty && (
           <button className="myplots-btn-primary" onClick={() => onPlant(plot)}>
-            <Sprout size={16} /> ปลูกผัก
+            <Sprout size={16} /> {isThai ? 'ปลูกผัก' : 'Plant Crop'}
           </button>
         )}
         {isGrowing && (
@@ -102,20 +112,20 @@ const PlotCard = ({ plot, onPlant, onHarvest, onHistory, onEdit, onDelete }) => 
             className={`myplots-btn-harvest ${canHarvest ? '' : 'myplots-btn-harvest--disabled'}`}
             onClick={() => onHarvest(plot, planting)}
           >
-            <Scissors size={16} /> เก็บเกี่ยว
+            <Scissors size={16} /> {isThai ? 'เก็บเกี่ยว' : 'Harvest'}
           </button>
         )}
 
         {/* Bottom action buttons */}
         <div className="myplots-card-actions">
           <button className="myplots-btn-action myplots-btn-history" onClick={() => onHistory(plot)}>
-            <History size={14} /> ประวัติ
+            <History size={14} /> {isThai ? 'ประวัติ' : 'History'}
           </button>
           <button className="myplots-btn-action myplots-btn-edit" onClick={() => onEdit(plot)}>
-            <Pencil size={14} /> แก้ไข
+            <Pencil size={14} /> {isThai ? 'แก้ไข' : 'Edit'}
           </button>
           <button className="myplots-btn-action myplots-btn-delete" onClick={() => onDelete(plot)}>
-            <Trash2 size={14} /> ลบ
+            <Trash2 size={14} /> {isThai ? 'ลบ' : 'Delete'}
           </button>
         </div>
       </div>
@@ -125,6 +135,9 @@ const PlotCard = ({ plot, onPlant, onHarvest, onHistory, onEdit, onDelete }) => 
 
 /* ─────────────────────────── ADD/EDIT PLOT MODAL ─────────────── */
 const PlotModal = ({ plot, onClose, onSaved }) => {
+  const { i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
+
   const isEdit = !!(plot?.id || plot?._id);
   const [form, setForm] = useState({
     name: plot?.name || '',
@@ -141,7 +154,7 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      Swal.fire({ icon: 'error', title: 'ไฟล์มีขนาดใหญ่เกินไป', text: 'สูงสุด 5MB', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'error', title: isThai ? 'ไฟล์มีขนาดใหญ่เกินไป' : 'File too large', text: isThai ? 'สูงสุด 5MB' : 'Max 5MB', confirmButtonColor: '#2E7D32' });
       return;
     }
 
@@ -163,7 +176,7 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
         throw new Error('Upload failed');
       }
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'อัพโหลดรูปภาพไม่สำเร็จ', text: err?.response?.data?.detail || 'เกิดข้อผิดพลาด', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'error', title: isThai ? 'อัปโหลดรูปภาพไม่สำเร็จ' : 'Image upload failed', text: err?.response?.data?.detail || (isThai ? 'เกิดข้อผิดพลาด' : 'Error occurred'), confirmButtonColor: '#2E7D32' });
     } finally {
       setUploading(false);
     }
@@ -171,7 +184,7 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
 
   const handleSubmit = async () => {
     if (!form.name.trim() || !form.area) {
-      Swal.fire({ icon: 'warning', title: 'กรุณากรอกชื่อแปลงและขนาด', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'warning', title: isThai ? 'กรุณากรอกชื่อแปลงและขนาด' : 'Please fill plot name and size', confirmButtonColor: '#2E7D32' });
       return;
     }
     setSaving(true);
@@ -192,7 +205,7 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
       onSaved();
       onClose();
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.detail || 'ไม่สามารถบันทึกได้', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'error', title: isThai ? 'เกิดข้อผิดพลาด' : 'Error occurred', text: err.response?.data?.detail || (isThai ? 'ไม่สามารถบันทึกได้' : 'Could not save'), confirmButtonColor: '#2E7D32' });
     } finally {
       setSaving(false);
     }
@@ -201,74 +214,142 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
   return (
     <div className="myplots-overlay" onClick={onClose}>
       <div className="myplots-modal" onClick={e => e.stopPropagation()}>
-        <div className="myplots-modal-header">
-          <h2>{isEdit ? 'แก้ไขแปลงผัก' : 'เพิ่มข้อมูลแปลงผัก'}</h2>
-          <button className="myplots-modal-close" onClick={onClose}><X size={20} /></button>
-        </div>
-        <div className="myplots-modal-body">
-          <label>ชื่อแปลง <span className="req">*</span></label>
-          <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="เช่น A1, แปลงหน้าบ้าน" />
-
-          <div className="myplots-modal-row">
-            <div style={{ flex: 1 }}>
-              <label>ขนาด <span className="req">*</span></label>
-              <input type="number" min="0" step="0.1" value={form.area}
-                onChange={e => setForm(p => ({ ...p, area: e.target.value }))} placeholder="0.0" />
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shadow-xs">
+              <Sprout className="w-4 h-4" />
             </div>
-            <div style={{ width: 120 }}>
-              <label>หน่วย</label>
-              <select value={form.area_unit} onChange={e => setForm(p => ({ ...p, area_unit: e.target.value }))}>
-                <option value="ไร่">ไร่</option>
-                <option value="ตารางเมตร">ตารางเมตร</option>
-                <option value="งาน">งาน</option>
+            <h2 className="text-base font-black text-slate-900">{isEdit ? (isThai ? 'แก้ไขข้อมูลแปลงผัก' : 'Edit Vegetable Plot') : (isThai ? 'เพิ่มข้อมูลแปลงผัก' : 'Add Vegetable Plot')}</h2>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-xl transition-all"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-4 bg-white">
+          {/* Plot Name */}
+          <div>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'ชื่อแปลงผัก' : 'Plot Name'} <span className="text-rose-500">*</span>
+            </label>
+            <input 
+              value={form.name} 
+              onChange={e => setForm(p => ({ ...p, name: e.target.value }))} 
+              placeholder={isThai ? 'เช่น แปลง A1, แปลงผักสวนครัวหน้าบ้าน' : 'e.g. Plot A1, Front Yard Plot'} 
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+            />
+          </div>
+
+          {/* Area & Unit */}
+          <div className="grid grid-cols-12 gap-3">
+            <div className="col-span-7">
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+                {isThai ? 'ขนาดพื้นที่' : 'Area Size'} <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                step="0.1" 
+                value={form.area}
+                onChange={e => setForm(p => ({ ...p, area: e.target.value }))} 
+                placeholder="0.0" 
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+              />
+            </div>
+            <div className="col-span-5">
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+                {isThai ? 'หน่วย' : 'Unit'}
+              </label>
+              <select 
+                value={form.area_unit} 
+                onChange={e => setForm(p => ({ ...p, area_unit: e.target.value }))}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none cursor-pointer"
+              >
+                <option value="ไร่">{isThai ? 'ไร่' : 'Rai'}</option>
+                <option value="ตารางเมตร">{isThai ? 'ตารางเมตร' : 'sq.m.'}</option>
+                <option value="งาน">{isThai ? 'งาน' : 'Ngan'}</option>
+                <option value="ตารางวา">{isThai ? 'ตารางวา' : 'Sq. Wah'}</option>
               </select>
             </div>
           </div>
 
-          <label>รูปภาพแปลง (ไม่บังคับ)</label>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+          {/* Image Upload Dropzone */}
+          <div>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'รูปภาพแปลงผัก' : 'Plot Image'} <span className="text-slate-400 font-normal">({isThai ? 'ไม่บังคับ' : 'Optional'})</span>
+            </label>
+            <input type="file" accept="image/*" onChange={handleImageUpload} id="plot-image-input" className="hidden" />
+
             {form.image_url ? (
-              <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+              <div className="relative h-36 w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-900 group">
                 <img 
                   src={getImageUrl(form.image_url)} 
-                  alt="Plot" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  alt="Plot Preview" 
+                  className="w-full h-full object-cover" 
                 />
-                <button 
-                  onClick={() => setForm(p => ({ ...p, image_url: '' }))} 
-                  style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', border: 'none', cursor: 'pointer' }}
-                >
-                  <X size={14} />
-                </button>
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <label 
+                    htmlFor="plot-image-input"
+                    className="px-3 py-1.5 bg-white/90 hover:bg-white text-slate-800 font-bold text-xs rounded-lg cursor-pointer transition-all shadow-xs"
+                  >
+                    {isThai ? 'เปลี่ยนรูป' : 'Change Image'}
+                  </label>
+                  <button 
+                    onClick={() => setForm(p => ({ ...p, image_url: '' }))} 
+                    className="px-3 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs rounded-lg transition-all shadow-xs"
+                  >
+                    {isThai ? 'ลบรูปภาพ' : 'Remove'}
+                  </button>
+                </div>
               </div>
             ) : (
-                <div style={{ width: '80px', height: '80px', borderRadius: '8px', border: '2px dashed #d1d5db', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', backgroundColor: '#f9fafb' }}>
-                  <ImageIcon size={24} style={{ opacity: 0.5 }} />
-                </div>
-            )}
-            
-            <div style={{ flex: 1 }}>
-              <input type="file" accept="image/*" onChange={handleImageUpload} id="plot-image" style={{ display: 'none' }} />
               <label 
-                htmlFor="plot-image" 
-                style={{ 
-                  display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', 
-                  backgroundColor: uploading ? '#9ca3af' : '#16a34a', color: 'white', 
-                  borderRadius: '8px', cursor: uploading ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: '500' 
-                }}
+                htmlFor="plot-image-input"
+                className="border-2 border-dashed border-slate-200 hover:border-emerald-500 bg-slate-50/80 hover:bg-emerald-50/40 rounded-2xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center group"
               >
-                {uploading ? <Loader2 size={16} className="spin" /> : <Upload size={16} />}
-                {uploading ? 'กำลังอัปโหลด...' : 'เลือกรูปภาพ'}
+                {uploading ? (
+                  <div className="flex flex-col items-center gap-2 py-2">
+                    <Loader2 size={24} className="spin text-emerald-600" />
+                    <span className="text-xs font-bold text-emerald-700">{isThai ? 'กำลังอัปโหลดรูปภาพ...' : 'Uploading image...'}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                      <Upload size={18} />
+                    </div>
+                    <p className="text-xs font-bold text-slate-700 group-hover:text-emerald-700 transition-colors">
+                      {isThai ? 'คลิกเพื่อเลือกหรืออัปโหลดรูปภาพแปลง' : 'Click to select or upload plot image'}
+                    </p>
+                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">
+                      {isThai ? 'รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB' : 'Supports JPG, PNG up to 5MB'}
+                    </p>
+                  </>
+                )}
               </label>
-              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', marginBottom: 0 }}>รูปภาพขนาดไม่เกิน 5MB</p>
-            </div>
+            )}
           </div>
         </div>
-        <div className="myplots-modal-footer">
-          <button className="myplots-modal-cancel" onClick={onClose}>ยกเลิก</button>
-          <button className="myplots-modal-save" onClick={handleSubmit} disabled={saving}>
-            {saving ? <Loader2 size={16} className="spin" /> : null}
-            {saving ? 'กำลังบันทึก...' : 'บันทึก'}
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2.5 bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all"
+          >
+            {isThai ? 'ยกเลิก' : 'Cancel'}
+          </button>
+          <button 
+            onClick={handleSubmit} 
+            disabled={saving}
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-200 transition-all flex items-center gap-2 disabled:bg-emerald-300"
+          >
+            {saving ? <Loader2 size={14} className="spin" /> : null}
+            <span>{saving ? (isThai ? 'กำลังบันทึก...' : 'Saving...') : (isThai ? 'บันทึกข้อมูล' : 'Save Plot')}</span>
           </button>
         </div>
       </div>
@@ -278,6 +359,9 @@ const PlotModal = ({ plot, onClose, onSaved }) => {
 
 /* ─────────────────────────── PLANT MODAL ─────────────────────── */
 const PlantModal = ({ plot, onClose, onSaved }) => {
+  const { i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
+
   const [form, setForm] = useState({
     vegetable_name: '',
     plant_date: new Date().toISOString().split('T')[0],
@@ -287,6 +371,8 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
   const [saving, setSaving] = useState(false);
   const [vegetables, setVegetables] = useState([]);
   const [loadingVeg, setLoadingVeg] = useState(false);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const selectRef = useRef(null);
 
   useEffect(() => {
     const fetchVeg = async () => {
@@ -303,6 +389,16 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
     fetchVeg();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (selectRef.current && !selectRef.current.contains(e.target)) {
+        setIsSelectOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const calculateHarvestDate = (plantDateStr, vegName) => {
     const selected = vegetables.find(v => v.thai_name === vegName);
     if (selected && selected.growth && plantDateStr) {
@@ -313,10 +409,10 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
     return '';
   };
 
-  const handleVegetableChange = (e) => {
-    const name = e.target.value;
-    const newHarvest = calculateHarvestDate(form.plant_date, name);
-    setForm(p => ({ ...p, vegetable_name: name, harvest_date: newHarvest || p.harvest_date }));
+  const handleSelectVegetable = (vegName) => {
+    const newHarvest = calculateHarvestDate(form.plant_date, vegName);
+    setForm(p => ({ ...p, vegetable_name: vegName, harvest_date: newHarvest || p.harvest_date }));
+    setIsSelectOpen(false);
   };
 
   const handlePlantDateChange = (e) => {
@@ -327,17 +423,17 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
 
   const handleSubmit = async () => {
     if (!form.vegetable_name.trim() || !form.plant_date || !form.harvest_date || !form.quantity) {
-      Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'warning', title: isThai ? 'กรุณากรอกข้อมูลให้ครบ' : 'Please fill all required fields', confirmButtonColor: '#2E7D32' });
       return;
     }
     setSaving(true);
     try {
       await axios.post(`/api/plots/${plot.id || plot._id}/plant`, form);
-      Swal.fire({ icon: 'success', title: 'บันทึกการปลูกสำเร็จ', timer: 1500, showConfirmButton: false });
+      Swal.fire({ icon: 'success', title: isThai ? 'บันทึกการปลูกสำเร็จ' : 'Planting saved successfully', timer: 1500, showConfirmButton: false });
       onSaved();
       onClose();
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.detail || 'ไม่สามารถบันทึกได้', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'error', title: isThai ? 'เกิดข้อผิดพลาด' : 'Error occurred', text: err.response?.data?.detail || (isThai ? 'ไม่สามารถบันทึกได้' : 'Could not save'), confirmButtonColor: '#2E7D32' });
     } finally {
       setSaving(false);
     }
@@ -346,49 +442,123 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
   return (
     <div className="myplots-overlay" onClick={onClose}>
       <div className="myplots-modal" onClick={e => e.stopPropagation()}>
-        <div className="myplots-modal-header">
-          <h2>ปลูกผัก — แปลง {plot.name}</h2>
-          <button className="myplots-modal-close" onClick={onClose}><X size={20} /></button>
-        </div>
-        <div className="myplots-modal-body">
-          <label>ชื่อผัก <span className="req">*</span></label>
-          <select 
-            value={form.vegetable_name} 
-            onChange={handleVegetableChange}
-            disabled={loadingVeg}
-            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', marginBottom: '16px' }}
-          >
-            <option value="">{loadingVeg ? 'กำลังโหลดข้อมูลผัก...' : '-- เลือกผัก --'}</option>
-            {vegetables.map(v => (
-              <option key={v.id || v._id} value={v.thai_name}>{v.thai_name} {v.growth ? `(${v.growth} วัน)` : ''}</option>
-            ))}
-          </select>
-
-          <div className="myplots-modal-row">
-            <div style={{ flex: 1 }}>
-              <label>วันที่ปลูก <span className="req">*</span></label>
-              <input type="date" value={form.plant_date}
-                onChange={handlePlantDateChange} />
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shadow-xs shrink-0">
+              <Leaf className="w-4 h-4" />
             </div>
-            <div style={{ flex: 1 }}>
-              <label>วันที่เก็บเกี่ยว <span className="req">*</span></label>
-              <input type="date" value={form.harvest_date}
+            <h2 className="text-sm sm:text-base font-black text-slate-900 truncate">{isThai ? 'ปลูกผัก' : 'Plant Crop'} — {isThai ? 'แปลง' : 'Plot'} {plot.name}</h2>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-xl transition-all shrink-0 ml-2"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-5 space-y-4 bg-white max-h-[70vh] overflow-y-auto">
+          {/* Custom Vegetable Select */}
+          <div className="relative" ref={selectRef}>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'ชื่อผักที่ต้องการปลูก' : 'Select Vegetable'} <span className="text-rose-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => !loadingVeg && setIsSelectOpen(!isSelectOpen)}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 flex items-center justify-between hover:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all cursor-pointer"
+            >
+              <span className={form.vegetable_name ? 'text-slate-800 font-bold truncate' : 'text-slate-400 font-medium truncate'}>
+                {form.vegetable_name || (loadingVeg ? (isThai ? 'กำลังโหลดข้อมูลผัก...' : 'Loading vegetables...') : (isThai ? '-- เลือกผักที่ต้องการปลูก --' : '-- Select Vegetable --'))}
+              </span>
+              <ChevronLeft className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${isSelectOpen ? '-rotate-90' : 'rotate-180'}`} />
+            </button>
+
+            {isSelectOpen && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150">
+                {vegetables.length > 0 ? (
+                  vegetables.map(v => (
+                    <div
+                      key={v.id || v._id}
+                      onClick={() => handleSelectVegetable(v.thai_name)}
+                      className={`px-3.5 py-2.5 text-xs cursor-pointer flex items-center justify-between transition-colors hover:bg-emerald-50 hover:text-emerald-700 ${
+                        form.vegetable_name === v.thai_name ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700 font-medium'
+                      }`}
+                    >
+                      <span className="truncate">{v.thai_name}</span>
+                      {v.growth && <span className="text-[10px] text-slate-400 font-normal shrink-0 ml-2">({v.growth} {isThai ? 'วัน' : 'days'})</span>}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-3.5 py-3 text-xs text-slate-400 text-center font-medium">
+                    {loadingVeg ? (isThai ? 'กำลังโหลด...' : 'Loading...') : (isThai ? 'ไม่พบข้อมูลผัก' : 'No vegetables found')}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Plant Date & Harvest Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+                {isThai ? 'วันที่ปลูก' : 'Planting Date'} <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                type="date" 
+                lang={isThai ? 'th-TH' : 'en-US'}
+                value={form.plant_date}
+                onChange={handlePlantDateChange}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+                {isThai ? 'วันที่คาดว่าจะเก็บเกี่ยว' : 'Expected Harvest Date'} <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                type="date" 
+                lang={isThai ? 'th-TH' : 'en-US'}
+                value={form.harvest_date}
                 readOnly
-                style={{ backgroundColor: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }} 
+                className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-500 cursor-not-allowed outline-none"
               />
             </div>
           </div>
 
-          <label>จำนวน (ต้น) <span className="req">*</span></label>
-          <input type="number" min="1" value={form.quantity}
-            onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))}
-            placeholder="จำนวนต้น" />
+          {/* Quantity */}
+          <div>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'จำนวนต้นที่ปลูก' : 'Quantity (Plants)'} <span className="text-rose-500">*</span>
+            </label>
+            <input 
+              type="number" 
+              min="1" 
+              value={form.quantity}
+              onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))}
+              placeholder={isThai ? 'ระบุจำนวนต้น เช่น 100' : 'e.g. 100'} 
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+            />
+          </div>
         </div>
-        <div className="myplots-modal-footer">
-          <button className="myplots-modal-cancel" onClick={onClose}>ยกเลิก</button>
-          <button className="myplots-modal-save" onClick={handleSubmit} disabled={saving}>
-            {saving ? <Loader2 size={16} className="spin" /> : <Sprout size={15} />}
-            {saving ? 'กำลังบันทึก...' : 'บันทึกการปลูก'}
+
+        {/* Footer */}
+        <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2.5 bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all"
+          >
+            {isThai ? 'ยกเลิก' : 'Cancel'}
+          </button>
+          <button 
+            onClick={handleSubmit} 
+            disabled={saving}
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-200 transition-all flex items-center gap-2 disabled:bg-emerald-300"
+          >
+            {saving ? <Loader2 size={14} className="spin" /> : <Sprout size={14} />}
+            <span>{saving ? (isThai ? 'กำลังบันทึก...' : 'Saving...') : (isThai ? 'บันทึกการปลูก' : 'Save Planting')}</span>
           </button>
         </div>
       </div>
@@ -398,6 +568,9 @@ const PlantModal = ({ plot, onClose, onSaved }) => {
 
 /* ─────────────────────────── HARVEST MODAL ────────────────────── */
 const HarvestModal = ({ plot, planting, onClose, onSaved }) => {
+  const { i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
+
   const [form, setForm] = useState({
     actual_harvest_date: new Date().toISOString().split('T')[0],
     amount_kg: '',
@@ -410,17 +583,17 @@ const HarvestModal = ({ plot, planting, onClose, onSaved }) => {
 
   const handleSubmit = async () => {
     if (!form.amount_kg || !form.income) {
-      Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'warning', title: isThai ? 'กรุณากรอกข้อมูลให้ครบ' : 'Please fill all required fields', confirmButtonColor: '#2E7D32' });
       return;
     }
     setSaving(true);
     try {
       await axios.post(`/api/plots/${plot.id || plot._id}/harvest`, form);
-      Swal.fire({ icon: 'success', title: 'บันทึกการเก็บเกี่ยวสำเร็จ', timer: 1500, showConfirmButton: false });
+      Swal.fire({ icon: 'success', title: isThai ? 'บันทึกการเก็บเกี่ยวสำเร็จ' : 'Harvest recorded successfully', timer: 1500, showConfirmButton: false });
       onSaved();
       onClose();
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.detail || 'ไม่สามารถบันทึกได้', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'error', title: isThai ? 'เกิดข้อผิดพลาด' : 'Error occurred', text: err.response?.data?.detail || (isThai ? 'ไม่สามารถบันทึกได้' : 'Could not save'), confirmButtonColor: '#2E7D32' });
     } finally {
       setSaving(false);
     }
@@ -429,55 +602,116 @@ const HarvestModal = ({ plot, planting, onClose, onSaved }) => {
   return (
     <div className="myplots-overlay" onClick={onClose}>
       <div className="myplots-modal" onClick={e => e.stopPropagation()}>
-        <div className="myplots-modal-header">
-          <h2>บันทึกการเก็บเกี่ยว — {plot.name}</h2>
-          <button className="myplots-modal-close" onClick={onClose}><X size={20} /></button>
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold shadow-xs shrink-0">
+              <Scissors className="w-4 h-4" />
+            </div>
+            <h2 className="text-sm sm:text-base font-black text-slate-900 truncate">{isThai ? 'บันทึกการเก็บเกี่ยว' : 'Record Harvest'} — {plot.name}</h2>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-xl transition-all shrink-0 ml-2"
+          >
+            <X size={16} />
+          </button>
         </div>
-        <div className="myplots-modal-body">
+
+        {/* Body */}
+        <div className="p-5 space-y-4 bg-white max-h-[70vh] overflow-y-auto">
           {!canHarvest && (
-            <div className="myplots-harvest-warn">
-              <AlertCircle size={16} />
-              ยังไม่ถึงวันเก็บเกี่ยว ({fmt(planting?.harvest_date)}) แต่คุณสามารถบันทึกล่วงหน้าได้
+            <div className="bg-amber-50 border border-amber-200/80 rounded-xl p-3 flex items-center gap-2.5 text-xs text-amber-800 font-semibold">
+              <AlertCircle size={16} className="text-amber-600 shrink-0" />
+              <span>{isThai ? `ยังไม่ถึงวันเก็บเกี่ยว (${fmt(planting?.harvest_date)}) แต่คุณสามารถบันทึกล่วงหน้าได้` : `Harvest date is ${fmt(planting?.harvest_date)}, but you can record in advance.`}</span>
             </div>
           )}
 
-          <label>วันที่เก็บเกี่ยวจริง</label>
-          <input type="date" value={form.actual_harvest_date}
-            onChange={e => setForm(p => ({ ...p, actual_harvest_date: e.target.value }))} />
-
-          <div className="myplots-modal-row">
-            <div style={{ flex: 1 }}>
-              <label>ปริมาณที่ได้ (กก.) <span className="req">*</span></label>
-              <input type="number" min="0" step="0.1" value={form.amount_kg}
-                onChange={e => setForm(p => ({ ...p, amount_kg: e.target.value }))}
-                placeholder="0.0" />
-            </div>
+          <div>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'วันที่เก็บเกี่ยวจริง' : 'Actual Harvest Date'} <span className="text-rose-500">*</span>
+            </label>
+            <input 
+              type="date" 
+              lang={isThai ? 'th-TH' : 'en-US'}
+              value={form.actual_harvest_date}
+              onChange={e => setForm(p => ({ ...p, actual_harvest_date: e.target.value }))} 
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+            />
           </div>
 
-          <div className="myplots-modal-row">
-            <div style={{ flex: 1 }}>
-              <label>รายรับ (บาท) <span className="req">*</span></label>
-              <input type="number" min="0" value={form.income}
+          <div>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'ปริมาณผลผลิตที่ได้ (กก.)' : 'Yield Quantity (kg)'} <span className="text-rose-500">*</span>
+            </label>
+            <input 
+              type="number" 
+              min="0" 
+              step="0.1" 
+              value={form.amount_kg}
+              onChange={e => setForm(p => ({ ...p, amount_kg: e.target.value }))}
+              placeholder="0.0" 
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+                {isThai ? 'รายรับ (บาท)' : 'Income (THB)'} <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                value={form.income}
                 onChange={e => setForm(p => ({ ...p, income: e.target.value }))}
-                placeholder="0" />
+                placeholder="0" 
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+              />
             </div>
-            <div style={{ flex: 1 }}>
-              <label>รายจ่าย (บาท)</label>
-              <input type="number" min="0" value={form.expense}
+            <div>
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+                {isThai ? 'รายจ่าย (บาท)' : 'Expense (THB)'}
+              </label>
+              <input 
+                type="number" 
+                min="0" 
+                value={form.expense}
                 onChange={e => setForm(p => ({ ...p, expense: e.target.value }))}
-                placeholder="0" />
+                placeholder="0" 
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+              />
             </div>
           </div>
 
-          <label>หมายเหตุ</label>
-          <input value={form.note} onChange={e => setForm(p => ({ ...p, note: e.target.value }))}
-            placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" />
+          <div>
+            <label className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 block">
+              {isThai ? 'หมายเหตุเพิ่มเติม' : 'Note'}
+            </label>
+            <input 
+              value={form.note} 
+              onChange={e => setForm(p => ({ ...p, note: e.target.value }))}
+              placeholder={isThai ? 'หมายเหตุเพิ่มเติม (ถ้ามี)' : 'Additional note (optional)'} 
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+            />
+          </div>
         </div>
-        <div className="myplots-modal-footer">
-          <button className="myplots-modal-cancel" onClick={onClose}>ยกเลิก</button>
-          <button className="myplots-modal-save" onClick={handleSubmit} disabled={saving}>
-            {saving ? <Loader2 size={16} className="spin" /> : <Scissors size={15} />}
-            {saving ? 'กำลังบันทึก...' : 'บันทึกการเก็บเกี่ยว'}
+
+        {/* Footer */}
+        <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2.5 bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all"
+          >
+            {isThai ? 'ยกเลิก' : 'Cancel'}
+          </button>
+          <button 
+            onClick={handleSubmit} 
+            disabled={saving}
+            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-200 transition-all flex items-center gap-2 disabled:bg-emerald-300"
+          >
+            {saving ? <Loader2 size={14} className="spin" /> : <Scissors size={14} />}
+            <span>{saving ? (isThai ? 'กำลังบันทึก...' : 'Saving...') : (isThai ? 'บันทึกการเก็บเกี่ยว' : 'Save Harvest')}</span>
           </button>
         </div>
       </div>
@@ -487,6 +721,9 @@ const HarvestModal = ({ plot, planting, onClose, onSaved }) => {
 
 /* ─────────────────────────── HISTORY VIEW ─────────────────────── */
 const HistoryView = ({ plot, onBack }) => {
+  const { i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
+
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -513,7 +750,7 @@ const HistoryView = ({ plot, onBack }) => {
   const handleSearch = () => {
     let data = [...records];
     if (search.trim()) {
-      data = data.filter(r => r.vegetable_name?.includes(search.trim()));
+      data = data.filter(r => r.vegetable_name?.toLowerCase().includes(search.trim().toLowerCase()));
     }
     if (fromDate) data = data.filter(r => new Date(r.plant_date) >= new Date(fromDate));
     if (toDate) data = data.filter(r => new Date(r.plant_date) <= new Date(toDate));
@@ -528,7 +765,16 @@ const HistoryView = ({ plot, onBack }) => {
   };
 
   const exportToCSV = () => {
-    const headers = ['วันที่ปลูก', 'วันที่เก็บเกี่ยว', 'ผัก', 'จำนวน (ต้น)', 'ปริมาณ (กก.)', 'รายรับ (บาท)', 'รายจ่าย (บาท)', 'กำไร (บาท)'];
+    const headers = [
+      isThai ? 'วันที่ปลูก' : 'Planting Date',
+      isThai ? 'วันที่เก็บเกี่ยว' : 'Harvest Date',
+      isThai ? 'ผัก' : 'Crop',
+      isThai ? 'จำนวน (ต้น)' : 'Quantity (Plants)',
+      isThai ? 'ปริมาณ (กก.)' : 'Yield (kg)',
+      isThai ? 'รายรับ (บาท)' : 'Income (THB)',
+      isThai ? 'รายจ่าย (บาท)' : 'Expense (THB)',
+      isThai ? 'กำไร (บาท)' : 'Profit (THB)'
+    ];
     const escapeCsv = (val) => `"${String(val || '-').replace(/"/g, '""')}"`;
 
     const rows = filtered.map(r => {
@@ -545,7 +791,7 @@ const HistoryView = ({ plot, onBack }) => {
       ].map(escapeCsv).join(',');
     });
 
-    const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n'); // Add BOM for UTF-8 Excel support
+    const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -561,117 +807,212 @@ const HistoryView = ({ plot, onBack }) => {
   const totalProfit = totalIncome - totalExpense;
 
   return (
-    <div className="myplots-history">
-            {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight">
-            ประวัติการปลูก – แปลง <span className="text-green-700">{plot.name}</span>
-          </h1>
-          <button className="myplots-back-btn" onClick={onBack}>
-            <ChevronLeft size={16} /> กลับไปหน้าแปลงผัก
+    <div className="space-y-6">
+      {/* Header Banner */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-700 text-xs font-bold mb-2">
+              <History className="w-3.5 h-3.5 text-emerald-600" />
+              {isThai ? 'ประวัติการปลูกพืช' : 'Planting History'}
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              {isThai ? 'ประวัติการปลูก' : 'Planting History'} — {isThai ? 'แปลง' : 'Plot'} <span className="text-emerald-600">{plot.name}</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              {isThai ? 'ติดตามประวัติการปลูก ผลผลิต รายรับ รายจ่าย และสรุปกำไรขาดทุนของแปลงผักนี้' : 'Track planting history, yield, revenue, expenses, and profit summary for this plot.'}
+            </p>
+          </div>
+          <button 
+            onClick={onBack}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4 text-slate-500" />
+            <span>{isThai ? 'กลับไปหน้าแปลงผัก' : 'Back to Plots'}</span>
           </button>
         </div>
       </div>
 
-      {/* Filter card */}
-      <div className="myplots-history-card">
-        <div className="myplots-history-tabs">
-          <span className="myplots-history-tab active">ประวัติทั้งหมด</span>
+      {/* Filter & Search Card */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100 shadow-xs space-y-5">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <h2 className="text-sm font-bold text-slate-800">{isThai ? 'กรองและค้นหาข้อมูลประวัติ' : 'Filter & Search History'}</h2>
         </div>
 
-        <div className="myplots-history-filters">
-          <div className="myplots-filter-group">
-            <label>ค้นหาชื่อผัก</label>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="เช่น กะเพรา"
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          {/* Search Input */}
+          <div>
+            <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1 block">
+              {isThai ? 'ค้นหาชื่อผัก' : 'Search Crop'}
+            </label>
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder={isThai ? 'เช่น กะเพรา, คะน้า...' : 'e.g. Basil, Kale...'}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Date From */}
+          <div>
+            <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1 block">
+              {isThai ? 'เลือกตามวันที่ปลูก (เริ่มต้น)' : 'Planting Date (Start)'}
+            </label>
+            <input 
+              type="date" 
+              lang={isThai ? 'th-TH' : 'en-US'}
+              value={fromDate} 
+              onChange={e => setFromDate(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
             />
           </div>
 
-          <div className="myplots-history-date-row">
-            <div className="myplots-filter-group">
-              <label>เลือกตามวันที่ปลูก</label>
-              <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} />
-            </div>
-            <div className="myplots-filter-group">
-              <label>ถึงวันที่</label>
-              <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} />
-            </div>
-            <div className="myplots-filter-actions">
-              <button className="myplots-search-btn" onClick={handleSearch}>
-                <Search size={15} /> ค้นหา
-              </button>
-              <button className="myplots-reset-btn" onClick={handleReset}>
-                <RotateCcw size={15} /> รีเซ็ต
-              </button>
-              <button className="myplots-export-btn" onClick={exportToCSV} disabled={filtered.length === 0}>
-                <Download size={15} /> ส่งออก CSV
-              </button>
-            </div>
+          {/* Date To */}
+          <div>
+            <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1 block">
+              {isThai ? 'ถึงวันที่' : 'To Date'}
+            </label>
+            <input 
+              type="date" 
+              lang={isThai ? 'th-TH' : 'en-US'}
+              value={toDate} 
+              onChange={e => setToDate(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+            />
           </div>
         </div>
 
-        {/* Table */}
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2.5 pt-1">
+          <button 
+            onClick={handleSearch}
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs shadow-emerald-200 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+          >
+            <Search size={14} />
+            <span>{isThai ? 'ค้นหา' : 'Search'}</span>
+          </button>
+
+          <button 
+            onClick={handleReset}
+            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+          >
+            <RotateCcw size={14} />
+            <span>{isThai ? 'รีเซ็ต' : 'Reset'}</span>
+          </button>
+
+          <button 
+            onClick={exportToCSV} 
+            disabled={filtered.length === 0}
+            className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 ml-auto"
+          >
+            <Download size={14} />
+            <span>{isThai ? 'ส่งออก CSV' : 'Export CSV'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Summary Metrics Cards (Only when filtered has data) */}
+      {filtered.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">{isThai ? 'รวมรายรับทั้งหมด' : 'Total Revenue'}</p>
+              <p className="text-xl font-black text-blue-900 mt-0.5">฿{fmtNum(totalIncome)}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+              ฿
+            </div>
+          </div>
+
+          <div className="bg-amber-50/70 border border-amber-100 rounded-2xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-amber-600 uppercase tracking-wider">{isThai ? 'รวมรายจ่ายทั้งหมด' : 'Total Expenses'}</p>
+              <p className="text-xl font-black text-amber-900 mt-0.5">฿{fmtNum(totalExpense)}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+              ฿
+            </div>
+          </div>
+
+          <div className={`${totalProfit >= 0 ? 'bg-emerald-50/70 border-emerald-100' : 'bg-rose-50/70 border-rose-100'} border rounded-2xl p-4 flex items-center justify-between`}>
+            <div>
+              <p className={`text-[11px] font-bold uppercase tracking-wider ${totalProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {totalProfit >= 0 ? (isThai ? 'กำไรสุทธิรวม' : 'Net Profit') : (isThai ? 'ขาดทุนสุทธิรวม' : 'Net Loss')}
+              </p>
+              <p className={`text-xl font-black mt-0.5 ${totalProfit >= 0 ? 'text-emerald-900' : 'text-rose-900'}`}>
+                ฿{fmtNum(totalProfit)}
+              </p>
+            </div>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${totalProfit >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+              <Sprout size={20} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table Data View */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
         {loading ? (
-          <div className="myplots-loading">
-            <Loader2 size={28} className="spin" color="#2E7D32" />
-            <p>กำลังโหลด...</p>
+          <div className="py-12 text-center text-slate-400">
+            <Loader2 size={28} className="spin mx-auto mb-2 text-emerald-600" />
+            <p className="text-xs font-semibold">{isThai ? 'กำลังโหลดข้อมูลประวัติการปลูก...' : 'Loading planting history...'}</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-12 px-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <Sprout size={24} />
+            </div>
+            <h3 className="text-sm font-bold text-slate-700">{isThai ? 'ไม่พบประวัติการปลูกพืช' : 'No Planting History Found'}</h3>
+            <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+              {isThai ? 'ยังไม่มีข้อมูลการบันทึกประวัติการปลูกพืชในแปลงนี้ หรือไม่พบข้อมูลตามเงื่อนไขที่ระบุ' : 'No planting history recorded for this plot, or no data matching search criteria.'}
+            </p>
           </div>
         ) : (
-          <div className="myplots-table-wrap">
-            <table className="myplots-table">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr>
-                  <th>วันที่ปลูก</th>
-                  <th>วันที่เก็บเกี่ยว</th>
-                  <th>ผัก</th>
-                  <th>จำนวน (ต้น)</th>
-                  <th>ปริมาณ (กก.)</th>
-                  <th>รายรับ (บาท)</th>
-                  <th>รายจ่าย (บาท)</th>
-                  <th>กำไร (บาท)</th>
+                <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                  <th className="py-3.5 px-4">{isThai ? 'วันที่ปลูก' : 'Planting Date'}</th>
+                  <th className="py-3.5 px-4">{isThai ? 'วันที่เก็บเกี่ยว' : 'Harvest Date'}</th>
+                  <th className="py-3.5 px-4">{isThai ? 'ผัก' : 'Crop'}</th>
+                  <th className="py-3.5 px-4 text-center">{isThai ? 'จำนวน (ต้น)' : 'Quantity'}</th>
+                  <th className="py-3.5 px-4 text-right">{isThai ? 'ปริมาณ (กก.)' : 'Yield (kg)'}</th>
+                  <th className="py-3.5 px-4 text-right">{isThai ? 'รายรับ (บาท)' : 'Income (THB)'}</th>
+                  <th className="py-3.5 px-4 text-right">{isThai ? 'รายจ่าย (บาท)' : 'Expense (THB)'}</th>
+                  <th className="py-3.5 px-4 text-right">{isThai ? 'กำไร (บาท)' : 'Profit (THB)'}</th>
                 </tr>
               </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="myplots-table-empty">ไม่พบข้อมูล</td>
-                  </tr>
-                ) : (
-                  filtered.map((r, i) => {
-                    const profit = (Number(r.income) || 0) - (Number(r.expense) || 0);
-                    return (
-                      <tr key={i}>
-                        <td data-label="วันที่ปลูก">{fmt(r.plant_date)}</td>
-                        <td data-label="วันที่เก็บเกี่ยว">{fmt(r.actual_harvest_date || r.harvesting_date || r.harvest_date || r.created_at)}</td>
-                        <td data-label="ผัก">{r.vegetable_name || '-'}</td>
-                        <td data-label="จำนวน (ต้น)">{r.quantity != null && r.quantity !== '' ? r.quantity : '-'}</td>
-                        <td data-label="ปริมาณ (กก.)">{r.amount_kg != null ? fmtNum(r.amount_kg) : '-'}</td>
-                        <td data-label="รายรับ (บาท)">{r.income != null ? fmtNum(r.income) : '-'}</td>
-                        <td data-label="รายจ่าย (บาท)">{r.expense != null ? fmtNum(r.expense) : '-'}</td>
-                        <td data-label="กำไร (บาท)" style={{ color: profit >= 0 ? '#2E7D32' : '#C62828', fontWeight: 700 }}>
-                          {fmtNum(profit)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+              <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
+                {filtered.map((r, i) => {
+                  const profit = (Number(r.income) || 0) - (Number(r.expense) || 0);
+                  return (
+                    <tr key={i} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-semibold text-slate-700">{fmt(r.plant_date)}</td>
+                      <td className="py-3.5 px-4 text-slate-500">{fmt(r.actual_harvest_date || r.harvesting_date || r.harvest_date || r.created_at)}</td>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center gap-1.5 font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                          <Leaf className="w-3 h-3 text-emerald-600" />
+                          {r.vegetable_name || '-'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-bold">{r.quantity != null && r.quantity !== '' ? r.quantity : '-'}</td>
+                      <td className="py-3.5 px-4 text-right font-bold text-slate-700">{r.amount_kg != null ? fmtNum(r.amount_kg) : '-'}</td>
+                      <td className="py-3.5 px-4 text-right font-bold text-blue-600">{r.income != null ? fmtNum(r.income) : '-'}</td>
+                      <td className="py-3.5 px-4 text-right font-bold text-amber-600">{r.expense != null ? fmtNum(r.expense) : '-'}</td>
+                      <td className="py-3.5 px-4 text-right">
+                        <span className={`inline-block font-bold px-2.5 py-0.5 rounded-md ${profit >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                          {profit >= 0 ? '+' : ''}{fmtNum(profit)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
-              {filtered.length > 0 && (
-                <tfoot>
-                  <tr className="myplots-table-summary">
-                    <td colSpan={5} style={{ fontWeight: 700 }} className="hide-mobile">รวมจากข้อมูลที่แสดง:</td>
-                    <td data-label="รวมรายรับ" style={{ fontWeight: 700, color: '#1565C0' }}>{fmtNum(totalIncome)}</td>
-                    <td data-label="รวมรายจ่าย" style={{ fontWeight: 700, color: '#E65100' }}>{fmtNum(totalExpense)}</td>
-                    <td data-label="กำไรรวม" style={{ fontWeight: 700, color: totalProfit >= 0 ? '#2E7D32' : '#C62828' }}>
-                      {fmtNum(totalProfit)}
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
             </table>
           </div>
         )}
@@ -682,6 +1023,8 @@ const HistoryView = ({ plot, onBack }) => {
 
 /* ═════════════════════════ MAIN PAGE ══════════════════════════ */
 const MyPlotsPage = () => {
+  const { t, i18n } = useTranslation();
+  const isThai = i18n.language?.startsWith('th');
   const navigate = useNavigate();
   const [plots, setPlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -711,34 +1054,47 @@ const MyPlotsPage = () => {
       }));
       setPlots(mappedPlots);
     } catch (err) {
-      setError('ไม่สามารถโหลดข้อมูลแปลงผักได้');
+      setError(isThai ? 'ไม่สามารถโหลดข้อมูลแปลงผักได้' : 'Could not load plot data');
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, isThai]);
 
   useEffect(() => { fetchPlots(); }, [fetchPlots]);
+
+  // Lock background scroll when modal is open
+  useEffect(() => {
+    const isAnyModalOpen = !!(plotModal || plantModal || harvestModal);
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [plotModal, plantModal, harvestModal]);
 
   const navigateToHarvestHistory = () => navigate('/harvest-history');
 
   const handleDelete = async (plot) => {
     const result = await Swal.fire({
-      title: 'ยืนยันการลบ?',
-      text: `ต้องการลบแปลง "${plot.name}" ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`,
+      title: isThai ? 'ยืนยันการลบ?' : 'Confirm Delete?',
+      text: isThai ? `ต้องการลบแปลง "${plot.name}" ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้` : `Are you sure you want to delete plot "${plot.name}"? This action cannot be undone.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#C62828',
       cancelButtonColor: '#666',
-      confirmButtonText: 'ลบ',
-      cancelButtonText: 'ยกเลิก',
+      confirmButtonText: isThai ? 'ลบ' : 'Delete',
+      cancelButtonText: isThai ? 'ยกเลิก' : 'Cancel',
     });
     if (!result.isConfirmed) return;
     try {
       await axios.delete(`/api/plots/${plot.id || plot._id}`);
-      Swal.fire({ icon: 'success', title: 'ลบแปลงผักสำเร็จ', timer: 1200, showConfirmButton: false });
+      Swal.fire({ icon: 'success', title: isThai ? 'ลบแปลงผักสำเร็จ' : 'Plot deleted successfully', timer: 1200, showConfirmButton: false });
       fetchPlots();
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถลบแปลงผักได้', confirmButtonColor: '#2E7D32' });
+      Swal.fire({ icon: 'error', title: isThai ? 'เกิดข้อผิดพลาด' : 'Error occurred', text: isThai ? 'ไม่สามารถลบแปลงผักได้' : 'Could not delete plot', confirmButtonColor: '#2E7D32' });
     }
   };
 
@@ -758,40 +1114,49 @@ const MyPlotsPage = () => {
       <MyPlotsStyles />
       <div className="myplots-page">
               {/* Page Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">
-            แปลงผักของคุณ
-          </h1>
-        </div>
-        <div className="flex justify-end mb-6 gap-3">
-          <button className="myplots-add-btn" onClick={navigateToHarvestHistory}>
-            <History size={16} /> ประวัติการเก็บเกี่ยว
-          </button>
-          <button className="myplots-add-btn" onClick={() => setPlotModal('new')}>
-            <Plus size={16} /> เพิ่มข้อมูลแปลงผัก
-          </button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-xs font-bold mb-2">
+              <Sprout className="w-3.5 h-3.5" />
+              <span>{isThai ? 'ระบบจัดการแปลงเกษตร' : 'Agricultural Plot Management'}</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              {isThai ? 'แปลงผักของคุณ' : 'Your Vegetable Plots'}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              {isThai ? 'จัดการแปลงผัก บันทึกการปลูก และติดตามประวัติการเก็บเกี่ยว' : 'Manage plots, track growth, and view harvest records'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <button className="myplots-add-btn bg-slate-800 hover:bg-slate-700" onClick={navigateToHarvestHistory}>
+              <History size={16} /> {t('harvestHistoryPage.title')}
+            </button>
+            <button className="myplots-add-btn bg-emerald-600 hover:bg-emerald-500" onClick={() => setPlotModal('new')}>
+              <Plus size={16} /> {isThai ? 'เพิ่มข้อมูลแปลงผัก' : 'Add Plot'}
+            </button>
+          </div>
         </div>
 
         {/* Content */}
         {loading ? (
           <div className="myplots-loading">
             <Loader2 size={36} className="spin" color="#2E7D32" />
-            <p>กำลังโหลดข้อมูล...</p>
+            <p>{t('common.loading')}</p>
           </div>
         ) : error ? (
           <div className="myplots-error">
             <AlertCircle size={40} color="#C62828" />
             <p>{error}</p>
             <button onClick={fetchPlots} className="myplots-retry-btn">
-              <RotateCcw size={14} /> ลองใหม่
+              <RotateCcw size={14} /> {t('common.retry')}
             </button>
           </div>
         ) : plots.length === 0 ? (
           <div className="myplots-empty">
             <LayoutGrid size={56} color="#ccc" />
-            <p>ยังไม่มีแปลงผัก</p>
+            <p>{isThai ? 'ยังไม่มีแปลงผัก' : 'No plots created yet'}</p>
             <button className="myplots-add-btn" onClick={() => setPlotModal('new')}>
-              <Plus size={16} /> เพิ่มแปลงผักแรก
+              <Plus size={16} /> {isThai ? 'เพิ่มแปลงผักแรก' : 'Add Your First Plot'}
             </button>
           </div>
         ) : (
@@ -845,309 +1210,286 @@ const MyPlotsStyles = () => (
     .myplots-page {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 32px 24px 60px;
+      padding: 24px 20px 60px;
       font-family: 'Prompt', 'Inter', sans-serif;
     }
-    .myplots-page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .myplots-page-title {
-      font-size: 28px;
-      font-weight: 800;
-      color: #2E7D32;
-      margin: 0;
-    }
     .myplots-add-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 7px;
-      background: #2E7D32;
+      justify-content: center;
+      gap: 8px;
       color: #fff;
       border: none;
-      border-radius: 10px;
-      padding: 10px 20px;
-      font-size: 14px;
+      border-radius: 14px;
+      padding: 10px 18px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.18s, transform 0.1s;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .myplots-add-btn:hover { background: #1B5E20; transform: translateY(-1px); }
-    .myplots-add-btn:active { transform: scale(0.97); }
+    .myplots-add-btn:hover { transform: translateY(-1px); }
+    .myplots-add-btn:active { transform: scale(0.98); }
 
     /* Grid */
     .myplots-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 20px;
     }
 
     /* Card */
     .myplots-card {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.09);
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: box-shadow 0.2s, transform 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .myplots-card:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.13); transform: translateY(-2px); }
-    .myplots-card-img-wrap { width: 100%; height: 180px; overflow: hidden; background: #f0f0f0; }
-    .myplots-card-img { width: 100%; height: 100%; object-fit: cover; }
+    .myplots-card:hover {
+      box-shadow: 0 12px 32px rgba(0,0,0,0.09);
+      transform: translateY(-3px);
+      border-color: #cbd5e1;
+    }
+    .myplots-card-img-wrap { width: 100%; height: 160px; overflow: hidden; background: #f1f5f9; position: relative; }
+    .myplots-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+    .myplots-card:hover .myplots-card-img { transform: scale(1.05); }
     .myplots-card-img-placeholder {
       width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      background: #F5F5F5;
+      background: #f8fafc; color: #94a3b8;
     }
     .myplots-card-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
     .myplots-card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .myplots-card-name { font-size: 18px; font-weight: 800; color: #222; margin: 0; }
+    .myplots-card-name { font-size: 17px; font-weight: 800; color: #0f172a; margin: 0; tracking-tight: -0.02em; }
     .myplots-card-info-row {
       display: flex; align-items: center; gap: 6px;
-      font-size: 13px; color: #666;
-      border-left: 3px solid #4CAF50;
-      padding-left: 8px;
+      font-size: 12px; font-weight: 600; color: #64748b;
+      background: #f8fafc;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border-left: 3px solid #10b981;
     }
     .myplots-card-planting {
-      background: #F1F8E9;
-      border-radius: 10px;
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+      border-radius: 14px;
       padding: 10px 12px;
-      display: flex; flex-direction: column; gap: 4px;
+      display: flex; flex-direction: column; gap: 3px;
     }
     .myplots-card-planting-title {
       display: flex; align-items: center; gap: 5px;
-      font-size: 13px; font-weight: 700; color: #388E3C;
+      font-size: 12px; font-weight: 700; color: #166534;
     }
-    .myplots-card-planting-name { font-size: 15px; font-weight: 700; color: #1B5E20; margin: 2px 0 0; }
-    .myplots-card-planting-date { font-size: 12px; color: #555; margin: 0; }
-    .myplots-card-empty-text { text-align: center; color: #aaa; font-size: 13px; margin: 4px 0; }
+    .myplots-card-planting-name { font-size: 14px; font-weight: 800; color: #14532d; margin: 1px 0 0; }
+    .myplots-card-planting-date { font-size: 11px; color: #475569; margin: 0; font-weight: 500; }
+    .myplots-card-empty-text { text-align: center; color: #94a3b8; font-size: 12px; font-weight: 600; margin: 6px 0; }
 
     /* Primary action buttons */
-    .myplots-btn-primary {
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      width: 100%; padding: 11px;
-      background: #2E7D32; color: #fff;
-      border: none; border-radius: 10px;
-      font-size: 15px; font-weight: 700; cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-      margin-top: 4px;
+    .myplots-btn-primary, .myplots-btn-harvest {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 10px;
+      background: #059669; color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
     }
-    .myplots-btn-primary:hover { background: #1B5E20; }
-    .myplots-btn-harvest {
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      width: 100%; padding: 11px;
-      background: #2E7D32; color: #fff;
-      border: none; border-radius: 10px;
-      font-size: 15px; font-weight: 700; cursor: pointer;
-      transition: background 0.15s;
-      margin-top: 4px;
-    }
-    .myplots-btn-harvest:hover { background: #1B5E20; }
+    .myplots-btn-primary:hover, .myplots-btn-harvest:hover { background: #047857; }
     .myplots-btn-harvest--disabled {
-      background: #A5D6A7; cursor: pointer;
+      background: #a7f3d0; color: #065f46; cursor: pointer; box-shadow: none;
     }
-    .myplots-btn-harvest--disabled:hover { background: #81C784; }
+    .myplots-btn-harvest--disabled:hover { background: #6ee7b7; }
 
     /* Bottom action buttons */
-    .myplots-card-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .myplots-card-actions { display: flex; gap: 6px; margin-top: 2px; }
     .myplots-btn-action {
-      flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
-      padding: 7px 4px; border: none; border-radius: 8px;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 7px 4px; border: none; border-radius: 10px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .myplots-btn-action:active { transform: scale(0.95); }
-    .myplots-btn-history { background: #7B1FA2; color: #fff; }
-    .myplots-btn-history:hover { background: #6A1B9A; }
-    .myplots-btn-edit { background: #F57C00; color: #fff; }
-    .myplots-btn-edit:hover { background: #E65100; }
-    .myplots-btn-delete { background: #C62828; color: #fff; }
-    .myplots-btn-delete:hover { background: #B71C1C; }
+    .myplots-btn-action:active { transform: scale(0.96); }
+    .myplots-btn-history { background: #f3e8ff; color: #7e22ce; }
+    .myplots-btn-history:hover { background: #e9d5ff; }
+    .myplots-btn-edit { background: #ffedd5; color: #c2410c; }
+    .myplots-btn-edit:hover { background: #fed7aa; }
+    .myplots-btn-delete { background: #ffe4e6; color: #be123c; }
+    .myplots-btn-delete:hover { background: #fecdd3; }
 
     /* States */
-    .myplots-loading {
+    .myplots-loading, .myplots-error, .myplots-empty {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 280px; gap: 12px; color: #666; font-size: 15px;
-    }
-    .myplots-error {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 280px; gap: 12px; color: #C62828; font-size: 15px;
+      min-height: 260px; gap: 12px; color: #64748b; font-size: 14px; font-weight: 600;
     }
     .myplots-retry-btn {
       display: flex; align-items: center; gap: 6px;
-      padding: 9px 20px; background: #2E7D32; color: #fff;
-      border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+      padding: 8px 18px; background: #059669; color: #fff;
+      border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
     }
-    .myplots-empty {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 280px; gap: 14px; color: #aaa;
-    }
-    .myplots-empty p { font-size: 16px; margin: 0; }
 
-    /* Modal Overlay */
+    /* Modal Overlay & Compact Container */
     .myplots-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center;
       z-index: 1000; padding: 16px;
     }
     .myplots-modal {
-      background: #fff; border-radius: 18px;
-      width: 100%; max-width: 480px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-      overflow: hidden; animation: modalIn 0.2s ease;
+      background: #fff; border-radius: 24px;
+      width: min(100%, 440px); max-width: calc(100vw - 32px);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      overflow: hidden; animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid rgba(255,255,255,0.2);
+      box-sizing: border-box;
     }
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: none; } }
     .myplots-modal-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid #eee;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
     }
-    .myplots-modal-header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #2E7D32; }
+    .myplots-modal-header h2 { margin: 0; font-size: 16px; font-weight: 800; color: #0f172a; }
     .myplots-modal-close {
-      background: none; border: none; cursor: pointer; color: #888; padding: 4px;
-      border-radius: 6px; transition: background 0.15s;
+      background: #f1f5f9; border: none; cursor: pointer; color: #64748b; padding: 6px;
+      border-radius: 10px; transition: all 0.15s;
     }
-    .myplots-modal-close:hover { background: #f5f5f5; color: #333; }
+    .myplots-modal-close:hover { background: #ffe4e6; color: #e11d48; }
     .myplots-modal-body {
       padding: 18px 20px;
       display: flex; flex-direction: column; gap: 12px;
-      max-height: 60vh; overflow-y: auto;
+      max-height: 65vh; overflow-y: auto;
     }
     .myplots-modal-body label {
-      font-size: 13px; font-weight: 700; color: #555; margin-bottom: 4px; display: block;
+      font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 2px; display: block;
+      text-transform: uppercase; tracking: 0.05em;
     }
     .myplots-modal-body input,
     .myplots-modal-body select {
       width: 100%; padding: 9px 12px;
-      border: 1.5px solid #ddd; border-radius: 9px;
-      font-size: 14px; outline: none;
-      transition: border 0.15s; box-sizing: border-box;
+      border: 1.5px solid #e2e8f0; border-radius: 12px;
+      font-size: 13px; outline: none; background: #f8fafc;
+      transition: all 0.15s ease; box-sizing: border-box; font-family: inherit;
     }
     .myplots-modal-body input:focus,
-    .myplots-modal-body select:focus { border-color: #2E7D32; }
+    .myplots-modal-body select:focus { border-color: #10b981; background: #fff; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
     .myplots-modal-row { display: flex; gap: 12px; }
     .myplots-modal-footer {
-      display: flex; justify-content: flex-end; gap: 10px;
+      display: flex; justify-content: flex-end; gap: 8px;
       padding: 14px 20px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #f1f5f9;
+      background: #f8fafc;
     }
     .myplots-modal-cancel {
-      padding: 9px 20px; background: #f5f5f5; color: #666;
-      border: none; border-radius: 9px; font-weight: 700; cursor: pointer;
+      padding: 9px 18px; background: #e2e8f0; color: #475569;
+      border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;
     }
-    .myplots-modal-cancel:hover { background: #e0e0e0; }
+    .myplots-modal-cancel:hover { background: #cbd5e1; }
     .myplots-modal-save {
-      display: flex; align-items: center; gap: 7px;
-      padding: 9px 20px; background: #2E7D32; color: #fff;
-      border: none; border-radius: 9px; font-weight: 700; cursor: pointer;
-      transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 20px; background: #059669; color: #fff;
+      border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;
+      transition: all 0.15s ease; shadow: 0 4px 12px rgba(5,150,105,0.2);
     }
-    .myplots-modal-save:hover:not(:disabled) { background: #1B5E20; }
-    .myplots-modal-save:disabled { background: #A5D6A7; cursor: not-allowed; }
-    .req { color: #C62828; }
+    .myplots-modal-save:hover:not(:disabled) { background: #047857; }
+    .myplots-modal-save:disabled { background: #a7f3d0; cursor: not-allowed; }
+    .req { color: #e11d48; }
 
     /* Harvest warning */
     .myplots-harvest-warn {
       display: flex; align-items: center; gap: 8px;
-      background: #FFF8E1; border: 1px solid #FFE082;
-      border-radius: 9px; padding: 10px 12px;
-      font-size: 13px; color: #F57F17;
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 12px; padding: 10px 12px;
+      font-size: 12px; color: #b45309; font-weight: 600;
     }
 
     /* History View */
     .myplots-history {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 32px 24px 60px;
+      padding: 24px 20px 60px;
       font-family: 'Prompt', 'Inter', sans-serif;
     }
-    .myplots-history-header {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
-    }
-    .myplots-history-title { font-size: 24px; font-weight: 800; color: #222; margin: 0; }
     .myplots-back-btn {
       display: flex; align-items: center; gap: 5px;
-      background: none; border: none; color: #2E7D32;
-      font-size: 14px; font-weight: 700; cursor: pointer;
-      padding: 6px 12px; border-radius: 8px; transition: background 0.15s;
+      background: #f1f5f9; border: none; color: #059669;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      padding: 8px 14px; border-radius: 12px; transition: all 0.15s ease;
     }
-    .myplots-back-btn:hover { background: #E8F5E9; }
+    .myplots-back-btn:hover { background: #dcfce7; }
     .myplots-history-card {
-      background: #fff; border-radius: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-      padding: 24px; overflow: hidden;
+      background: #fff; border-radius: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      padding: 20px; overflow: hidden; border: 1px solid #e2e8f0;
     }
-    .myplots-history-tabs { margin-bottom: 20px; }
+    .myplots-history-tabs { margin-bottom: 16px; }
     .myplots-history-tab {
-      display: inline-block; padding: 8px 18px;
+      display: inline-block; padding: 6px 16px;
       border-bottom: 3px solid transparent;
-      font-size: 14px; font-weight: 700; color: #888; cursor: pointer;
+      font-size: 13px; font-weight: 800; color: #64748b; cursor: pointer;
     }
-    .myplots-history-tab.active { color: #2E7D32; border-color: #2E7D32; }
-    .myplots-history-filters { margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px; }
-    .myplots-filter-group { display: flex; flex-direction: column; gap: 5px; }
-    .myplots-filter-group label { font-size: 13px; font-weight: 700; color: #555; }
+    .myplots-history-tab.active { color: #059669; border-color: #059669; }
+    .myplots-history-filters { margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .myplots-filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .myplots-filter-group label { font-size: 12px; font-weight: 700; color: #475569; }
     .myplots-filter-group input {
-      padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 9px;
-      font-size: 14px; outline: none; transition: border 0.15s;
+      padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 13px; outline: none; transition: border 0.15s; background: #f8fafc;
     }
-    .myplots-filter-group input:focus { border-color: #2E7D32; }
+    .myplots-filter-group input:focus { border-color: #10b981; background: #fff; }
     .myplots-history-date-row {
-      display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
+      display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap;
     }
-    .myplots-history-date-row .myplots-filter-group { flex: 1; min-width: 160px; }
-    .myplots-filter-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding-bottom: 2px; }
+    .myplots-history-date-row .myplots-filter-group { flex: 1; min-width: 150px; }
+    .myplots-filter-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; padding-bottom: 2px; }
     .myplots-search-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 9px 18px; background: #2E7D32; color: #fff;
-      border: none; border-radius: 9px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      padding: 8px 16px; background: #059669; color: #fff;
+      border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
       white-space: nowrap; transition: background 0.15s;
     }
-    .myplots-search-btn:hover { background: #1B5E20; }
+    .myplots-search-btn:hover { background: #047857; }
     .myplots-reset-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 9px 14px; background: #f5f5f5; color: #666;
-      border: none; border-radius: 9px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      padding: 8px 14px; background: #f1f5f9; color: #64748b;
+      border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
       white-space: nowrap;
     }
-    .myplots-reset-btn:hover { background: #e0e0e0; }
+    .myplots-reset-btn:hover { background: #e2e8f0; }
     .myplots-export-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 9px 14px; background: #0277BF; color: #fff;
-      border: none; border-radius: 9px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      padding: 8px 14px; background: #0284c7; color: #fff;
+      border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
       white-space: nowrap; transition: background 0.15s;
     }
-    .myplots-export-btn:hover:not(:disabled) { background: #01579B; }
-    .myplots-export-btn:disabled { background: #81D4FA; cursor: not-allowed; }
+    .myplots-export-btn:hover:not(:disabled) { background: #0369a1; }
+    .myplots-export-btn:disabled { background: #bae6fd; cursor: not-allowed; }
 
     /* Table */
-    .myplots-table-wrap { overflow-x: auto; }
+    .myplots-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid #e2e8f0; }
     .myplots-table {
       width: 100%; border-collapse: collapse;
-      font-size: 14px; min-width: 700px;
+      font-size: 13px; min-width: 700px;
     }
     .myplots-table th {
-      background: #F5F5F5; padding: 11px 12px;
-      text-align: left; font-weight: 700; color: #555;
-      border-bottom: 2px solid #e0e0e0;
+      background: #f8fafc; padding: 10px 12px;
+      text-align: left; font-weight: 700; color: #475569;
+      border-bottom: 2px solid #e2e8f0; text-transform: uppercase; font-size: 11px; tracking: 0.04em;
     }
     .myplots-table td {
-      padding: 11px 12px; border-bottom: 1px solid #F0F0F0;
-      color: #333;
+      padding: 10px 12px; border-bottom: 1px solid #f1f5f9;
+      color: #334155; font-weight: 500;
     }
-    .myplots-table tbody tr:hover { background: #FAFAFA; }
+    .myplots-table tbody tr:hover { background: #f8fafc; }
     .myplots-table-empty {
-      text-align: center; color: #aaa; padding: 32px !important; font-size: 15px;
+      text-align: center; color: #94a3b8; padding: 32px !important; font-size: 14px;
     }
-    .myplots-table-summary { background: #F1F8E9; }
-    .myplots-table-summary td { font-size: 14px; border-top: 2px solid #C8E6C9; }
+    .myplots-table-summary { background: #f0fdf4; }
+    .myplots-table-summary td { font-size: 13px; border-top: 2px solid #bbf7d0; }
 
     /* Spin animation */
     .spin { animation: spin 1s linear infinite; }
@@ -1155,7 +1497,6 @@ const MyPlotsStyles = () => (
 
     @media (max-width: 768px) {
       .myplots-page, .myplots-history { padding: 16px 12px 40px; }
-      .myplots-page-title, .myplots-history-title { font-size: 22px; }
       .myplots-grid { grid-template-columns: 1fr; }
       .myplots-history-date-row { flex-direction: column; align-items: stretch; }
       .myplots-filter-actions { 
@@ -1167,8 +1508,8 @@ const MyPlotsStyles = () => (
       .myplots-filter-actions button {
         flex: 1;
         justify-content: center;
-        padding: 9px 4px;
-        font-size: 13px;
+        padding: 8px 4px;
+        font-size: 12px;
         gap: 4px;
       }
       
@@ -1179,24 +1520,24 @@ const MyPlotsStyles = () => (
       }
       .myplots-table { min-width: unset; }
       .myplots-table tr {
-        margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 8px 16px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05); background: #fff;
+        margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 14px; padding: 8px 14px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04); background: #fff;
       }
       .myplots-table td {
         display: flex; justify-content: space-between; align-items: center;
-        padding: 10px 0; border-bottom: 1px dashed #f3f4f6; text-align: right; margin: 0;
+        padding: 8px 0; border-bottom: 1px dashed #f3f4f6; text-align: right; margin: 0;
       }
       .myplots-table td:last-child { border-bottom: none; }
       .myplots-table td::before {
-        content: attr(data-label); font-weight: 700; color: #6b7280; text-align: left;
-        margin-right: 16px; font-size: 13px;
+        content: attr(data-label); font-weight: 700; color: #64748b; text-align: left;
+        margin-right: 16px; font-size: 12px;
       }
       
       /* Summary Row Mobile */
-      .myplots-table-summary { background: #F1F8E9; display: block; border-color: #C8E6C9; }
+      .myplots-table-summary { background: #f0fdf4; display: block; border-color: #bbf7d0; }
       .hide-mobile { display: none !important; }
-      .myplots-table-summary td { border-bottom: 1px dashed #C8E6C9; }
-      .myplots-table-summary td::before { color: #2E7D32; font-weight: 800; }
+      .myplots-table-summary td { border-bottom: 1px dashed #bbf7d0; }
+      .myplots-table-summary td::before { color: #166534; font-weight: 800; }
     }
   `}</style>
 );

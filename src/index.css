@@ -37,25 +37,41 @@
            placeholder-gray-400;
   }
 
-  .html-content {
-    @apply space-y-2;
+  .html-content,
+  .formatted-text {
+    @apply space-y-2 max-w-full overflow-hidden;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
   }
-  .html-content p {
+  .html-content *,
+  .formatted-text * {
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+  }
+  .html-content p,
+  .formatted-text p {
     @apply mb-2;
   }
-  .html-content ul {
+  .html-content ul,
+  .formatted-text ul {
     @apply list-disc list-inside mb-2;
   }
-  .html-content ol {
+  .html-content ol,
+  .formatted-text ol {
     @apply list-decimal list-inside mb-2;
   }
-  .html-content li {
+  .html-content li,
+  .formatted-text li {
     @apply ml-2;
   }
-  .html-content strong {
+  .html-content strong,
+  .formatted-text strong {
     @apply font-bold text-gray-900;
   }
-  .html-content em {
+  .html-content em,
+  .formatted-text em {
     @apply italic;
   }
 }

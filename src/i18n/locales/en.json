@@ -37,7 +37,32 @@
   },
   "historyPage": {
     "title": "Detection History",
-    "subtitle": "Collect your detection history of diseases and pests."
+    "subtitle": "Collect your detection history of diseases and pests.",
+    "filters": {
+      "period": "Period",
+      "date": "Select Date",
+      "dateRange": "Date Range",
+      "to": "To",
+      "today": "Today",
+      "type": "Type",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "all": "All (Diseases & Pests)",
+      "search": "Search"
+    },
+    "table": {
+      "date": "Date/Time",
+      "detected": "Detections",
+      "type": "Type",
+      "location": "Plot / Crop",
+      "manage": "Action",
+      "view": "View Details"
+    },
+    "chart": {
+      "title": "Detection Summary Chart"
+    }
   },
   "contactPage": {
     "title": "Contact Admin",
@@ -702,5 +727,65 @@
         "button": "Contact Support"
       }
     }
+  },
+  "harvestHistoryPage": {
+    "title": "Harvest History",
+    "subtitle": "Track total harvest income, cost, and net profit",
+    "allPlots": "All Plots",
+    "plot": "Plot",
+    "totalHarvests": "Total Harvests",
+    "totalYield": "Total Yield",
+    "totalRevenue": "Total Revenue",
+    "netProfit": "Net Profit",
+    "table": {
+      "plot": "Plot",
+      "crop": "Crop",
+      "date": "Harvest Date",
+      "yield": "Yield",
+      "income": "Income",
+      "cost": "Cost",
+      "profit": "Profit"
+    },
+    "noHistory": "No harvest history yet",
+    "goToPlots": "Go to Vegetable Plots"
+  },
+  "reportPage": {
+    "title": "System Overview Report",
+    "subtitle": "System-wide data overview and analytics",
+    "topDiseases": "Top Detected Diseases",
+    "topPests": "Top Detected Pests",
+    "noDiseases": "No disease detection data for selected date",
+    "noPests": "No pest detection data for selected date",
+    "times": "times"
+  },
+  "workerPage": {
+    "title": "Detection Worker Status",
+    "subtitle": "Automated CCTV monitoring engine",
+    "running": "Worker Running",
+    "stopped": "Worker Stopped",
+    "start": "Start Worker",
+    "stop": "Stop Worker",
+    "refresh": "Refresh",
+    "loopCount": "Loop Count",
+    "processedCameras": "Processed Cameras",
+    "errorCameras": "Errored Cameras",
+    "detectionsToday": "Detections Today",
+    "config": "Settings",
+    "threshold": "Confidence Threshold",
+    "interval": "Poll Interval",
+    "cooldown": "Cooldown",
+    "testCameras": "Test Cameras Individually",
+    "test": "Test",
+    "noCameras": "No cameras found. Please add a camera in CCTV page."
+  },
+  "cameraStreamPage": {
+    "title": "Camera Stream Monitor",
+    "subtitle": "View live stream from all CCTV cameras",
+    "checkStatus": "Check Status",
+    "loading": "Loading camera streams...",
+    "noCameras": "No CCTV cameras",
+    "goToCctv": "Go to CCTV page",
+    "online": "ONLINE",
+    "offline": "OFFLINE"
   }
 }

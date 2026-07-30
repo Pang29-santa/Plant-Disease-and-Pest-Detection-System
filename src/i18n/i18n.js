@@ -15,6 +15,13 @@ i18n
     },
     fallbackLng: 'th',
     debug: false,
+    detection: {
+      // ลำดับการ detect ภาษา: querystring (?lang=) → localStorage → navigator
+      order: ['querystring', 'localStorage', 'navigator'],
+      lookupQuerystring: 'lang',       // ?lang=th หรือ ?lang=en
+      lookupLocalStorage: 'i18nextLng',
+      caches: ['localStorage'],
+    },
     interpolation: {
       escapeValue: false,
     },

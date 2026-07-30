@@ -34,7 +34,7 @@ const stripHtml = (html) => {
 
 const Pests = () => {
   const { t, i18n } = useTranslation();
-  const isThai = i18n.language === 'th';
+  const isThai = i18n.language?.startsWith('th');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [pests, setPests] = useState([]);
@@ -177,9 +177,9 @@ const Pests = () => {
 
                   {/* Title overlay on image */}
                   <div className="absolute bottom-4 left-6 right-6 text-white">
-                    <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-1">{pest.eng_name}</p>
+                    <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-1">{isThai ? pest.eng_name : pest.thai_name}</p>
                     <h3 className="text-2xl font-black tracking-tight leading-tight group-hover:text-orange-200 transition-colors">
-                      {pest.thai_name}
+                      {isThai ? pest.thai_name : (pest.eng_name || pest.thai_name)}
                     </h3>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ const Pests = () => {
                       </div>
                       <div>
                         <span className="text-[10px] uppercase font-black text-gray-400 tracking-widest">{t('diseasesPage.symptoms')}</span>
-                        <p className="text-sm text-gray-600 line-clamp-2 font-bold leading-relaxed">{stripHtml(pest.description) || t('vegetablesPage.noDataDetails')}</p>
+                        <p className="text-sm text-gray-600 line-clamp-2 font-bold leading-relaxed">{stripHtml(isThai ? pest.description : (pest.description_en || pest.description)) || t('vegetablesPage.noDataDetails')}</p>
                       </div>
                     </div>
                   </div>
@@ -216,8 +216,8 @@ const Pests = () => {
 
       {/* Detailed Modal */}
       {selectedPest && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[88vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
             {/* Close Button */}
             <button
               onClick={() => setSelectedPest(null)}
@@ -251,10 +251,10 @@ const Pests = () => {
               <div className="relative z-10 mt-auto space-y-4">
                 <div>
                   <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md">
-                    {selectedPest.thai_name}
+                    {isThai ? selectedPest.thai_name : (selectedPest.eng_name || selectedPest.thai_name)}
                   </h2>
                   <p className="text-xs md:text-sm font-bold text-amber-300 uppercase tracking-widest mt-1 drop-shadow-sm">
-                    {selectedPest.eng_name}
+                    {isThai ? selectedPest.eng_name : selectedPest.thai_name}
                   </p>
                 </div>
 
@@ -299,8 +299,8 @@ const Pests = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedPest.description || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedPest.description : (selectedPest.description_en || selectedPest.description)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -316,8 +316,8 @@ const Pests = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-rose-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedPest.cause || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-rose-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedPest.cause : (selectedPest.cause_en || selectedPest.cause)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -333,8 +333,8 @@ const Pests = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedPest.treatment || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedPest.treatment : (selectedPest.treatment_en || selectedPest.treatment)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -350,8 +350,8 @@ const Pests = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedPest.prevention || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedPest.prevention : (selectedPest.prevention_en || selectedPest.prevention)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
             </div>

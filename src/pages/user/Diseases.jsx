@@ -33,7 +33,7 @@ const stripHtml = (html) => {
 
 const Diseases = () => {
   const { t, i18n } = useTranslation();
-  const isThai = i18n.language === 'th';
+  const isThai = i18n.language?.startsWith('th');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [diseases, setDiseases] = useState([]);
@@ -174,9 +174,9 @@ const Diseases = () => {
 
                   {/* Title overlay on image */}
                   <div className="absolute bottom-4 left-6 right-6 text-white">
-                    <p className="text-xs font-black text-red-300 uppercase tracking-widest mb-1">{disease.eng_name}</p>
+                    <p className="text-xs font-black text-red-300 uppercase tracking-widest mb-1">{isThai ? disease.eng_name : disease.thai_name}</p>
                     <h3 className="text-2xl font-black tracking-tight leading-tight group-hover:text-red-200 transition-colors">
-                      {disease.thai_name}
+                      {isThai ? disease.thai_name : (disease.eng_name || disease.thai_name)}
                     </h3>
                   </div>
                 </div>
@@ -190,7 +190,7 @@ const Diseases = () => {
                       </div>
                       <div>
                         <span className="text-[10px] uppercase font-black text-gray-400 tracking-widest">{t('diseasesPage.symptoms')}</span>
-                        <p className="text-sm text-gray-600 line-clamp-2 font-bold leading-relaxed">{stripHtml(disease.description) || t('vegetablesPage.noDataDetails')}</p>
+                        <p className="text-sm text-gray-600 line-clamp-2 font-bold leading-relaxed">{stripHtml(isThai ? disease.description : (disease.description_en || disease.description)) || t('vegetablesPage.noDataDetails')}</p>
                       </div>
                     </div>
                   </div>
@@ -212,8 +212,8 @@ const Diseases = () => {
 
       {/* Detailed Modal */}
       {selectedDisease && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[88vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
             {/* Close Button */}
             <button
               onClick={() => setSelectedDisease(null)}
@@ -247,10 +247,10 @@ const Diseases = () => {
               <div className="relative z-10 mt-auto space-y-4">
                 <div>
                   <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md">
-                    {selectedDisease.thai_name}
+                    {isThai ? selectedDisease.thai_name : (selectedDisease.eng_name || selectedDisease.thai_name)}
                   </h2>
                   <p className="text-xs md:text-sm font-bold text-red-300 uppercase tracking-widest mt-1 drop-shadow-sm">
-                    {selectedDisease.eng_name}
+                    {isThai ? selectedDisease.eng_name : selectedDisease.thai_name}
                   </p>
                 </div>
 
@@ -295,8 +295,8 @@ const Diseases = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedDisease.description || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedDisease.description : (selectedDisease.description_en || selectedDisease.description)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -312,8 +312,8 @@ const Diseases = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-rose-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedDisease.cause || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-rose-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedDisease.cause : (selectedDisease.cause_en || selectedDisease.cause)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -329,8 +329,8 @@ const Diseases = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedDisease.treatment || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedDisease.treatment : (selectedDisease.treatment_en || selectedDisease.treatment)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -346,8 +346,8 @@ const Diseases = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: selectedDisease.prevention || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedDisease.prevention : (selectedDisease.prevention_en || selectedDisease.prevention)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
             </div>

@@ -21,7 +21,7 @@ import { getImageUrl } from '../../utils/urlHelper';
 
 const Vegetables = () => {
   const { t, i18n } = useTranslation();
-  const isThai = i18n.language === 'th';
+  const isThai = i18n.language?.startsWith('th');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
@@ -197,9 +197,9 @@ const Vegetables = () => {
 
                 <div className="px-2 pb-2 flex-grow flex flex-col select-none">
                   <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-emerald-700 transition-colors line-clamp-1">
-                    {veg.thai_name}
+                    {isThai ? veg.thai_name : (veg.eng_name || veg.thai_name)}
                   </h3>
-                  <p className="text-sm font-medium text-slate-400 mb-4">{veg.eng_name || '-'}</p>
+                  <p className="text-sm font-medium text-slate-400 mb-4">{isThai ? (veg.eng_name || '-') : veg.thai_name}</p>
 
                   <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-50">
                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-emerald-600 transition-colors">{t('vegetablesPage.readMore')}</span>
@@ -241,8 +241,8 @@ const Vegetables = () => {
 
       {/* Detailed Modal */}
       {selectedVeg && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+          <div className="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[88vh] md:h-[85vh] animate-in zoom-in-95 duration-300 border border-white/20">
             {/* Close Button */}
             <button
               onClick={() => setSelectedVeg(null)}
@@ -280,10 +280,10 @@ const Vegetables = () => {
               <div className="relative z-10 mt-auto space-y-4">
                 <div>
                   <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-md">
-                    {selectedVeg.thai_name}
+                    {isThai ? selectedVeg.thai_name : (selectedVeg.eng_name || selectedVeg.thai_name)}
                   </h2>
                   <p className="text-xs md:text-sm font-bold text-emerald-300 uppercase tracking-widest mt-1 drop-shadow-sm">
-                    {selectedVeg.eng_name}
+                    {isThai ? selectedVeg.eng_name : selectedVeg.thai_name}
                   </p>
                 </div>
 
@@ -328,8 +328,8 @@ const Vegetables = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.details_en || selectedVeg.details) : selectedVeg.details || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-amber-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedVeg.details : (selectedVeg.details_en || selectedVeg.details)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -345,8 +345,8 @@ const Vegetables = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.planting_method_en || selectedVeg.planting_method) : selectedVeg.planting_method || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-emerald-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedVeg.planting_method : (selectedVeg.planting_method_en || selectedVeg.planting_method)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 
@@ -362,8 +362,8 @@ const Vegetables = () => {
                   </div>
                 </div>
                 <div 
-                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content" 
-                  dangerouslySetInnerHTML={{ __html: i18n.language === 'en' ? (selectedVeg.care_en || selectedVeg.care) : selectedVeg.care || t('vegetablesPage.noDataDetails') }} 
+                  className="text-sm leading-relaxed text-slate-700 font-medium pl-3 border-l-3 border-sky-400 html-content break-words [word-break:break-word] overflow-hidden" 
+                  dangerouslySetInnerHTML={{ __html: (isThai ? selectedVeg.care : (selectedVeg.care_en || selectedVeg.care)) || t('vegetablesPage.noDataDetails') }} 
                 />
               </section>
 

@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next';
 const DiseasePestDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isThai = i18n.language?.startsWith('th');
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -90,9 +91,9 @@ const DiseasePestDetail = () => {
     const shadowColor = isDisease ? 'shadow-red-100' : 'shadow-orange-100';
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 md:p-8">
+        <div className="min-h-screen bg-[#F8FAFC] md:flex md:items-center md:justify-center p-4 md:p-8">
             {/* Main Card adapting Modal Layout */}
-            <div className="relative w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[85vh] animate-in zoom-in-95 duration-300 ring-1 ring-black/5">
+            <div className="relative w-full max-w-6xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row md:h-[85vh] animate-in zoom-in-95 duration-300 ring-1 ring-black/5">
                 
                 {/* Back Button (Floating) */}
                 <button
@@ -151,7 +152,7 @@ const DiseasePestDetail = () => {
 
                 {/* Right: Content */}
                 <div
-                   className="w-full md:w-7/12 bg-white flex-1 md:h-full overflow-y-auto custom-scrollbar flex flex-col"
+                   className="w-full md:w-7/12 bg-white flex-1 md:h-full md:overflow-y-auto custom-scrollbar flex flex-col"
                    onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 50)}
                 >
                    <div className="p-8 md:p-16 space-y-12">
@@ -164,10 +165,10 @@ const DiseasePestDetail = () => {
                                </div>
                                <h3 className="font-extrabold text-gray-900 text-2xl tracking-tight">{t('detailPage.description')}</h3>
                             </div>
-                            <div 
-                                className="text-gray-600 text-lg leading-relaxed prose prose-slate max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4" 
-                                dangerouslySetInnerHTML={{ __html: item.description || t('vegetablesPage.noDataDetails') }} 
-                            />
+                             <div 
+                                 className="text-gray-600 text-lg leading-relaxed prose prose-slate max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4 [word-break:normal] break-words overflow-hidden" 
+                                 dangerouslySetInnerHTML={{ __html: (isThai ? item.description : (item.description_en || item.description)) || t('vegetablesPage.noDataDetails') }} 
+                             />
                          </section>
 
                          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -177,10 +178,10 @@ const DiseasePestDetail = () => {
                                </div>
                                <h3 className="font-extrabold text-gray-900 text-2xl tracking-tight">{t('detailPage.cause')}</h3>
                             </div>
-                            <div 
-                                className="text-gray-600 text-lg leading-relaxed prose prose-slate max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4" 
-                                dangerouslySetInnerHTML={{ __html: item.cause || t('vegetablesPage.noDataDetails') }} 
-                            />
+                             <div 
+                                 className="text-gray-600 text-lg leading-relaxed prose prose-slate max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4 [word-break:normal] break-words overflow-hidden" 
+                                 dangerouslySetInnerHTML={{ __html: (isThai ? item.cause : (item.cause_en || item.cause)) || t('vegetablesPage.noDataDetails') }} 
+                             />
                          </section>
 
                          <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -190,10 +191,10 @@ const DiseasePestDetail = () => {
                                </div>
                                <h3 className="font-extrabold text-gray-900 text-2xl tracking-tight">{t('detailPage.treatment')}</h3>
                             </div>
-                            <div 
-                                className="text-gray-600 text-lg leading-relaxed prose prose-emerald max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4" 
-                                dangerouslySetInnerHTML={{ __html: item.treatment || t('vegetablesPage.noDataDetails') }} 
-                            />
+                             <div 
+                                 className="text-gray-600 text-lg leading-relaxed prose prose-emerald max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4 [word-break:normal] break-words overflow-hidden" 
+                                 dangerouslySetInnerHTML={{ __html: (isThai ? item.treatment : (item.treatment_en || item.treatment)) || t('vegetablesPage.noDataDetails') }} 
+                             />
                          </section>
 
                          <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -203,10 +204,10 @@ const DiseasePestDetail = () => {
                                </div>
                                <h3 className="font-extrabold text-gray-900 text-2xl tracking-tight">{t('detailPage.prevention')}</h3>
                             </div>
-                            <div 
-                                className="text-gray-600 text-lg leading-relaxed prose prose-sky max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4" 
-                                dangerouslySetInnerHTML={{ __html: item.prevention || t('vegetablesPage.noDataDetails') }} 
-                            />
+                             <div 
+                                 className="text-gray-600 text-lg leading-relaxed prose prose-sky max-w-none font-medium [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p]:mb-4 break-words [word-break:break-word] overflow-hidden" 
+                                 dangerouslySetInnerHTML={{ __html: (isThai ? item.prevention : (item.prevention_en || item.prevention)) || t('vegetablesPage.noDataDetails') }} 
+                             />
                          </section>
                       </div>
 

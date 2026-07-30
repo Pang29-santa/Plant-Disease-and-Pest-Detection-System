@@ -31,7 +31,7 @@ import logo from '../static/img/logo.png';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
-  const isThai = i18n.language === 'th';
+  const isThai = i18n.language?.startsWith('th');
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,16 +74,11 @@ const Navbar = () => {
     });
   };
 
-  // Re-order links as requested
   const mainLinks = [
     { to: '/cctv', label: t('nav.cctv'), icon: BookOpen, authRequired: true },
     { to: isAuthenticated ? '/detect/plots' : '/detect', label: t('nav.detect'), icon: Camera },
     { to: '/plots', label: t('nav.plots'), icon: Map, authRequired: true },
     { to: '/history', label: t('nav.history'), icon: History, authRequired: true },
-    { to: '/harvest-history', label: 'ประวัติเก็บเกี่ยว', icon: Sprout, authRequired: true },
-    { to: '/report', label: 'รายงาน', icon: FileBarChart, authRequired: true },
-    { to: '/camera-stream', label: 'กล้องสด', icon: Video, authRequired: true },
-    { to: '/worker-status', label: 'Worker', icon: Activity, authRequired: true },
   ];
 
   const knowledgeLinks = [
