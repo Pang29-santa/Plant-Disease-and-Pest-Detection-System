@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import cctvStreamApi from '../../services/cctvStreamApi';
 import {
   Camera, ChevronLeft, Plus, X, Loader2, Video, 
-  Settings, Trash2, Sprout, Network, Play, Info
+  Settings, Trash2, Sprout, Network, Play, Info,
+  Pencil, Wifi, WifiOff, RefreshCw, Bug, Cpu
 } from 'lucide-react';
 
 const CCTVPage = () => {
@@ -26,6 +28,11 @@ const CCTVPage = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingCamera, setEditingCamera] = useState(null);
+  const [statuses, setStatuses] = useState({});
+  const [checkingStatus, setCheckingStatus] = useState({});
+  const [detecting, setDetecting] = useState({});
+  const [detectionResults, setDetectionResults] = useState({});
   
   const [form, setForm] = useState({
     camera_name: '',
@@ -75,8 +82,13 @@ const CCTVPage = () => {
     fetchCctvs();
   }, [fetchCctvs]);
 
-  // Open modal and fetch plots
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleOpenModal = () => {
+    setEditingCamera(null);
     setForm({
       camera_name: '',
       ip_address: '',
@@ -89,13 +101,23 @@ const CCTVPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleEdit = (cam) => {
+    setEditingCamera(cam);
+    setForm({
+      camera_name: cam.camera_name || '',
+      ip_address: cam.ip_address || '',
+      rtsp_username: cam.rtsp_username || '',
+      rtsp_password: cam.rtsp_password || '',
+      device_ip: cam.device_ip || '',
+      plot_id: cam.plot_id || cam.plot_object_id || plots[0]?.id || plots[0]?._id || ''
+    });
+    fetchPlots();
+    setIsModalOpen(true);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingCamera(null);
   };
 
   const handleSubmit = async (e) => {
@@ -114,27 +136,132 @@ const CCTVPage = () => {
       setIsSubmitting(true);
       const payload = { ...form, user_id: userId };
       
-      await axios.post(`/api/cctv`, payload);
-      
-      Swal.fire({
-        icon: 'success',
-        title: 'สำเร็จ!',
-        text: 'เพิ่มกล้องวงจรปิดเรียบร้อยแล้ว',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      if (editingCamera) {
+        await axios.put(`/api/cctv/${editingCamera._id || editingCamera.id}`, payload);
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ!',
+          text: 'อัปเดตข้อมูลกล้องวงจรปิดเรียบร้อยแล้ว',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } else {
+        await axios.post(`/api/cctv`, payload);
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ!',
+          text: 'เพิ่มกล้องวงจรปิดเรียบร้อยแล้ว',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
       setIsModalOpen(false);
+      setEditingCamera(null);
       fetchCctvs();
     } catch (err) {
-      console.error('Error adding CCTV:', err);
+      console.error('Error saving CCTV:', err);
       Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด',
-        text: 'ไม่สามารถเพิ่มกล้องวงจรปิดได้ โปรดลองอีกครั้ง',
+        text: editingCamera
+          ? 'ไม่สามารถอัปเดตข้อมูลกล้องวงจรปิดได้ โปรดลองอีกครั้ง'
+          : 'ไม่สามารถเพิ่มกล้องวงจรปิดได้ โปรดลองอีกครั้ง',
         confirmButtonColor: '#ef4444'
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleTestConnection = async (cam) => {
+    setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: true }));
+    try {
+      const res = await axios.post(`/api/cctv/${cam._id || cam.id}/test-connection`);
+      Swal.fire({
+        icon: res.data?.status === 'connected' ? 'success' : 'warning',
+        title: res.data?.status === 'connected' ? 'เชื่อมต่อสำเร็จ' : 'เชื่อมต่อไม่สำเร็จ',
+        text: res.data?.message || `สถานะ: ${res.data?.status}`,
+        confirmButtonColor: '#059669'
+      });
+    } catch (err) {
+      console.error('Test connection error:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'ไม่สามารถทดสอบการเชื่อมต่อได้',
+        confirmButtonColor: '#ef4444'
+      });
+    } finally {
+      setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: false }));
+    }
+  };
+
+  const checkCameraStatus = async (cam) => {
+    setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: true }));
+    try {
+      const res = await axios.get(`/api/cctv/status/${cam._id || cam.id}`);
+      setStatuses(prev => ({ ...prev, [cam._id || cam.id]: res.data }));
+    } catch (err) {
+      console.error('Status check error:', err);
+      setStatuses(prev => ({ ...prev, [cam._id || cam.id]: { status: 'offline', reason: 'error' } }));
+    } finally {
+      setCheckingStatus(prev => ({ ...prev, [cam._id || cam.id]: false }));
+    }
+  };
+
+  const handleLiveStream = (cam) => {
+    navigate('/camera-stream', { state: { selectedCameraId: cam._id || cam.id } });
+  };
+
+  const handleDetectPest = async (cam) => {
+    const camId = cam._id || cam.id;
+    setDetecting(prev => ({ ...prev, [camId]: true }));
+    try {
+      // ดึง snapshot จากสตรีมกล้อง
+      const snapshotUrl = await cctvStreamApi.captureSnapshot(camId);
+      
+      // แปลง data URL เป็น Blob/File
+      const response = await fetch(snapshotUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `cctv_${camId}_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      
+      // ส่งไปวิเคราะห์
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('camera_id', camId);
+      if (cam.plot_id) formData.append('plot_id', cam.plot_id);
+      
+      const res = await axios.post('/api/ai/detect-cctv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setDetectionResults(prev => ({ ...prev, [camId]: res.data }));
+      
+      const isPest = res.data?.analysis?.category === 'pest';
+      const targetName = res.data?.analysis?.target_name_th || res.data?.analysis?.target_name_en || 'ไม่ระบุ';
+      
+      Swal.fire({
+        icon: isPest ? 'warning' : 'success',
+        title: isPest ? `พบศัตรูพืช: ${targetName}` : 'ไม่พบศัตรูพืช',
+        html: isPest
+          ? `<div class="text-left">
+              <p><b>ความมั่นใจ:</b> ${res.data?.analysis?.confidence || 0}%</p>
+              <p><b>IoT ทำงาน:</b> ${res.data?.iot_triggered ? 'ใช่ ✅' : 'ไม่ ❌'}</p>
+              ${res.data?.iot_device_ip ? `<p><b>อุปกรณ์:</b> ${res.data.iot_device_ip}</p>` : ''}
+             </div>`
+          : 'ภาพจากกล้องดูปกติ',
+        confirmButtonColor: isPest ? '#ef4444' : '#059669'
+      });
+    } catch (err) {
+      console.error('Pest detection error:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'ตรวจจับไม่สำเร็จ',
+        text: err.response?.data?.detail || 'ไม่สามารถวิเคราะห์ภาพจากกล้องได้',
+        confirmButtonColor: '#ef4444'
+      });
+    } finally {
+      setDetecting(prev => ({ ...prev, [camId]: false }));
     }
   };
 
@@ -192,13 +319,22 @@ const CCTVPage = () => {
                 : 'Monitor and inspect your vegetable plots in real-time.'}
             </p>
           </div>
-          <button
-            onClick={handleOpenModal}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-200/80 active:scale-95 shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            {isThai ? 'เพิ่มกล้องวงจรปิด' : 'Add CCTV Camera'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/worker-status')}
+              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700 font-bold rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-95 shrink-0"
+            >
+              <Cpu className="w-4 h-4 text-indigo-600" />
+              {isThai ? 'สถานะ Worker' : 'Worker Status'}
+            </button>
+            <button
+              onClick={handleOpenModal}
+              className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-200/80 active:scale-95 shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              {isThai ? 'เพิ่มกล้องวงจรปิด' : 'Add CCTV Camera'}
+            </button>
+          </div>
         </div>
 
         {/* Content Section */}
@@ -244,18 +380,47 @@ const CCTVPage = () => {
                     </div>
                     <div>
                       <h3 className="font-black text-slate-800 text-base">{cam.camera_name || 'ไม่ระบุชื่อกล้อง'}</h3>
-                      <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
-                        {isThai ? 'เชื่อมต่อแล้ว' : 'CONNECTED'}
+                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border ${
+                        statuses[cam._id || cam.id]?.status === 'online'
+                          ? 'bg-green-50 text-green-600 border-green-100'
+                          : statuses[cam._id || cam.id]?.status === 'offline'
+                          ? 'bg-red-50 text-red-600 border-red-100'
+                          : 'bg-gray-50 text-gray-500 border-gray-100'
+                      }`}>
+                        {checkingStatus[cam._id || cam.id]
+                          ? (isThai ? 'กำลังตรวจสอบ...' : 'Checking...')
+                          : statuses[cam._id || cam.id]?.status === 'online'
+                          ? (isThai ? 'ออนไลน์' : 'ONLINE')
+                          : statuses[cam._id || cam.id]?.status === 'offline'
+                          ? (isThai ? 'ออฟไลน์' : 'OFFLINE')
+                          : (isThai ? 'ยังไม่ได้ตรวจสอบ' : 'NOT CHECKED')}
                       </span>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleDelete(cam.id || cam._id)} 
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
-                    title={isThai ? 'ลบกล้อง' : 'Delete Camera'}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => checkCameraStatus(cam)}
+                      disabled={checkingStatus[cam._id || cam.id]}
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-90 disabled:opacity-50"
+                      title={isThai ? 'ตรวจสอบสถานะ' : 'Check Status'}
+                    >
+                      {checkingStatus[cam._id || cam.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={() => handleEdit(cam)}
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all active:scale-90"
+                      title={isThai ? 'แก้ไขกล้อง' : 'Edit Camera'}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(cam.id || cam._id)} 
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
+                      title={isThai ? 'ลบกล้อง' : 'Delete Camera'}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Card Body */}
@@ -286,20 +451,29 @@ const CCTVPage = () => {
                 </div>
 
                 {/* Card Footer */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50/30">
+                <div className="p-4 border-t border-slate-100 bg-slate-50/30 grid grid-cols-3 gap-2">
                   <button 
-                    onClick={() => {
-                      Swal.fire({
-                        icon: 'info',
-                        title: 'Coming Soon!',
-                        text: isThai ? 'ระบบหน้าจอ Live Streaming กำลังอยู่ในช่วงพัฒนาครับ' : 'Live Streaming view is under development.',
-                        confirmButtonColor: '#059669'
-                      });
-                    }}
-                    className="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95 border border-emerald-100/80"
+                    onClick={() => handleTestConnection(cam)}
+                    disabled={checkingStatus[cam._id || cam.id]}
+                    className="py-3 bg-white hover:bg-slate-50 text-slate-600 font-bold text-[10px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-slate-200 disabled:opacity-50"
+                  >
+                    {checkingStatus[cam._id || cam.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                    {isThai ? 'ทดสอบ' : 'Test'}
+                  </button>
+                  <button 
+                    onClick={() => handleDetectPest(cam)}
+                    disabled={detecting[cam._id || cam.id]}
+                    className="py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-[10px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-amber-100/80 disabled:opacity-50"
+                  >
+                    {detecting[cam._id || cam.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bug className="w-4 h-4" />}
+                    {isThai ? 'ตรวจแมลง' : 'Detect'}
+                  </button>
+                  <button 
+                    onClick={() => handleLiveStream(cam)}
+                    className="py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[10px] rounded-xl transition-all flex items-center justify-center gap-1 active:scale-95 border border-emerald-100/80"
                   >
                     <Play className="w-4 h-4 fill-current" />
-                    {isThai ? 'เปิดดูกล้อง' : 'Live Stream'}
+                    {isThai ? 'ดูกล้อง' : 'Live'}
                   </button>
                 </div>
               </div>
@@ -319,7 +493,7 @@ const CCTVPage = () => {
                   <Video className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">{isThai ? 'เพิ่มกล้องวงจรปิดใหม่' : 'Add New CCTV Camera'}</h2>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">{editingCamera ? (isThai ? 'แก้ไขกล้องวงจรปิด' : 'Edit CCTV Camera') : (isThai ? 'เพิ่มกล้องวงจรปิดใหม่' : 'Add New CCTV Camera')}</h2>
                   <p className="text-xs font-medium text-slate-400">{isThai ? 'กรอกรายละเอียด IP และแปลงที่ต้องการติดตั้ง' : 'Fill camera RTSP & plot connection'}</p>
                 </div>
               </div>
@@ -451,7 +625,7 @@ const CCTVPage = () => {
                   disabled={isSubmitting}
                   className="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-200 transition-all duration-300 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (isThai ? 'สร้างและบันทึก' : 'Save Camera')}
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingCamera ? (isThai ? 'บันทึกการเปลี่ยนแปลง' : 'Update Camera') : (isThai ? 'สร้างและบันทึก' : 'Save Camera'))}
                 </button>
               </div>
             </form>

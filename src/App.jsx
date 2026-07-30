@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DetectionProvider } from './context/DetectionContext';
 import Navbar from './components/Navbar';
@@ -19,11 +19,15 @@ const Diseases = lazy(() => import('./pages/user/Diseases'));
 const Pests = lazy(() => import('./pages/user/Pests'));
 const Dashboard = lazy(() => import('./pages/user/Dashboard'));
 const CCTV = lazy(() => import('./pages/user/CCTV'));
+const CameraStream = lazy(() => import('./pages/user/CameraStream'));
+const WorkerStatus = lazy(() => import('./pages/user/WorkerStatus'));
 const Plots = lazy(() => import('./pages/user/MyPlots'));
 const History = lazy(() => import('./pages/user/History'));
+const HarvestHistory = lazy(() => import('./pages/user/HarvestHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
 const Telegram = lazy(() => import('./pages/user/Telegram'));
 const Contact = lazy(() => import('./pages/user/Contact'));
+const Report = lazy(() => import('./pages/user/Report'));
 const DiseasePestDetail = lazy(() => import('./pages/user/DiseasePestDetail'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -65,6 +69,7 @@ function App() {
               
               {/* Feature Routes */}
               <Route path="/detect" element={<DetectPublic />} />
+              <Route path="/health-check_user" element={<Navigate to="/detect" replace />} />
               <Route path="/detect/plots" element={
                 <ProtectedRoute>
                   <DetectWithPlot />
@@ -85,9 +90,24 @@ function App() {
                   <CCTV />
                 </ProtectedRoute>
               } />
+              <Route path="/camera-stream" element={
+                <ProtectedRoute>
+                  <CameraStream />
+                </ProtectedRoute>
+              } />
+              <Route path="/worker-status" element={
+                <ProtectedRoute>
+                  <WorkerStatus />
+                </ProtectedRoute>
+              } />
               <Route path="/plots" element={
                 <ProtectedRoute>
                   <Plots />
+                </ProtectedRoute>
+              } />
+              <Route path="/harvest-history" element={
+                <ProtectedRoute>
+                  <HarvestHistory />
                 </ProtectedRoute>
               } />
               <Route path="/history" element={
@@ -108,6 +128,11 @@ function App() {
               <Route path="/contact" element={
                 <ProtectedRoute>
                   <Contact />
+                </ProtectedRoute>
+              } />
+              <Route path="/report" element={
+                <ProtectedRoute>
+                  <Report />
                 </ProtectedRoute>
               } />
               

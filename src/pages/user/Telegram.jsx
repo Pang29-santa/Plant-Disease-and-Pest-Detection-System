@@ -8,7 +8,13 @@ import {
   verifyConnectionCode, 
   sendTestMessage,
   deleteTelegramConnection,
-  requestNewCode} from '../../services/telegramApi';
+  requestNewCode,
+  getTelegramSettings,
+  updateTelegramSettings,
+  testNotification,
+  disconnectTelegram,
+  checkTelegramConnection
+} from '../../services/telegramApi';
 import { useTranslation, Trans } from 'react-i18next';
 
 const TelegramPage = () => {
@@ -20,6 +26,12 @@ const TelegramPage = () => {
   const [isChecking, setIsChecking] = useState(true);
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [settings, setSettings] = useState({
+    harvest: true,
+    system: true,
+    language: 'th'
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   // Use user_id if available, otherwise fallback to _id
   const userId = user?.user_id || user?._id;
@@ -42,6 +54,15 @@ const TelegramPage = () => {
         if (activeConnection) {
           setConnection(activeConnection);
           setIsConnected(true);
+          // ดึงการตั้งค่าการแจ้งเตือน
+          try {
+            const settingsRes = await getTelegramSettings();
+            if (settingsRes?.settings) {
+              setSettings(settingsRes.settings);
+            }
+          } catch (err) {
+            console.log('No settings found');
+          }
         }
       }
     } catch (error) {
@@ -160,6 +181,78 @@ const TelegramPage = () => {
     }
   };
 
+  const handleSettingChange = (key) => async (e) => {
+    const newValue = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const newSettings = { ...settings, [key]: newValue };
+    setSettings(newSettings);
+
+    setSettingsLoading(true);
+    try {
+      await updateTelegramSettings(newSettings);
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกการตั้งค่า',
+        text: 'อัปเดตการตั้งค่าการแจ้งเตือนเรียบร้อย',
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'บันทึกไม่สำเร็จ',
+        text: error.response?.data?.detail || 'ไม่สามารถอัปเดตการตั้งค่าได้',
+        confirmButtonColor: '#EF4444',
+      });
+      setSettings(settings);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleCheckConnection = async () => {
+    setIsLoading(true);
+    try {
+      const result = await checkTelegramConnection();
+      Swal.fire({
+        icon: result?.connected || result?.success ? 'success' : 'warning',
+        title: result?.connected || result?.success ? 'เชื่อมต่อปกติ' : 'ไม่สามารถเชื่อมต่อได้',
+        text: result?.message || '',
+        confirmButtonColor: '#3B82F6',
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ตรวจสอบไม่สำเร็จ',
+        text: error.response?.data?.detail || 'เกิดข้อผิดพลาด',
+        confirmButtonColor: '#EF4444',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    setIsLoading(true);
+    try {
+      await testNotification();
+      Swal.fire({
+        icon: 'success',
+        title: 'ส่งการแจ้งเตือนทดสอบ',
+        text: 'กรุณาตรวจสอบข้อความใน Telegram',
+        confirmButtonColor: '#3B82F6',
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ส่งไม่สำเร็จ',
+        text: error.response?.data?.detail || 'ไม่สามารถส่งการแจ้งเตือนทดสอบได้',
+        confirmButtonColor: '#EF4444',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRequestNewCode = async () => {
     if (!userId) {
       Swal.fire({
@@ -235,13 +328,74 @@ const TelegramPage = () => {
           {isConnected ? (
             /* Connected View Actions */
             <div className="w-full flex flex-col gap-4">
+              {/* Notification Settings */}
+              <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  ตั้งค่าการแจ้งเตือน
+                </h3>
+                <div className="space-y-3">
+                  <label className="flex items-center justify-between p-3 bg-white rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                    <span className="text-sm font-medium text-gray-700">แจ้งเตือนเมื่อถึงวันเก็บเกี่ยว</span>
+                    <input
+                      type="checkbox"
+                      checked={settings.harvest}
+                      onChange={handleSettingChange('harvest')}
+                      disabled={settingsLoading}
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                  </label>
+                  <label className="flex items-center justify-between p-3 bg-white rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                    <span className="text-sm font-medium text-gray-700">แจ้งเตือนสถานะระบบ</span>
+                    <input
+                      type="checkbox"
+                      checked={settings.system}
+                      onChange={handleSettingChange('system')}
+                      disabled={settingsLoading}
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                  </label>
+                  <label className="flex items-center justify-between p-3 bg-white rounded-xl cursor-pointer">
+                    <span className="text-sm font-medium text-gray-700">ภาษา</span>
+                    <select
+                      value={settings.language}
+                      onChange={handleSettingChange('language')}
+                      disabled={settingsLoading}
+                      className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="th">ไทย</option>
+                      <option value="en">English</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button 
+                  onClick={handleSendTest}
+                  disabled={isLoading}
+                  className="py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <MessageSquare className="w-5 h-5" />}
+                  {t('telegramPage.sendTestBtn')}
+                </button>
+                <button 
+                  onClick={handleTestNotification}
+                  disabled={isLoading}
+                  className="py-4 bg-sky-600 text-white rounded-2xl font-black hover:bg-sky-700 transition-all shadow-xl shadow-sky-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <AlertCircle className="w-5 h-5" />}
+                  ทดสอบแจ้งเตือน
+                </button>
+              </div>
+
               <button 
-                onClick={handleSendTest}
+                onClick={handleCheckConnection}
                 disabled={isLoading}
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                className="w-full py-4 bg-white border-2 border-blue-100 text-blue-600 rounded-2xl font-black hover:bg-blue-50 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
               >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <MessageSquare className="w-5 h-5" />}
-                {t('telegramPage.sendTestBtn')}
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+                ตรวจสอบการเชื่อมต่อ
               </button>
               
               <button 

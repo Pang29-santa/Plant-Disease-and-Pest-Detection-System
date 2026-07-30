@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../../utils/urlHelper';
 import { useAuth } from '../../context/AuthContext';
+import workerApi from '../../services/workerApi';
 import Swal from 'sweetalert2';
 import { 
   Leaf, 
@@ -18,13 +19,18 @@ import {
   ShieldAlert,
   ArrowRight,
   Sparkles,
-  Activity
+  Activity,
+  FileBarChart,
+  Sprout,
+  Video,
+  Cpu
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [workerStatus, setWorkerStatus] = useState(null);
 
   // Redirect admin to admin dashboard
   useEffect(() => {
@@ -32,6 +38,21 @@ const Dashboard = () => {
       navigate('/admin');
     }
   }, [user, navigate]);
+
+  // Fetch worker status
+  useEffect(() => {
+    const fetchWorker = async () => {
+      try {
+        const res = await workerApi.getStatus();
+        setWorkerStatus(res?.status || null);
+      } catch (err) {
+        console.error('Worker status fetch failed:', err);
+      }
+    };
+    fetchWorker();
+    const interval = setInterval(fetchWorker, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     Swal.fire({
@@ -103,6 +124,38 @@ const Dashboard = () => {
        path: "/history",
        color: "text-teal-600",
        bg: "bg-teal-50"
+    },
+    {
+       title: 'ประวัติการเก็บเกี่ยว',
+       desc: 'ติดตามรายได้และกำไรจากการเก็บเกี่ยว',
+       icon: Sprout,
+       path: "/harvest-history",
+       color: "text-green-600",
+       bg: "bg-green-50"
+    },
+    {
+       title: 'รายงานสรุป',
+       desc: 'ดูสถิติและรายงานของระบบ',
+       icon: FileBarChart,
+       path: "/report",
+       color: "text-purple-600",
+       bg: "bg-purple-50"
+    },
+    {
+       title: 'หน้าจอติดตามกล้อง',
+       desc: 'ดูสตรีมสดจากกล้องวงจรปิด',
+       icon: Video,
+       path: "/camera-stream",
+       color: "text-rose-600",
+       bg: "bg-rose-50"
+    },
+    {
+       title: 'สถานะ Worker',
+       desc: 'ควบคุมและตรวจสอบระบบตรวจจับอัตโนมัติ',
+       icon: Cpu,
+       path: "/worker-status",
+       color: "text-indigo-600",
+       bg: "bg-indigo-50"
     }
   ];
 
@@ -175,6 +228,33 @@ const Dashboard = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 -mt-16 relative z-20">
+        {/* Worker Status Banner */}
+        {workerStatus && (
+          <div className={`mb-6 rounded-2xl px-5 py-4 border flex items-center justify-between shadow-sm ${
+            workerStatus.running
+              ? 'bg-green-50 border-green-100 text-green-800'
+              : 'bg-red-50 border-red-100 text-red-800'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full animate-pulse ${workerStatus.running ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div>
+                <p className="font-bold text-sm">
+                  {workerStatus.running ? 'Detection Worker กำลังทำงาน' : 'Detection Worker หยุดทำงาน'}
+                </p>
+                <p className="text-xs opacity-80">
+                  รอบที่ {workerStatus.loop_count || 0} · ตรวจพบวันนี้ {workerStatus.detections_today || 0} ครั้ง
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/worker-status')}
+              className="text-xs font-bold px-4 py-2 bg-white/80 hover:bg-white rounded-xl transition-colors"
+            >
+              ดูรายละเอียด
+            </button>
+          </div>
+        )}
+
         {/* Main Category Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {menuActions.map((item, index) => (

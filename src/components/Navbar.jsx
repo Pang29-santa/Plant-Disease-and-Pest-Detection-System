@@ -23,7 +23,9 @@ import {
   Bug,
   Activity,
   Map,
-  Library
+  Library,
+  FileBarChart,
+  Video
 } from 'lucide-react';
 import logo from '../static/img/logo.png';
 
@@ -78,6 +80,10 @@ const Navbar = () => {
     { to: isAuthenticated ? '/detect/plots' : '/detect', label: t('nav.detect'), icon: Camera },
     { to: '/plots', label: t('nav.plots'), icon: Map, authRequired: true },
     { to: '/history', label: t('nav.history'), icon: History, authRequired: true },
+    { to: '/harvest-history', label: 'ประวัติเก็บเกี่ยว', icon: Sprout, authRequired: true },
+    { to: '/report', label: 'รายงาน', icon: FileBarChart, authRequired: true },
+    { to: '/camera-stream', label: 'กล้องสด', icon: Video, authRequired: true },
+    { to: '/worker-status', label: 'Worker', icon: Activity, authRequired: true },
   ];
 
   const knowledgeLinks = [

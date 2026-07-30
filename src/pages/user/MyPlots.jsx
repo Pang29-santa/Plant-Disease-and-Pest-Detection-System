@@ -719,6 +719,8 @@ const MyPlotsPage = () => {
 
   useEffect(() => { fetchPlots(); }, [fetchPlots]);
 
+  const navigateToHarvestHistory = () => navigate('/harvest-history');
+
   const handleDelete = async (plot) => {
     const result = await Swal.fire({
       title: 'ยืนยันการลบ?',
@@ -761,7 +763,10 @@ const MyPlotsPage = () => {
             แปลงผักของคุณ
           </h1>
         </div>
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end mb-6 gap-3">
+          <button className="myplots-add-btn" onClick={navigateToHarvestHistory}>
+            <History size={16} /> ประวัติการเก็บเกี่ยว
+          </button>
           <button className="myplots-add-btn" onClick={() => setPlotModal('new')}>
             <Plus size={16} /> เพิ่มข้อมูลแปลงผัก
           </button>
